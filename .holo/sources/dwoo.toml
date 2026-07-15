@@ -3,4 +3,4 @@
 # into EmergencePlatform per the skeleton-v3 spec
 [holosource]
 url = "https://github.com/EmergencePlatform/dwoo.git"
-ref = "refs/heads/php8-compat"
+ref = "refs/heads/1.2"
