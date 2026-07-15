@@ -1,0 +1,6 @@
+# Dwoo 1.2 with PHP 8 fixes (each() removal, uniform variable syntax,
+# named-argument array_values wraps) -- the one patched upstream, forked
+# into EmergencePlatform per the skeleton-v3 spec
+[holosource]
+url = "https://github.com/EmergencePlatform/dwoo.git"
+ref = "refs/heads/php8-compat"
