@@ -5,7 +5,7 @@ namespace Emergence\People\Groups;
 use DB;
 use ActiveRecord;
 use HandleBehavior, NestingBehavior;
-use Person; // TODO: use Emergence\People\Person instead in skeleton-v2+
+use Emergence\People\Person;
 use Emergence\People\IPerson;
 use PeopleRequestHandler;
 use DuplicateKeyException;
@@ -69,7 +69,7 @@ class Group extends ActiveRecord
         )
         ,'People' => array(
             'type' => 'many-many'
-            ,'class' => 'Person'
+            ,'class' => Person::class
             ,'linkClass' => 'Emergence\People\Groups\GroupMember'
             ,'linkLocal' => 'GroupID'
             ,'linkForeign' => 'PersonID'

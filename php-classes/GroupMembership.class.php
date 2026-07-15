@@ -1,6 +1,6 @@
 <?php
 
-
+use Emergence\People\Person;
 
  class GroupMembership extends ActiveRecord
  {
@@ -34,12 +34,12 @@
      public static $relationships = array(
         'Person' => array(
             'type' => 'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
             ,'local' => 'PersonID'
         )
         ,'Group' => array(
             'type' => 'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
             ,'local' => 'PersonID'
         )
     );

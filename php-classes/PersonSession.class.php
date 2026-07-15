@@ -1,6 +1,6 @@
 <?php
 
-
+use Emergence\People\Person;
 
  class PersonSession extends Session
  {

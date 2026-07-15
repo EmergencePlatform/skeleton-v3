@@ -1,5 +1,7 @@
 <?php
 
+use Emergence\People\Person;
+
 $tableName = Person::$tableName;
 $historyTableName = Person::getHistoryTableName();
 $columnName = 'MiddleName';

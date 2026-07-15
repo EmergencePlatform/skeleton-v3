@@ -4,6 +4,7 @@ namespace Emergence\CMS;
 
 use ActiveRecord;
 use Emergence\People\IPerson;
+use Emergence\People\Person;
 use HandleBehavior;
 use JSON;
 
@@ -77,7 +78,7 @@ abstract class AbstractContent extends \VersionedRecord
         )
         ,'Author' =>  array(
             'type' =>  'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
         )
         ,'Items' => array(
             'type' => 'one-many'

@@ -2,6 +2,8 @@
 
 namespace Emergence\CMS\Item;
 
+use Emergence\People\Person;
+
 abstract class AbstractItem extends \VersionedRecord
 {
     // ActiveRecord configuration
@@ -51,7 +53,7 @@ abstract class AbstractItem extends \VersionedRecord
     public static $relationships = array(
         'Author'    =>  array(
             'type'  =>  'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
         )
         ,'Content' =>   array(
             'type'  =>  'one-one'

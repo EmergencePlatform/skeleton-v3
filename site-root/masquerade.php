@@ -1,5 +1,7 @@
 <?php
 
+use Emergence\People\User;
+
 $GLOBALS['Session']->requireAccountLevel('Administrator');
 
 if (!empty($_POST['username'])) {

@@ -1,5 +1,7 @@
 <?php
 
+use Emergence\People\Person;
+
 class Tag extends ActiveRecord
 {
     // support subclassing
@@ -30,7 +32,7 @@ class Tag extends ActiveRecord
         'Creator' => array(
             'type' => 'one-one'
             ,'local' => 'CreatorID'
-            ,'class' => 'Person'
+            ,'class' => Person::class
         )
         ,'Items' => array(
             'type' => 'one-many'

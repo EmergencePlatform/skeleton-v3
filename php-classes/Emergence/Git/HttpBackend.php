@@ -4,7 +4,7 @@ namespace Emergence\Git;
 
 use Sabre\HTTP\BasicAuth;
 use Site;
-use User;
+use Emergence\People\User;
 
 class HttpBackend
 {

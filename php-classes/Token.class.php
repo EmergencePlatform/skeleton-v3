@@ -1,5 +1,7 @@
 <?php
 
+use Emergence\People\Person;
+
 abstract class Token extends ActiveRecord
 {
     public static $expirationHours = 48;
@@ -33,7 +35,7 @@ abstract class Token extends ActiveRecord
     public static $relationships = array(
         'Creator' => array(
             'type' => 'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
             ,'local' => 'CreatorID'
         )
     );

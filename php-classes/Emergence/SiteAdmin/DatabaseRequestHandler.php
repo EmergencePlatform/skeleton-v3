@@ -3,7 +3,7 @@
 namespace Emergence\SiteAdmin;
 
 use Site;
-use User;
+use Emergence\People\User;
 use Ifsnop\Mysqldump\Mysqldump;
 
 class DatabaseRequestHandler extends \RequestHandler

@@ -3,6 +3,7 @@
 namespace Emergence\CMS;
 
 use ActiveRecord;
+use Emergence\People\User;
 
 class BlogRequestHandler extends AbstractRequestHandler
 {

@@ -4,8 +4,8 @@ namespace Emergence\SiteAdmin;
 
 use DB;
 use Site;
-use Person;
-use User;
+use Emergence\People\Person;
+use Emergence\People\User;
 use Emergence\Util\ByteSize;
 
 class DashboardRequestHandler extends \RequestHandler
