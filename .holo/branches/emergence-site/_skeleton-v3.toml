@@ -1,0 +1,13 @@
+[holomapping]
+files = [
+    "*/**",
+
+    # project the composer manifest so composed site trees can install
+    # emergence/php-core (+ its deps) at image build time
+    "composer.json",
+
+    # exclude CI and developer assets
+    "!.github/",
+    "!.vscode/",
+]
+after = "*"

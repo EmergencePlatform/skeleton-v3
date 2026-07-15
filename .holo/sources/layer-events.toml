@@ -1,0 +1,6 @@
+# Emergence events layer (Emergence\Events\Event + templates); a hard
+# dependency of product home templates (e.g. Slate). Projected through its
+# own emergence-layer holobranch, which also pulls in intouch-ical.
+[holosource]
+url = "https://github.com/EmergencePlatform/layer-events.git"
+ref = "refs/heads/releases/v1"

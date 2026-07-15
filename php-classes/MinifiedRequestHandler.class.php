@@ -131,7 +131,13 @@ class MinifiedRequestHandler extends RequestHandler
             } else {
                 $node = Site::resolvePath($path);
                 if (!$node || !is_a($node, 'SiteFile')) {
-                    throw new Exception('Source file "'.implode('/', $path).'" does not exist', self::ERROR_NOT_FOUND);
+                    // skeleton-v3: the gen-1 kernel compiled Sass to
+                    // css/*.css on demand and gen-3 builds them via a hologit lens;
+                    // neither pipeline exists in this prototype yet, so tolerate
+                    // missing generated assets instead of fataling the whole page.
+                    // TODO: revert once skeleton-v3 grows a real asset build (see BREAKING.md).
+                    error_log('minify source missing, skipped: '.implode('/', $path));
+                    continue;
                 }
 
                 if ($node->Type != $contentType) {
