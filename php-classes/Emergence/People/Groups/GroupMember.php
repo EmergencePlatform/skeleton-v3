@@ -3,6 +3,7 @@
 namespace Emergence\People\Groups;
 
 use ActiveRecord;
+use Emergence\People\Person;
 
 class GroupMember extends ActiveRecord
 {
@@ -44,7 +45,7 @@ class GroupMember extends ActiveRecord
     public static $relationships = array(
         'Person' => array(
             'type' => 'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
         )
         ,'Group' => array(
             'type' => 'one-one'

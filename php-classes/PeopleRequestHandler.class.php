@@ -3,6 +3,8 @@
 use Emergence\People\Groups\Group;
 use Emergence\People\IPerson;
 use Emergence\People\IUser;
+use Emergence\People\Person;
+use Emergence\People\User;
 
 
 class PeopleRequestHandler extends RecordsRequestHandler

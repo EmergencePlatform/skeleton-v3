@@ -1,6 +1,7 @@
 <?php
 
 use Emergence\People\IPerson;
+use Emergence\People\Person;
 use Emergence\Interfaces\Image AS IImage;
 
 class ActiveRecord
@@ -102,7 +103,7 @@ class ActiveRecord
     public static $relationships = array(
         'Creator' => array(
             'type' => 'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
             ,'local' => 'CreatorID'
         )
     );
@@ -216,7 +217,7 @@ class ActiveRecord
             if (empty(static::$relationships['Modifier'])) {
                 static::$relationships['Modifier'] = array(
                     'type' => 'one-one',
-                    'class' => 'Person',
+                    'class' => Person::class,
                     'local' => 'ModifierID'
                 );
 

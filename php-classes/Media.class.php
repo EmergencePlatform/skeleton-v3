@@ -1,5 +1,6 @@
 <?php
 
+use Emergence\People\Person;
 use Emergence\Site\Storage;
 
 class Media extends ActiveRecord
@@ -55,7 +56,7 @@ class Media extends ActiveRecord
     public static $relationships = array(
         'Creator' => array(
             'type' => 'one-one'
-            ,'class' => 'Person'
+            ,'class' => Person::class
             ,'local' => 'CreatorID'
         )
         ,'Context' => array(

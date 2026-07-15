@@ -1,5 +1,7 @@
 <?php
 
+use Emergence\People\User;
+
 $tableName = User::$tableName;
 
 // create table if it doesn't exist

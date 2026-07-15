@@ -1,5 +1,7 @@
 <?php
 
+use Emergence\People\Person;
+
 return [
     'title' => 'People',
     'description' => 'Each row represents an individual person tracked in the database',
