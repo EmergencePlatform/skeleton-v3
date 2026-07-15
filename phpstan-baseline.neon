@@ -19,12 +19,6 @@ parameters:
 			path: console-commands/events/fire.php
 
 		-
-			message: '#^Only booleans are allowed in an if condition, string given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
-			path: console-commands/events/fire.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
@@ -52,12 +46,6 @@ parameters:
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 5
-			path: console-commands/migrations/execute.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, string given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
 			path: console-commands/migrations/execute.php
 
 		-
@@ -100,12 +88,6 @@ parameters:
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
-			path: dwoo-plugins/datestamp.php
-
-		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 2
 			path: dwoo-plugins/datestamp.php
 
 		-
@@ -175,15 +157,9 @@ parameters:
 			path: dwoo-plugins/jsmin.php
 
 		-
-			message: '#^Regex pattern is invalid\: Compilation failed\: invalid range in character class at offset 14 in pattern\: /\(\[\\w\]\+\:\\/\\/\[\\w\-\?&;\#~\=\\\.\\/\\@\+\]\+\[\\w\\/\]\)/i$#'
-			identifier: regexp.pattern
-			count: 1
-			path: dwoo-plugins/linkify.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 3
+			count: 2
 			path: dwoo-plugins/log_report.php
 
 		-
@@ -211,7 +187,7 @@ parameters:
 			path: dwoo-plugins/money.php
 
 		-
-			message: '#^Only booleans are allowed in a ternary operator condition, \(array\<string\>\|string\|null\) given\.$#'
+			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
 			identifier: ternary.condNotBoolean
 			count: 1
 			path: dwoo-plugins/money.php
@@ -243,7 +219,13 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 3
+			count: 2
+			path: dwoo-plugins/sencha_bootstrap.php
+
+		-
+			message: '#^Elseif condition is always false\.$#'
+			identifier: elseif.alwaysFalse
+			count: 1
 			path: dwoo-plugins/sencha_bootstrap.php
 
 		-
@@ -255,7 +237,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
+			count: 1
 			path: dwoo-plugins/sencha_bootstrap.php
 
 		-
@@ -271,12 +253,6 @@ parameters:
 			path: dwoo-plugins/sencha_bootstrap.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between int\<1, max\>\|false and 0 will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: dwoo-plugins/sencha_bootstrap.php
-
-		-
 			message: '#^Variable \$appPath might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -285,12 +261,6 @@ parameters:
 		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
-			count: 1
-			path: dwoo-plugins/sencha_preloader.php
-
-		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
 			count: 1
 			path: dwoo-plugins/sencha_preloader.php
 
@@ -321,7 +291,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 5
+			count: 3
 			path: dwoo-plugins/time_range.php
 
 		-
@@ -465,25 +435,13 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 89
-			path: php-classes/ActiveRecord.class.php
-
-		-
-			message: '#^Dynamic call to static method ActiveRecord\:\:getClassFields\(\)\.$#'
-			identifier: staticMethod.dynamicCall
-			count: 3
+			count: 86
 			path: php-classes/ActiveRecord.class.php
 
 		-
 			message: '#^Dynamic call to static method ActiveRecord\:\:getRootClass\(\)\.$#'
 			identifier: staticMethod.dynamicCall
-			count: 5
-			path: php-classes/ActiveRecord.class.php
-
-		-
-			message: '#^Dynamic call to static method ActiveRecord\:\:getUserFromEnvironment\(\)\.$#'
-			identifier: staticMethod.dynamicCall
-			count: 6
+			count: 3
 			path: php-classes/ActiveRecord.class.php
 
 		-
@@ -495,7 +453,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 72
+			count: 71
 			path: php-classes/ActiveRecord.class.php
 
 		-
@@ -541,20 +499,8 @@ parameters:
 			path: php-classes/ActiveRecord.class.php
 
 		-
-			message: '#^Only booleans are allowed in a ternary operator condition, ActiveRecord\|null given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 2
-			path: php-classes/ActiveRecord.class.php
-
-		-
 			message: '#^Only booleans are allowed in a ternary operator condition, mixed given\.$#'
 			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/ActiveRecord.class.php
-
-		-
-			message: '#^Only booleans are allowed in an elseif condition, int\<0, max\> given\.$#'
-			identifier: elseif.condNotBoolean
 			count: 1
 			path: php-classes/ActiveRecord.class.php
 
@@ -567,17 +513,11 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
 			identifier: if.condNotBoolean
-			count: 6
-			path: php-classes/ActiveRecord.class.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, mixed given\.$#'
-			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/ActiveRecord.class.php
 
 		-
-			message: '#^Only booleans are allowed in an if condition, string given\.$#'
+			message: '#^Only booleans are allowed in an if condition, mixed given\.$#'
 			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/ActiveRecord.class.php
@@ -711,13 +651,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 3
-			path: php-classes/CSV.class.php
-
-		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 1
+			count: 2
 			path: php-classes/CSV.class.php
 
 		-
@@ -775,12 +709,6 @@ parameters:
 			path: php-classes/Email.class.php
 
 		-
-			message: '#^Regex pattern is invalid\: Compilation failed\: invalid range in character class at offset 519 in pattern\: /\(On\)\( \)\(\(\?\:Monday\|Tuesday\|Wednesday\|Thursday\|Friday\|Saturday\|Sunday\|Tues\|Thur\|Thurs\|Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\)\)\(,\)\( \)\(\(\?\:Jan\(\?\:uary\)\?\|Feb\(\?\:ruary\)\?\|Mar\(\?\:ch\)\?\|Apr\(\?\:il\)\?\|May\|Jun\(\?\:e\)\?\|Jul\(\?\:y\)\?\|Aug\(\?\:ust\)\?\|Sep\(\?\:tember\)\?\|Sept\|Oct\(\?\:ober\)\?\|Nov\(\?\:ember\)\?\|Dec\(\?\:ember\)\?\)\)\( \)\(\(\?\:\(\?\:\[0\-2\]\?\\d\{1\}\)\|\(\?\:\[3\]\[0,1\]\{1\}\)\)\)\(\?\!\[\\d\]\)\(,\)\( \)\(\(\?\:\(\?\:\[1\]\{1\}\\d\{1\}\\d\{1\}\\d\{1\}\)\|\(\?\:\[2\]\{1\}\\d\{3\}\)\)\)\(\?\!\[\\d\]\)\( \)\(at\)\( \)\(\(\?\:\(\?\:\[0\-1\]\[0\-9\]\)\|\(\?\:\[2\]\[0\-3\]\)\|\(\?\:\[0\-9\]\)\)\:\(\?\:\[0\-5\]\[0\-9\]\)\(\?\:\:\[0\-5\]\[0\-9\]\)\?\(\?\:\\s\?\(\?\:am\|AM\|pm\|PM\)\)\?\)\(,\)\( \)\(YouGee\)\(\\\.\)\(com\)\( \)\(\<\)\(\[\\w\-\+\]\+\(\?\:\\\.\[\\w\-\+\]\+\)\*@\(\?\:\[\\w\-\]\+\\\.\)\+\[a\-zA\-Z\]\{2,7\}\)\(\>\)\( \)\(wrote\)\(\:\)/is$#'
-			identifier: regexp.pattern
-			count: 2
-			path: php-classes/Email.class.php
-
-		-
 			message: '#^Undefined variable\: \$body$#'
 			identifier: variable.undefined
 			count: 1
@@ -795,7 +723,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 14
+			count: 13
 			path: php-classes/Emergence/ActiveRecord/AbstractActiveRecord.php
 
 		-
@@ -812,12 +740,6 @@ parameters:
 
 		-
 			message: '#^Only booleans are allowed in a negated boolean, array\|null given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
-			path: php-classes/Emergence/ActiveRecord/AbstractActiveRecord.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, int\<0, max\> given\.$#'
 			identifier: booleanNot.exprNotBoolean
 			count: 1
 			path: php-classes/Emergence/ActiveRecord/AbstractActiveRecord.php
@@ -969,7 +891,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 17
+			count: 15
 			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
 
 		-
@@ -981,13 +903,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 10
-			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, Emergence\\ActiveRecord\\ActiveRecordInterface\|null given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
+			count: 7
 			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
 
 		-
@@ -997,26 +913,8 @@ parameters:
 			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
 
 		-
-			message: '#^Only booleans are allowed in a ternary operator condition, array given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
-
-		-
 			message: '#^Only booleans are allowed in a ternary operator condition, int given\.$#'
 			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
-
-		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
-			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/Emergence/ActiveRecord/RequestHandler.php
 
@@ -1137,7 +1035,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 4
+			count: 3
 			path: php-classes/Emergence/CMS/AbstractContent.php
 
 		-
@@ -1317,7 +1215,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 2
+			count: 1
 			path: php-classes/Emergence/CMS/Item/AbstractItem.php
 
 		-
@@ -1503,13 +1401,7 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in &&, ActiveRecord\|null given on the left side\.$#'
 			identifier: booleanAnd.leftNotBoolean
-			count: 1
-			path: php-classes/Emergence/Comments/CommentsRequestHandler.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, ActiveRecord\|null given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
+			count: 2
 			path: php-classes/Emergence/Comments/CommentsRequestHandler.php
 
 		-
@@ -1585,15 +1477,9 @@ parameters:
 			path: php-classes/Emergence/Connectors/AbstractSpreadsheetConnector.php
 
 		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: php-classes/Emergence/Connectors/AbstractSpreadsheetConnector.php
-
-		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
+			count: 2
 			path: php-classes/Emergence/Connectors/AbstractSpreadsheetConnector.php
 
 		-
@@ -1689,12 +1575,6 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in a negated boolean, Emergence\\People\\IPerson given\.$#'
 			identifier: booleanNot.exprNotBoolean
-			count: 1
-			path: php-classes/Emergence/Connectors/Discourse.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, Emergence\\Connectors\\Mapping\|null given\.$#'
-			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/Emergence/Connectors/Discourse.php
 
@@ -1891,12 +1771,6 @@ parameters:
 			path: php-classes/Emergence/Dwoo/Engine.php
 
 		-
-			message: '#^Parameter \#3 \$compilerFactory of method Dwoo_Core\:\:addResource\(\) expects callback\|null, array\<int, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: php-classes/Emergence/Dwoo/Engine.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 1
@@ -1929,7 +1803,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
+			count: 2
 			path: php-classes/Emergence/Dwoo/Template.php
 
 		-
@@ -1963,12 +1837,6 @@ parameters:
 			path: php-classes/Emergence/EventBus.php
 
 		-
-			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
-			identifier: if.condNotBoolean
-			count: 2
-			path: php-classes/Emergence/EventBus.php
-
-		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
 			identifier: arrayFilter.strict
 			count: 1
@@ -1989,7 +1857,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
+			count: 1
 			path: php-classes/Emergence/Exports/ExportsRequestHandler.php
 
 		-
@@ -2097,13 +1965,13 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 7
+			count: 5
 			path: php-classes/Emergence/Git/Source.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 16
+			count: 15
 			path: php-classes/Emergence/Git/Source.php
 
 		-
@@ -2185,12 +2053,6 @@ parameters:
 			path: php-classes/Emergence/Git/Tree.php
 
 		-
-			message: '#^Only booleans are allowed in a negated boolean, string given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
-			path: php-classes/Emergence/Git/Tree.php
-
-		-
 			message: '#^Short ternary operator is not allowed\. Use null coalesce operator if applicable or consider using long ternary\.$#'
 			identifier: ternary.shortNotAllowed
 			count: 1
@@ -2233,12 +2095,6 @@ parameters:
 			path: php-classes/Emergence/Git/TreeUtil.php
 
 		-
-			message: '#^Only booleans are allowed in a ternary operator condition, string given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/Git/TreeUtil.php
-
-		-
 			message: '#^Undefined variable\: \$this$#'
 			identifier: variable.undefined
 			count: 1
@@ -2253,7 +2109,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
+			count: 2
 			path: php-classes/Emergence/Http/Message/Request.php
 
 		-
@@ -2285,6 +2141,12 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 1
 			path: php-classes/Emergence/Http/Message/Stream.php
+
+		-
+			message: '#^Casting to string something that''s already string\.$#'
+			identifier: cast.useless
+			count: 2
+			path: php-classes/Emergence/Http/Message/Uri.php
 
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
@@ -2337,7 +2199,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 12
+			count: 11
 			path: php-classes/Emergence/Logger.php
 
 		-
@@ -2419,12 +2281,6 @@ parameters:
 			path: php-classes/Emergence/Mailer/PostmarkMailer.php
 
 		-
-			message: '#^Only booleans are allowed in an if condition, string given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/Markdown.php
-
-		-
 			message: '#^Only booleans are allowed in \|\|, string given on the left side\.$#'
 			identifier: booleanOr.leftNotBoolean
 			count: 1
@@ -2445,7 +2301,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 14
+			count: 13
 			path: php-classes/Emergence/OpenAPI/Reader.php
 
 		-
@@ -2458,6 +2314,12 @@ parameters:
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 6
+			path: php-classes/Emergence/OpenAPI/Reader.php
+
+		-
+			message: '#^Offset ''description'' on array\{title\?\: mixed, description\: string\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
 			path: php-classes/Emergence/OpenAPI/Reader.php
 
 		-
@@ -2625,7 +2487,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
+			count: 1
 			path: php-classes/Emergence/People/Person.php
 
 		-
@@ -2637,7 +2499,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 6
+			count: 5
 			path: php-classes/Emergence/People/RegistrationRequestHandler.php
 
 		-
@@ -2791,12 +2653,6 @@ parameters:
 			path: php-classes/Emergence/RequestHandler/AbstractRequestHandler.php
 
 		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/RequestHandler/AbstractRequestHandler.php
-
-		-
 			message: '#^Parameter \$e of method Emergence\\RequestHandler\\AbstractRequestHandler\:\:throwValidationError\(\) has invalid type Emergence\\RequestHandler\\RecordValidationException\.$#'
 			identifier: class.notFound
 			count: 1
@@ -2807,12 +2663,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: php-classes/Emergence/RequestHandler/AbstractRequestHandler.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''type'' \(''type'', ''type''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: php-classes/Emergence/RequestHandler/IndexRequestHandler.php
 
 		-
 			message: '#^Call to function base64_decode\(\) requires parameter \#2 to be set\.$#'
@@ -2867,12 +2717,6 @@ parameters:
 			identifier: empty.notAllowed
 			count: 3
 			path: php-classes/Emergence/Site/Client.php
-
-		-
-			message: '#^Access to an undefined property Emergence\\Site\\Renderers\\DwooTemplate\:\:\$mode\.$#'
-			identifier: property.notFound
-			count: 2
-			path: php-classes/Emergence/Site/Renderers/DwooTemplate.php
 
 		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
@@ -2949,7 +2793,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
+			count: 2
 			path: php-classes/Emergence/SiteAdmin/LogsRequestHandler.php
 
 		-
@@ -2963,12 +2807,6 @@ parameters:
 			identifier: ternary.shortNotAllowed
 			count: 2
 			path: php-classes/Emergence/SiteAdmin/LogsRequestHandler.php
-
-		-
-			message: '#^Anonymous function has an unused use \$resetMigrationStatus\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: php-classes/Emergence/SiteAdmin/MigrationsRequestHandler.php
 
 		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
@@ -2997,7 +2835,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 7
+			count: 4
 			path: php-classes/Emergence/SiteAdmin/MigrationsRequestHandler.php
 
 		-
@@ -3031,8 +2869,8 @@ parameters:
 			path: php-classes/Emergence/SiteAdmin/MigrationsRequestHandler.php
 
 		-
-			message: '#^Only booleans are allowed in an elseif condition, int\<0, max\> given\.$#'
-			identifier: elseif.condNotBoolean
+			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
+			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/Emergence/SiteAdmin/MigrationsRequestHandler.php
 
@@ -3081,7 +2919,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 8
+			count: 7
 			path: php-classes/Emergence/SiteAdmin/SourcesRequestHandler.php
 
 		-
@@ -3117,7 +2955,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property SiteFile\:\:\$Handle\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 2
 			path: php-classes/Emergence/Util/Data.php
 
 		-
@@ -3147,13 +2985,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 7
-			path: php-classes/Emergence/Util/Data.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, string given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
+			count: 5
 			path: php-classes/Emergence/Util/Data.php
 
 		-
@@ -3161,24 +2993,6 @@ parameters:
 			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/Emergence/Util/Data.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, string given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
-			path: php-classes/Emergence/Util/Url.php
-
-		-
-			message: '#^Parameter \#1 \$separator of function implode expects string, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: php-classes/Emergence/Util/Url.php
-
-		-
-			message: '#^Parameter \#2 \$array of function implode expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: php-classes/Emergence/Util/Url.php
 
 		-
 			message: '#^Short ternary operator is not allowed\. Use null coalesce operator if applicable or consider using long ternary\.$#'
@@ -3199,33 +3013,15 @@ parameters:
 			path: php-classes/Emergence/WebApps/App.php
 
 		-
-			message: '#^Access to an undefined property Emergence\\WebApps\\IndexApp\:\:\$indexNode\.$#'
-			identifier: property.notFound
-			count: 2
-			path: php-classes/Emergence/WebApps/IndexApp.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 1
 			path: php-classes/Emergence/WebApps/IndexApp.php
 
 		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 2
-			path: php-classes/Emergence/WebApps/RequestHandler.php
-
-		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 1
-			path: php-classes/Emergence/WebApps/SenchaApp.php
-
-		-
-			message: '#^Dynamic call to static method Emergence\\WebApps\\SenchaApp\:\:getPlugins\(\)\.$#'
-			identifier: staticMethod.dynamicCall
-			count: 2
 			path: php-classes/Emergence/WebApps/SenchaApp.php
 
 		-
@@ -3249,6 +3045,12 @@ parameters:
 		-
 			message: '#^Call to static method getLog\(\) on an unknown class DebugLog\.$#'
 			identifier: class.notFound
+			count: 1
+			path: php-classes/ErrorHandler.class.php
+
+		-
+			message: '#^Parameter \#1 \$e of static method ErrorHandler\:\:handleValidationError\(\) expects RecordValidationException, Throwable given\.$#'
+			identifier: argument.type
 			count: 1
 			path: php-classes/ErrorHandler.class.php
 
@@ -3277,12 +3079,6 @@ parameters:
 			path: php-classes/Firebase/JWT/JWT.php
 
 		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: php-classes/Firebase/JWT/JWT.php
-
-		-
 			message: '#^Method Firebase\\JWT\\JWT\:\:sign\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
@@ -3298,12 +3094,6 @@ parameters:
 			message: '#^Only booleans are allowed in &&, int given on the right side\.$#'
 			identifier: booleanAnd.rightNotBoolean
 			count: 2
-			path: php-classes/Firebase/JWT/JWT.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, int\<0, 3\> given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
 			path: php-classes/Firebase/JWT/JWT.php
 
 		-
@@ -3373,15 +3163,9 @@ parameters:
 			path: php-classes/Format.class.php
 
 		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: php-classes/Format.class.php
-
-		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
+			count: 3
 			path: php-classes/Format.class.php
 
 		-
@@ -3532,12 +3316,6 @@ parameters:
 			path: php-classes/Inflector.class.php
 
 		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 1
-			path: php-classes/JSMin.class.php
-
-		-
 			message: '#^Switch condition type \("\\n"\) does not match case condition '' '' \(string\)\.$#'
 			identifier: switch.type
 			count: 1
@@ -3606,14 +3384,8 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
+			count: 2
 			path: php-classes/JSON.class.php
-
-		-
-			message: '#^Access to an undefined property Jarvus\\Sencha\\App\:\:\$workspaceConfig\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/Jarvus/Sencha/App.php
 
 		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
@@ -3658,12 +3430,6 @@ parameters:
 			path: php-classes/Jarvus/Sencha/Cmd.php
 
 		-
-			message: '#^Only booleans are allowed in a negated boolean, int\<0, max\> given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
-			path: php-classes/Jarvus/Sencha/Cmd.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 2
@@ -3673,18 +3439,6 @@ parameters:
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 2
-			path: php-classes/Jarvus/Sencha/Framework.php
-
-		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: php-classes/Jarvus/Sencha/Framework.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, string given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
 			path: php-classes/Jarvus/Sencha/Framework.php
 
 		-
@@ -3727,12 +3481,6 @@ parameters:
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 6
-			path: php-classes/Jarvus/Sencha/FrameworkPackage.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, Jarvus\\Sencha\\Framework\|null given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
 			path: php-classes/Jarvus/Sencha/FrameworkPackage.php
 
 		-
@@ -3808,12 +3556,6 @@ parameters:
 			path: php-classes/Jarvus/Sencha/Util.php
 
 		-
-			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
-			path: php-classes/Jarvus/Sencha/Util.php
-
-		-
 			message: '#^Call to an undefined static method Emergence\\Logger\:\:general_warning\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 2
@@ -3858,12 +3600,6 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in a negated boolean, string\|null given\.$#'
 			identifier: booleanNot.exprNotBoolean
-			count: 1
-			path: php-classes/Jarvus/Sencha/WorkspacePackage.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, Jarvus\\Sencha\\Framework\|null given\.$#'
-			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/Jarvus/Sencha/WorkspacePackage.php
 
@@ -4182,13 +3918,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 9
-			path: php-classes/MediaRequestHandler.class.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, Media\|null given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
+			count: 8
 			path: php-classes/MediaRequestHandler.class.php
 
 		-
@@ -4272,7 +4002,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
+			count: 3
 			path: php-classes/MinifiedRequestHandler.class.php
 
 		-
@@ -4320,14 +4050,8 @@ parameters:
 		-
 			message: '#^Variable property access on \$this\(MobileDetector\)\.$#'
 			identifier: property.dynamicName
-			count: 2
+			count: 1
 			path: php-classes/MobileDetector.class.php
-
-		-
-			message: '#^Cannot access static property \$tableName on class\-string\|false\.$#'
-			identifier: staticProperty.nonObject
-			count: 3
-			path: php-classes/NestingBehavior.class.php
 
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
@@ -4338,12 +4062,6 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 1
-			path: php-classes/NestingBehavior.class.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
-			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/NestingBehavior.class.php
 
@@ -4698,7 +4416,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 23
+			count: 21
 			path: php-classes/RecordsRequestHandler.class.php
 
 		-
@@ -4710,13 +4428,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 9
-			path: php-classes/RecordsRequestHandler.class.php
-
-		-
-			message: '#^Only booleans are allowed in a negated boolean, ActiveRecord\|null given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
+			count: 7
 			path: php-classes/RecordsRequestHandler.class.php
 
 		-
@@ -4728,12 +4440,6 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in a ternary operator condition, int given\.$#'
 			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/RecordsRequestHandler.class.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, int\<0, max\> given\.$#'
-			identifier: if.condNotBoolean
 			count: 1
 			path: php-classes/RecordsRequestHandler.class.php
 
@@ -4822,12 +4528,6 @@ parameters:
 			path: php-classes/RequestHandler.class.php
 
 		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/RequestHandler.class.php
-
-		-
 			message: '#^Call to an undefined static method Emergence\\Logger\:\:general_warning\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
@@ -4852,27 +4552,9 @@ parameters:
 			path: php-classes/RssReader.class.php
 
 		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 1
-			path: php-classes/RssReader.class.php
-
-		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
-			path: php-classes/RssReader.class.php
-
-		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, 1\> given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
-			path: php-classes/RssReader.class.php
-
-		-
-			message: '#^Only booleans are allowed in an if condition, string given\.$#'
-			identifier: if.condNotBoolean
-			count: 1
+			count: 2
 			path: php-classes/RssReader.class.php
 
 		-
@@ -4890,7 +4572,7 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 13
+			count: 12
 			path: php-classes/SQL.class.php
 
 		-
@@ -4906,6 +4588,12 @@ parameters:
 			path: php-classes/SQL.class.php
 
 		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: php-classes/SQL.class.php
+
+		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 6
@@ -4914,13 +4602,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
-			path: php-classes/SearchRequestHandler.class.php
-
-		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
+			count: 2
 			path: php-classes/SearchRequestHandler.class.php
 
 		-
@@ -5020,12 +4702,6 @@ parameters:
 			path: php-classes/Sencha/CodeGenerator.php
 
 		-
-			message: '#^Access to an undefined property Sencha_App\:\:\$_appCfg\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/Sencha_App.class.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
@@ -5076,7 +4752,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 6
+			count: 5
 			path: php-classes/Sencha_RequestHandler.class.php
 
 		-
@@ -5116,12 +4792,6 @@ parameters:
 			path: php-classes/SpreadsheetReader.class.php
 
 		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 1
-			path: php-classes/SpreadsheetReader.class.php
-
-		-
 			message: '#^Only booleans are allowed in &&, int\<1, max\> given on the left side\.$#'
 			identifier: booleanAnd.leftNotBoolean
 			count: 1
@@ -5134,22 +4804,10 @@ parameters:
 			path: php-classes/SpreadsheetReader.class.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: php-classes/SpreadsheetReader.class.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 1
 			path: php-classes/SpreadsheetReader.class.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: php-classes/SpreadsheetWriter.class.php
 
 		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
@@ -5274,7 +4932,7 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
 			identifier: ternary.condNotBoolean
-			count: 2
+			count: 1
 			path: php-classes/Tag.class.php
 
 		-
@@ -5322,12 +4980,6 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 3
-			path: php-classes/TagItem.class.php
-
-		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
-			identifier: ternary.condNotBoolean
 			count: 3
 			path: php-classes/TagItem.class.php
 
@@ -5404,22 +5056,10 @@ parameters:
 			path: php-classes/TokensRequestHandler.class.php
 
 		-
-			message: '#^Only booleans are allowed in a negated boolean, string given\.$#'
-			identifier: booleanNot.exprNotBoolean
-			count: 1
-			path: php-classes/TokensRequestHandler.class.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
 			path: php-classes/Twitter.class.php
-
-		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 2
-			path: php-classes/Twitter_Autolink.class.php
 
 		-
 			message: '#^Access to an undefined property UserSession\:\:\$Person\.$#'
@@ -5466,13 +5106,13 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 13
+			count: 2
 			path: php-classes/Validators.class.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 26
+			count: 12
 			path: php-classes/Validators.class.php
 
 		-
@@ -5484,6 +5124,12 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in a negated boolean, mixed given\.$#'
 			identifier: booleanNot.exprNotBoolean
+			count: 1
+			path: php-classes/Validators.class.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: php-classes/Validators.class.php
 
@@ -5502,19 +5148,13 @@ parameters:
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
-			count: 3
+			count: 2
 			path: php-classes/VersionedRecord.class.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 3
-			path: php-classes/VersionedRecord.class.php
-
-		-
-			message: '#^Only booleans are allowed in a ternary operator condition, int\<0, max\> given\.$#'
-			identifier: ternary.condNotBoolean
-			count: 1
 			path: php-classes/VersionedRecord.class.php
 
 		-
@@ -5562,7 +5202,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 4
+			count: 1
 			path: php-classes/VideoMedia.class.php
 
 		-
@@ -6106,12 +5746,6 @@ parameters:
 			path: site-root/phpunit/browse.php
 
 		-
-			message: '#^Only booleans are allowed in an elseif condition, int\<0, max\> given\.$#'
-			identifier: elseif.condNotBoolean
-			count: 1
-			path: site-root/phpunit/browse.php
-
-		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
@@ -6168,7 +5802,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 3
+			count: 2
 			path: site-tasks/cache/manage.php
 
 		-
