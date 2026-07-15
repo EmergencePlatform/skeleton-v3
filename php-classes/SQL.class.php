@@ -13,16 +13,15 @@ class SQL
 
         if ($field) {
             return static::$aggregateFieldConfigs[$recordClass][$field];
-        } else {
-            return static::$aggregateFieldConfigs[$recordClass];
         }
+        return static::$aggregateFieldConfigs[$recordClass];
     }
 
     public static function getCreateTable($recordClass, $historyVariant = false)
     {
-        $queryFields = array();
-        $indexes = $historyVariant ? array() : $recordClass::aggregateStackedConfig('indexes');
-        $fulltextColumns = array();
+        $queryFields = [];
+        $indexes = $historyVariant ? [] : $recordClass::aggregateStackedConfig('indexes');
+        $fulltextColumns = [];
 
         // history table revisionID field
         if ($historyVariant) {
@@ -31,7 +30,7 @@ class SQL
         }
 
         // compile fields
-        $rootClass = $recordClass::getStaticRootClass();
+        $recordClass::getStaticRootClass();
         foreach (static::getAggregateFieldOptions($recordClass) AS $fieldId => $field) {
             if ($field['columnName'] == 'RevisionID') {
                 continue;
@@ -70,7 +69,7 @@ class SQL
             if (is_array($index['fields'])) {
                 $indexFields = $index['fields'];
             } elseif ($index['fields']) {
-                $indexFields = array($index['fields']);
+                $indexFields = [$index['fields']];
             } else {
                 continue;
             }
@@ -87,21 +86,21 @@ class SQL
 
             $queryFields[] = sprintf(
                 '%s KEY `%s` (`%s`)'
-                , !empty($index['unique']) ? 'UNIQUE' : ''
+                , empty($index['unique']) ? '' : 'UNIQUE'
                 , $indexName
-                , join('`,`', $index['fields'])
+                , implode('`,`', $index['fields'])
             );
         }
 
-        if (!empty($fulltextColumns)) {
-            $queryFields[] = 'FULLTEXT KEY `FULLTEXT` (`'.join('`,`', $fulltextColumns).'`)';
+        if ($fulltextColumns !== []) {
+            $queryFields[] = 'FULLTEXT KEY `FULLTEXT` (`'.implode('`,`', $fulltextColumns).'`)';
         }
 
 
         $createSQL = sprintf(
             "CREATE TABLE IF NOT EXISTS `%s` (\n\t%s\n) ENGINE=%s DEFAULT CHARSET=utf8;"
             , $historyVariant ? $recordClass::getHistoryTableName() : $recordClass::$tableName
-            , join("\n\t,", $queryFields)
+            , implode("\n\t,", $queryFields)
             , static::$mysqlStorageEngine
         );
 
@@ -127,9 +126,9 @@ class SQL
                 $field['unsigned'] = true;
             case 'int':
             case 'integer':
-                return 'int'.($field['unsigned'] ? ' unsigned' : '').(!empty($field['zerofill']) ? ' zerofill' : '');
+                return 'int'.($field['unsigned'] ? ' unsigned' : '').(empty($field['zerofill']) ? '' : ' zerofill');
             case 'decimal':
-                return sprintf('decimal(%s)', $field['length']).(!empty($field['unsigned']) ? ' unsigned' : '').(!empty($field['zerofill']) ? ' zerofill' : '');;
+                return sprintf('decimal(%s)', $field['length']).(empty($field['unsigned']) ? '' : ' unsigned').(empty($field['zerofill']) ? '' : ' zerofill');;
             case 'float':
                 return 'float';
             case 'double':
@@ -160,14 +159,15 @@ class SQL
                 return 'year';
 
             case 'enum':
-                return sprintf('enum("%s")', join('","', array_map(array('DB', 'escape'), $field['values'])));
+                return sprintf('enum("%s")', implode('","', array_map(['DB', 'escape'], $field['values'])));
 
             case 'set':
-                return sprintf('set("%s")', join('","', array_map(array('DB', 'escape'), $field['values'])));
+                return sprintf('set("%s")', implode('","', array_map(['DB', 'escape'], $field['values'])));
 
             default:
                 die("getSQLType: unhandled type $field[type]");
         }
+        return null;
     }
 
     public static function getFieldDefinition($recordClass, $fieldName, $historyVariant = false)

@@ -6,22 +6,22 @@
  {
      public static $viewportLoader = 'Manager.Viewport';
 
-     public static $applicationPanels = array(
+     public static $applicationPanels = [
         //'dashboard' => 'Dashboard.DashboardPanel'
         'browser' => 'Browser.BrowserPanel'
         ,'people' => 'People.PeopleManager'
         ,'media' => 'Media.MediaManager'
-    );
+    ];
 
-     public static $contextPanels = array(
-        'Person' => array(
+     public static $contextPanels = [
+        'Person' => [
             'People.PersonDetailsPanel'
             ,'People.PersonGroupsPanel'
             ,'People.PersonJournalPanel'
-        )
-    );
+        ]
+    ];
 
-     public static $globalUse = array();
+     public static $globalUse = [];
 
 
      public static function handleRequest()
@@ -36,31 +36,27 @@
         // route request
         switch ($request = static::shiftPath()) {
             case 'sandbox':
-            {
-                return static::handleSandboxRequest();
-            }
+            return static::handleSandboxRequest();
 
             default:
-            {
-                return static::handleConsoleRequest();
-            }
+            return static::handleConsoleRequest();
         }
      }
 
      public static function handleConsoleRequest()
      {
-         return static::respond('console', array(
+         return static::respond('console', [
             'success' => true
             ,'viewportLoader' => static::$viewportLoader
             ,'applicationPanels' => static::$applicationPanels
             ,'contextPanels' => static::$contextPanels
-        ));
+        ]);
      }
 
      public static function handleSandboxRequest()
      {
-         return static::respond('sandbox', array(
+         return static::respond('sandbox', [
             'success' => true
-        ));
+        ]);
      }
  }

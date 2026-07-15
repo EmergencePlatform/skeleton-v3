@@ -11,18 +11,18 @@ class MobileDetector
     protected $accept;
     protected $userAgent;
     protected $isMobile = false;
-    protected $isAndroid = null;
-    protected $isAndroidtablet = null;
-    protected $isIphone = null;
-    protected $isIpad = null;
-    protected $isBlackberry = null;
-    protected $isBlackberrytablet = null;
-    protected $isOpera = null;
-    protected $isPalm = null;
-    protected $isWindows = null;
-    protected $isWindowsphone = null;
-    protected $isGeneric = null;
-    protected $devices = array(
+    protected $isAndroid;
+    protected $isAndroidtablet;
+    protected $isIphone;
+    protected $isIpad;
+    protected $isBlackberry;
+    protected $isBlackberrytablet;
+    protected $isOpera;
+    protected $isPalm;
+    protected $isWindows;
+    protected $isWindowsphone;
+    protected $isGeneric;
+    protected $devices = [
         "android" => "android.*mobile",
         "androidtablet" => "android(?!.*mobile)",
         "blackberry" => "blackberry",
@@ -33,7 +33,7 @@ class MobileDetector
         "windows" => "windows ce; (iemobile|ppc|smartphone)",
         "windowsphone" => "windows phone os",
         "generic" => "(kindle|mobile|mmp|midp|pocket|psp|symbian|smartphone|treo|up.browser|up.link|vodafone|wap|opera mini)"
-    );
+    ];
 
     public function __construct()
     {
@@ -42,7 +42,7 @@ class MobileDetector
 
         if (isset($_SERVER['HTTP_X_WAP_PROFILE']) || isset($_SERVER['HTTP_PROFILE'])) {
             $this->isMobile = true;
-        } elseif (strpos($this->accept, 'text/vnd.wap.wml') > 0 || strpos($this->accept, 'application/vnd.wap.xhtml+xml') > 0) {
+        } elseif (strpos((string) $this->accept, 'text/vnd.wap.wml') > 0 || strpos((string) $this->accept, 'application/vnd.wap.xhtml+xml') > 0) {
             $this->isMobile = true;
         } else {
             foreach ($this->devices as $device => $regexp) {
@@ -65,9 +65,8 @@ class MobileDetector
         $device = substr($name, 2);
         if ($name == "is".ucfirst($device) && array_key_exists(strtolower($device), $this->devices)) {
             return $this->_isDevice($device);
-        } else {
-            trigger_error("Method $name not defined", E_USER_WARNING);
         }
+        trigger_error("Method $name not defined", E_USER_WARNING);
     }
 
     /**
@@ -81,8 +80,8 @@ class MobileDetector
 
     protected function _isDevice($device)
     {
-        $var = "is".ucfirst($device);
-        $return = $this->$var === null ? (bool) preg_match("/".$this->devices[strtolower($device)]."/i", $this->userAgent) : $this->$var;
+        $var = "is".ucfirst((string) $device);
+        $return = $this->$var ?? (bool) preg_match("/".$this->devices[strtolower((string) $device)]."/i", (string) $this->userAgent);
         if ($device != 'generic' && $return == true) {
             $this->isGeneric = false;
         }

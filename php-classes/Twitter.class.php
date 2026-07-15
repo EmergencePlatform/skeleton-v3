@@ -18,11 +18,11 @@
 
         // get context
         if (!isset(static::$_streamContext)) {
-            static::$_streamContext = stream_context_create(array(
-                'http' => array(
+            static::$_streamContext = stream_context_create([
+                'http' => [
                     'timeout' => static::$requestTimeout
-                )
-            ));
+                ]
+            ]);
         }
 
          $failureKey = 'fail:'.$cacheKey;

@@ -4,27 +4,27 @@ class Sencha_RequestHandler extends RequestHandler
 {
     public static $externalRoot = '/app';
 
-    public static $validModes = array(
+    public static $validModes = [
         'development'
         ,'develop' => 'development'
         ,'testing'
         ,'production'
         ,'package'
-    );
+    ];
     public static $defaultMode = 'production';
 
-    public static $defaultAccountLevels = array(
+    public static $defaultAccountLevels = [
         'development' => 'Developer'
         ,'testing' => 'User'
         ,'production' => 'User'
         ,'package' => 'User'
         ,'docs' => 'Developer'
-    );
+    ];
 
-    public static $appAccountLevels = array(
+    public static $appAccountLevels = [
         'EmergenceEditor' => 'Developer'
         ,'EmergencePullTool' => 'Developer'
-    );
+    ];
 
     public static function handleRequest()
     {
@@ -34,7 +34,7 @@ class Sencha_RequestHandler extends RequestHandler
         }
 
         // check if appName is a framework
-        if (preg_match('/^([a-z]+)(-([0-9.]+))?$/', $appName, $matches) && array_key_exists($matches[1], Sencha::$frameworks)) {
+        if (preg_match('/^([a-z]+)(-([0-9.]+))?$/', (string) $appName, $matches) && array_key_exists($matches[1], Sencha::$frameworks)) {
             return static::handleFrameworkRequest($matches[1], $matches[3]);
         }
 
@@ -58,7 +58,7 @@ class Sencha_RequestHandler extends RequestHandler
             $path = array_slice(Site::$requestPath, 0, 2);
             $path[] = static::$validModes[$nextPath];
 
-            if (count($remainingPath) == 1) {
+            if (count($remainingPath) === 1) {
                 $path[] = '';
             } else {
                 $path = array_merge($path, array_slice($remainingPath, 1));
@@ -148,10 +148,10 @@ class Sencha_RequestHandler extends RequestHandler
 
         // render bootstrap HTML
         static::_forceTrailingSlash();
-        return static::respond($App->getFramework(), array(
+        return static::respond($App->getFramework(), [
             'App' => $App
             ,'mode' => $mode
-        ));
+        ]);
     }
 
     public static function handleDocsRequest(Sencha_App $App)
@@ -257,13 +257,12 @@ class Sencha_RequestHandler extends RequestHandler
 
     protected static function _getRequiredAccountLevel($appName, $mode)
     {
-        $requiredAccountLevel = 'default';
-
         // check for app-specific config
         if (array_key_exists($appName, static::$appAccountLevels)) {
             if (is_string(static::$appAccountLevels[$appName]) || !static::$appAccountLevels[$appName]) {
                 return static::$appAccountLevels[$appName];
-            } elseif (array_key_exists($mode, static::$appAccountLevels[$appName])) {
+            }
+            if (array_key_exists($mode, static::$appAccountLevels[$appName])) {
                 return static::$appAccountLevels[$appName][$mode];
             }
         }
@@ -271,7 +270,10 @@ class Sencha_RequestHandler extends RequestHandler
         // check for default matching mode
         if (is_string(static::$defaultAccountLevels)) {
             return static::$defaultAccountLevels;
-        } elseif (array_key_exists($mode, static::$defaultAccountLevels)) {
+        }
+
+        // check for default matching mode
+        if (array_key_exists($mode, static::$defaultAccountLevels)) {
             return static::$defaultAccountLevels[$mode];
         }
 

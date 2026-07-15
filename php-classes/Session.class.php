@@ -3,8 +3,8 @@
 class Session extends ActiveRecord
 {
     // Session configurables
-    public static $cookieName = null;
-    public static $cookieDomain = null;
+    public static $cookieName;
+    public static $cookieDomain;
     public static $cookiePath = '/';
     public static $cookieSecure = false;
     public static $cookieExpires = false;
@@ -12,9 +12,9 @@ class Session extends ActiveRecord
     public static $timeout = 3600;
 
     // support subclassing
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = [__CLASS__];
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class];
 
     // ActiveRecord configuration
     public static $tableName = 'sessions';
@@ -63,17 +63,17 @@ class Session extends ActiveRecord
     {
         $clientIp = Emergence\Site\Client::getAddress();
 
-        $sessionData = array(
+        $sessionData = [
             'LastIP' => $clientIp ? ip2long($clientIp) : null
             ,'LastRequest' => time()
-        );
+        ];
 
         $Session = null;
 
         // try to load from authorization header
         if (
             !empty($_SERVER['HTTP_AUTHORIZATION'])
-            && 0 === strpos($_SERVER['HTTP_AUTHORIZATION'], 'Token ')
+            && str_starts_with($_SERVER['HTTP_AUTHORIZATION'], 'Token ')
             && ($Session = static::getByHandle(substr($_SERVER['HTTP_AUTHORIZATION'], 6)))
         ) {
             $Session = static::updateSession($Session, $sessionData);
@@ -125,13 +125,15 @@ class Session extends ActiveRecord
         ) {
             $Session = static::updateSession($Session, $sessionData);
         }
-
-
         // return found or create new session
         if ($Session) {
             // session found
             return $Session;
-        } elseif ($create) {
+        }
+
+
+        // return found or create new session
+        if ($create) {
             // create session
             return static::create($sessionData, true);
         }
@@ -193,7 +195,7 @@ class Session extends ActiveRecord
 
     public function terminate()
     {
-        setcookie(static::$cookieName, '', time() - 3600);
+        setcookie(static::$cookieName, '', ['expires' => time() - 3600]);
         unset($_COOKIE[static::$cookieName]);
 
         $this->destroy();

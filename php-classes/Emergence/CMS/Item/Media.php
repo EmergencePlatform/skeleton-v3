@@ -56,11 +56,10 @@ class Media extends AbstractItem
     {
         if (empty($this->Data['MediaID']) || !($Media = \Media::getByID($this->Data['MediaID']))) {
             return '';
-        } else {
-            return '<div class="content-item content-media" id="contentItem-'.$this->ID.'">'
-                .static::getMediaMarkup($Media)
-                .'</div>';
         }
+        return '<div class="content-item content-media" id="contentItem-'.$this->ID.'">'
+            .static::getMediaMarkup($Media)
+            .'</div>';
     }
 
     public static function getMediaMarkup(\Media $Media)

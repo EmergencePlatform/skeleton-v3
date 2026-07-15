@@ -58,7 +58,7 @@ class JSMin {
   protected $input       = '';
   protected $inputIndex  = 0;
   protected $inputLength = 0;
-  protected $lookAhead   = null;
+  protected $lookAhead;
   protected $output      = '';
 
   // -- Public Static Methods --------------------------------------------------
@@ -139,11 +139,7 @@ class JSMin {
         $this->b = $this->next();
 
         if ($this->b === '/' && (
-            $this->a === '(' || $this->a === ',' || $this->a === '=' ||
-            $this->a === ':' || $this->a === '[' || $this->a === '!' ||
-            $this->a === '&' || $this->a === '|' || $this->a === '?' ||
-            $this->a === '{' || $this->a === '}' || $this->a === ';' ||
-            $this->a === "\n" )) {
+            in_array($this->a, ['(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';', "\n"], true) )) {
 
           $this->output .= $this->a . $this->b;
 
@@ -196,7 +192,7 @@ class JSMin {
 
     if ($c === null) {
       if ($this->inputIndex < $this->inputLength) {
-        $c = substr($this->input, $this->inputIndex, 1);
+        $c = substr((string) $this->input, $this->inputIndex, 1);
         $this->inputIndex += 1;
       } else {
         $c = null;
@@ -220,7 +216,7 @@ class JSMin {
    * @return bool
    */
   protected function isAlphaNum($c) {
-    return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
+    return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', (string) $c) === 1;
   }
 
   /**
@@ -233,7 +229,7 @@ class JSMin {
    * @return string
    */
   protected function min() {
-    if (0 == strncmp($this->peek(), "\xef", 1)) {
+    if (str_starts_with((string) $this->peek(), "\xef")) {
         $this->get();
         $this->get();
         $this->get();

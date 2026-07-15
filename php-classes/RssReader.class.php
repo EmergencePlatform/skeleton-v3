@@ -76,9 +76,9 @@ class RssReader
     private function loadParser($rss=false)
     {
         if ($rss) {
-            $this->document = array();
-            $this->channel = array();
-            $this->items = array();
+            $this->document = [];
+            $this->channel = [];
+            $this->items = [];
             $DOMDocument = new DOMDocument;
             $DOMDocument->strictErrorChecking = false;
             $DOMDocument->loadXML($rss);
@@ -95,11 +95,7 @@ class RssReader
             if (isset($values['value'])) {
                 $values = $values['value'];
             }
-            if (is_array($values)) {
-                $valueBlock[$valueName] = $this->valueReturner($values);
-            } else {
-                $valueBlock[$valueName] = $values;
-            }
+            $valueBlock[$valueName] = is_array($values) ? $this->valueReturner($values) : $values;
         }
         return $valueBlock;
     }
@@ -108,14 +104,14 @@ class RssReader
     {
         $itemCounter = 0;
         foreach ($nodeList as $values) {
-            if (substr($values->nodeName,0,1) != '#') {
+            if (!str_starts_with((string) $values->nodeName, '#')) {
                 if ($values->nodeName == 'item') {
                     $nodeName = $values->nodeName.':'.$itemCounter;
                     $itemCounter++;
                 } else {
                     $nodeName = $values->nodeName;
                 }
-                $tempNode[$nodeName] = array();
+                $tempNode[$nodeName] = [];
                 if ($values->attributes) {
                     for ($i=0;$values->attributes->item($i);$i++) {
                         $tempNode[$nodeName]['properties'][$values->attributes->item($i)->nodeName] = $values->attributes->item($i)->nodeValue;
@@ -126,19 +122,19 @@ class RssReader
                 } else {
                     $tempNode[$nodeName]['value']  = $this->extractDOM($values->childNodes, $values->nodeName);
                 }
-                if (in_array($parentNodeName, array('channel','rdf:RDF'))) {
+                if (in_array($parentNodeName, ['channel','rdf:RDF'])) {
                     if ($values->nodeName == 'item') {
                         $this->items[] = $tempNode[$nodeName]['value'];
-                    } elseif (!in_array($values->nodeName, array('rss','channel'))) {
+                    } elseif (!in_array($values->nodeName, ['rss','channel'])) {
                         $this->channel[$values->nodeName] = $tempNode[$nodeName];
                     }
                 }
-            } elseif (substr($values->nodeName,1) == 'text') {
+            } elseif (substr((string) $values->nodeName,1) === 'text') {
                 $tempValue = trim(preg_replace('/\s\s+/',' ',str_replace("\n",' ', $values->textContent)));
-                if ($tempValue) {
+                if ($tempValue !== '' && $tempValue !== '0') {
                     $tempNode = $tempValue;
                 }
-            } elseif (substr($values->nodeName,1) == 'cdata-section') {
+            } elseif (substr((string) $values->nodeName,1) === 'cdata-section') {
                 $tempNode = $values->textContent;
             }
         }
@@ -147,20 +143,20 @@ class RssReader
 
     private function randomContext()
     {
-        $headerstrings = array();
-        $headerstrings['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.'.rand(0,2).'; en-US; rv:1.'.rand(2,9).'.'.rand(0,4).'.'.rand(1,9).') Gecko/2007'.rand(10,12).rand(10,30).' Firefox/2.0.'.rand(0,1).'.'.rand(1,9);
-        $headerstrings['Accept-Charset'] = rand(0,1) ? 'en-gb,en;q=0.'.rand(3,8) : 'en-us,en;q=0.'.rand(3,8);
-        $headerstrings['Accept-Language'] = 'en-us,en;q=0.'.rand(4,6);
+        $headerstrings = [];
+        $headerstrings['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.'.random_int(0,2).'; en-US; rv:1.'.random_int(2,9).'.'.random_int(0,4).'.'.random_int(1,9).') Gecko/2007'.random_int(10,12).random_int(10,30).' Firefox/2.0.'.random_int(0,1).'.'.random_int(1,9);
+        $headerstrings['Accept-Charset'] = random_int(0,1) !== 0 ? 'en-gb,en;q=0.'.random_int(3,8) : 'en-us,en;q=0.'.random_int(3,8);
+        $headerstrings['Accept-Language'] = 'en-us,en;q=0.'.random_int(4,6);
         $setHeaders =    'Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5'."\r\n".
                         'Accept-Charset: '.$headerstrings['Accept-Charset']."\r\n".
                         'Accept-Language: '.$headerstrings['Accept-Language']."\r\n".
                         'User-Agent: '.$headerstrings['User-Agent']."\r\n";
-        $contextOptions = array(
-            'http'=>array(
+        $contextOptions = [
+            'http'=>[
                 'method'=>"GET",
                 'header'=>$setHeaders
-            )
-        );
+            ]
+        ];
         return stream_context_create($contextOptions);
     }
 }

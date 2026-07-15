@@ -16,7 +16,7 @@ foreach ($tableNames AS $tableName) {
         DB::nonQuery('ALTER TABLE `%s` ADD `ModifierID` int unsigned NULL default NULL AFTER `Modified`', $tableName);
     }
 
-    $tableName = substr($tableName, 8);
+    $tableName = substr((string) $tableName, 8);
 
     if (!static::columnExists($tableName, 'Modified')) {
         printf("Adding `Modified` column to `%s` table\n", $tableName);

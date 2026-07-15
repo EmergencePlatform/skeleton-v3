@@ -48,7 +48,7 @@ class Source
     {
         $sources = static::getAll();
 
-        return isset($sources[$sourceId]) ? $sources[$sourceId] : null;
+        return $sources[$sourceId] ?? null;
     }
 
     public static function getRepositoriesRootPath()
@@ -70,7 +70,7 @@ class Source
     public function getConfig($key = null)
     {
         if ($key) {
-            return isset($this->config[$key]) ? $this->config[$key] : null;
+            return $this->config[$key] ?? null;
         }
 
         return $this->config;
@@ -148,7 +148,7 @@ class Source
 
     public function getRepository()
     {
-        if (!isset($this->repository)) {
+        if ($this->repository === null) {
             $gitDir = $this->getRepositoryPath();
 
             if (is_dir($gitDir)) {
@@ -203,7 +203,7 @@ class Source
         if (!is_file($wrapperPath)) {
             file_put_contents(
                 $wrapperPath,
-                sprintf("#!/bin/bash\n\nssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s $1 $2\n", escapeshellarg($privateKeyPath))
+                sprintf("#!/bin/bash\n\nssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s $1 $2\n", escapeshellarg((string) $privateKeyPath))
             );
             chmod($wrapperPath, 0700);
         }
@@ -223,9 +223,9 @@ class Source
     {
         try {
             if ($repository = $this->getRepository()) {
-                return trim($repository->run('config', ['--get', 'remote.origin.url']));
+                return trim((string) $repository->run('config', ['--get', 'remote.origin.url']));
             }
-        } catch (GitProcessException $e) {
+        } catch (GitProcessException) {
             // fall through to returning configured remote
         }
 
@@ -236,7 +236,7 @@ class Source
     {
         $remoteUrl = $this->getRemoteUrl();
 
-        return 0 === strpos($remoteUrl, 'https://') || 0 === strpos($remoteUrl, 'http://') ? 'http' : 'ssh';
+        return str_starts_with((string) $remoteUrl, 'https://') || str_starts_with((string) $remoteUrl, 'http://') ? 'http' : 'ssh';
     }
 
     public function getTrees()
@@ -258,7 +258,7 @@ class Source
             return null;
         }
 
-        return trim($repository->run('describe', ['--tags', '--always']));
+        return trim((string) $repository->run('describe', ['--tags', '--always']));
     }
 
     public function getRefs($root = null)
@@ -267,10 +267,9 @@ class Source
             return null;
         }
 
-        $output = trim($repository->run('for-each-ref', ['--format=%(refname)', 'refs/'.$root]));
-        $output = explode(PHP_EOL, $output);
+        $output = trim((string) $repository->run('for-each-ref', ['--format=%(refname)', 'refs/'.$root]));
 
-        return $output;
+        return explode(PHP_EOL, $output);
     }
 
     public function getGroupedRefs($root = null, array $metaGroups = ['remotes'])
@@ -279,7 +278,7 @@ class Source
         $groups = [];
 
         foreach ($refs as $ref) {
-            $ref = explode('/', $ref);
+            $ref = explode('/', (string) $ref);
 
             array_shift($ref); // throw out 'refs/'
 
@@ -303,8 +302,8 @@ class Source
         }
 
         try {
-            return trim($repository->run('symbolic-ref', ['HEAD', '--short']));
-        } catch (GitProcessException $e) {
+            return trim((string) $repository->run('symbolic-ref', ['HEAD', '--short']));
+        } catch (GitProcessException) {
             return null;
         }
     }
@@ -313,12 +312,12 @@ class Source
     {
         if ($repository = $this->getRepository()) {
             try {
-                $upstreamBranch = trim($repository->run('rev-parse', ['--abbrev-ref', '@{upstream}']));
-            } catch (GitProcessException $e) {
+                $upstreamBranch = trim((string) $repository->run('rev-parse', ['--abbrev-ref', '@{upstream}']));
+            } catch (GitProcessException) {
                 return null;
             }
 
-            if (0 === strpos($upstreamBranch, 'origin/')) {
+            if (str_starts_with($upstreamBranch, 'origin/')) {
                 $upstreamBranch = substr($upstreamBranch, 7);
             }
         }
@@ -363,11 +362,11 @@ class Source
         }
 
         // determine ref / branch
-        if (0 === strpos($ref, 'heads/')) {
-            $branch = substr($ref, 6);
+        if (str_starts_with((string) $ref, 'heads/')) {
+            $branch = substr((string) $ref, 6);
             $ref = null;
-        } elseif (0 === strpos($ref, 'remotes/')) {
-            list($remotes, $remote, $branch) = explode('/', $ref, 3);
+        } elseif (str_starts_with((string) $ref, 'remotes/')) {
+            [$remotes, $remote, $branch] = explode('/', (string) $ref, 3);
         }
 
         // build and run git command
@@ -392,36 +391,36 @@ class Source
 
     public function pull()
     {
-        $output = trim($this->getRepository()->run('merge', ['--ff-only', '--no-stat', '@{upstream}']));
+        $output = trim((string) $this->getRepository()->run('merge', ['--ff-only', '--no-stat', '@{upstream}']));
         $output = explode(PHP_EOL, $output);
 
         if ('Already up-to-date.' == $output[0] || 'Already up to date.' == $output[0]) {
             return false;
         }
 
-        list($status, $commits) = explode(' ', $output[0]);
+        [$status, $commits] = explode(' ', $output[0]);
 
-        if ('Updating' != $status) {
+        if ('Updating' !== $status) {
             throw new \Exception("Unexpected merge status output '{$status}' from line: {$output[0]}");
         }
 
-        list($from, $to) = explode('..', $commits);
+        [$from, $to] = explode('..', $commits);
 
         return ['from' => $from, 'to' => $to];
     }
 
     public function push()
     {
-        $output = trim($this->getRepository()->run('push', ['--porcelain', 'origin', 'HEAD']));
+        $output = trim((string) $this->getRepository()->run('push', ['--porcelain', 'origin', 'HEAD']));
         $output = explode(PHP_EOL, $output);
 
-        list($symbol, $refs, $status) = explode("\t", $output[1]);
+        [$symbol, $refs, $status] = explode("\t", $output[1]);
 
-        if ('[up to date]' == $status) {
+        if ('[up to date]' === $status) {
             return false;
         }
 
-        list($from, $to) = explode('..', $status);
+        [$from, $to] = explode('..', $status);
 
         return ['from' => $from, 'to' => $to];
     }
@@ -435,7 +434,7 @@ class Source
             return ['error' => $e->getMessage()];
         }
 
-        $output = explode(PHP_EOL, trim($output));
+        $output = explode(PHP_EOL, trim((string) $output));
 
         $commits = [];
         $ahead = 0;
@@ -443,9 +442,9 @@ class Source
 
         while (($header = array_shift($output)) && ($details = array_shift($output))) {
             // parse header
-            list($objectType, $hash) = explode(' ', $header);
+            [$objectType, $hash] = explode(' ', $header);
 
-            if ('commit' != $objectType) {
+            if ('commit' !== $objectType) {
                 throw new \Exception('unexpected object type in rev-list output: '.$objectType);
             }
 
@@ -454,7 +453,7 @@ class Source
             ++${$position};
 
             // parse details
-            list($authorName, $authorEmail, $timestamp, $subject) = explode("\t", $details);
+            [$authorName, $authorEmail, $timestamp, $subject] = explode("\t", $details);
 
             $commit = [
                 'hash' => $hash,
@@ -482,7 +481,7 @@ class Source
     public function getWorkTreeStatus(array $options = [])
     {
         $output = $this->getRepository()->run('status', ['--porcelain', '-uall', '--ignored']);
-        $output = array_filter(explode(PHP_EOL, $output));
+        $output = array_filter(explode(PHP_EOL, (string) $output));
 
         $files = [];
 
@@ -511,7 +510,7 @@ class Source
                 $file['renamedPath'] = stripslashes(substr($file['renamedPath'], 1, -1));
             }
 
-            $file['currentPath'] = !empty($file['renamedPath']) ? $file['renamedPath'] : $file['path'];
+            $file['currentPath'] = empty($file['renamedPath']) ? $file['path'] : $file['renamedPath'];
 
             // decode status
             $file['tracked'] = '?' != $file['indexStatus'] && '?' != $file['workTreeStatus'];
@@ -592,7 +591,7 @@ class Source
 
         // analyze mode changes
         $diff = $this->getRepository()->run('diff', ['--summary']);
-        $diff = explode(PHP_EOL, $diff);
+        $diff = explode(PHP_EOL, (string) $diff);
 
         foreach ($diff as $diffLine) {
             $diffLine = trim($diffLine);
@@ -767,18 +766,14 @@ class Source
 
     protected function getTreeOptions($key, $value)
     {
-        if (is_string($value)) {
-            $treeOptions = [
-                'gitPath' => $value,
-            ];
-        } else {
-            $treeOptions = $value;
-        }
+        $treeOptions = is_string($value) ? [
+            'gitPath' => $value,
+        ] : $value;
 
         $treeOptions['dataPath'] = false;
 
         if (!isset($treeOptions['localOnly'])) {
-            $treeOptions['localOnly'] = null === $this->getConfig('localOnly') ? true : $this->getConfig('localOnly');
+            $treeOptions['localOnly'] = $this->getConfig('localOnly') ?? true;
         }
 
         if (is_string($key)) {
@@ -836,14 +831,10 @@ class Source
         }
 
         // normalize input paths
-        if (!$path || '/' == $path || '.' == $path || './' == $path) {
-            $path = null;
-        } else {
-            $path = trim($path, '/');
-        }
+        $path = !$path || '/' == $path || '.' == $path || './' == $path ? null : trim((string) $path, '/');
 
         // build map of subtrees to be erased
-        $prefixLen = strlen($path);
+        $prefixLen = strlen((string) $path);
         $tree = Emergence_FS::getTree($path, true);
 
         foreach ($tree as $collectionId => &$node) {
@@ -872,7 +863,7 @@ class Source
         // erase files
         if (count($collectionsAnalyzed)) {
             $conditions = [
-                sprintf('CollectionID IN (%s)', join(',', $collectionsAnalyzed)),
+                sprintf('CollectionID IN (%s)', implode(',', $collectionsAnalyzed)),
                 'Status != "Phantom"',
             ];
 
@@ -917,7 +908,7 @@ class Source
                         \SiteFile::$tableName,
                         $fileRow['CollectionID'],
                         $fileRow['Handle'],
-                        !empty($GLOBALS['Session']) ? $GLOBALS['Session']->PersonID : null,
+                        empty($GLOBALS['Session']) ? null : $GLOBALS['Session']->PersonID,
                         $fileRow['ID'],
                     ]
                 );

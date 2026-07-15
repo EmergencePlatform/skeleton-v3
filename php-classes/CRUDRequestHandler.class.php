@@ -36,9 +36,8 @@ abstract class CRUDRequestHandler extends RequestHandler
 
         if ($Record = static::getRecord($resourceHandle)) {
             return static::respondCRUD($Record);
-        } else {
-            return static::throwNotFoundError('Record not found');
         }
+        return static::throwNotFoundError('Record not found');
     }
 
     public static function handleCreateRequest($data = null)
@@ -56,9 +55,8 @@ abstract class CRUDRequestHandler extends RequestHandler
         if ($Record->validate()) {
             $Record->save();
             return static::respondCRUD($Record, 'singular', 'created');
-        } else {
-            return static::throwRecordInvalidError($Record, $data);
         }
+        return static::throwRecordInvalidError($Record, $data);
     }
 
     protected static function createRecord($data)
@@ -78,10 +76,11 @@ abstract class CRUDRequestHandler extends RequestHandler
         if (!$data) {
             return static::throwError('Unable to parse request data');
         }
-
         if (!$resourceHandle = static::shiftPath()) {
             return static::throwError('Unique identifier ID or Handle required for PUT operation');
-        } elseif (!$Record = static::getRecord($resourceHandle)) {
+        }
+
+        if (!$Record = static::getRecord($resourceHandle)) {
             return static::throwNotFoundError('Record not found');
         }
 
@@ -90,9 +89,8 @@ abstract class CRUDRequestHandler extends RequestHandler
         if ($Record->validate()) {
             $Record->save();
             return static::respondCRUD($Record, 'singular', 'updated');
-        } else {
-            return static::throwRecordInvalidError($Record, $data);
         }
+        return static::throwRecordInvalidError($Record, $data);
     }
 
     protected static function updateRecord(ActiveRecord $Record, $data)
@@ -104,7 +102,8 @@ abstract class CRUDRequestHandler extends RequestHandler
     {
         if (!$resourceHandle = static::shiftPath()) {
             return static::throwError('Unique identifier ID or Handle required for PUT operation');
-        } elseif (!$Record = static::getRecord($resourceHandle)) {
+        }
+        if (!$Record = static::getRecord($resourceHandle)) {
             return static::throwNotFoundError('Record not found');
         }
 
@@ -114,13 +113,13 @@ abstract class CRUDRequestHandler extends RequestHandler
     }
 
 
-    public static function getAllRecords($conditions = array(), $options = array())
+    public static function getAllRecords($conditions = [], $options = [])
     {
         $class = static::$recordClass;
 
-        $queryOptions = array_merge(array(
+        $queryOptions = array_merge([
             'limit' => false
-        ), $options);
+        ], $options);
 
         // process sorter
         if (!empty($_REQUEST['sort'])) {
@@ -144,10 +143,10 @@ abstract class CRUDRequestHandler extends RequestHandler
 
             foreach ($filter AS $field) {
                 if ($_GET['anyMatch']) {
-                    $conditions[$field['property']] = array(
+                    $conditions[$field['property']] = [
                         'value'    =>    '%'.$field['value'].'%'
                         ,'operator' => 'LIKE'
-                    );
+                    ];
                 } else {
                     $conditions[$field['property']] = $field['value'];
                 }
@@ -171,37 +170,31 @@ abstract class CRUDRequestHandler extends RequestHandler
     {
         $class = static::$recordClass;
 
-        if (is_int($resourceHandle) || ctype_digit($resourceHandle)) {
-            $Record = $class::getByID($resourceHandle);
-        } else {
-            $Record = $class::getByHandle($resourceHandle);
+        if (is_int($resourceHandle) || ctype_digit((string) $resourceHandle)) {
+            return $class::getByID($resourceHandle);
         }
 
-        return $Record;
+        return $class::getByHandle($resourceHandle);
     }
 
-    public static function respondCRUD($payload, $count = 'singular', $verb = '', $additional = array(), $responseID = false)
+    public static function respondCRUD($payload, $count = 'singular', $verb = '', $additional = [], $responseID = false)
     {
         // auto-generate response ID from noun and verb
         if (!$responseID) {
             $responseID = static::getResponseID($count, $verb);
         }
 
-        return static::respond($responseID, array_merge(array(
-            'success' => true
-            ,'data' => $payload
-            ,'total' => DB::foundRows()
-        )), $additional);
+        return static::respond($responseID, ['success' => true, 'data' => $payload, 'total' => DB::foundRows()], $additional);
     }
 
 
     public static function throwRecordInvalidError(ActiveRecord $Record, $data = null)
     {
-        return static::respond(static::getResponseID('singular','invalid'), array(
+        return static::respond(static::getResponseID('singular','invalid'), [
             'success' => false
             ,'data' => $Record
             ,'errors' => $Record->validationErrors
-        ));
+        ]);
     }
 
 
@@ -209,24 +202,23 @@ abstract class CRUDRequestHandler extends RequestHandler
     {
         $class = static::$recordClass;
         $noun = $count == 'singular' ? $class::$singularNoun : $class::$pluralNoun;
-        return preg_replace_callback('/\s+([a-zA-Z])/', function($matches) { return strtoupper($matches[1]); }, $noun).ucfirst($verb);
+        return preg_replace_callback('/\s+([a-zA-Z])/', fn($matches) => strtoupper($matches[1]), (string) $noun).ucfirst((string) $verb);
     }
 
 
     public static function getRequestData()
     {
-        if (0===strpos($_SERVER['CONTENT_TYPE'],'application/x-www-form-urlencoded')) {
+        if (str_starts_with($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded')) {
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 return $_POST;
-            } else {
-                $data = array();
-                parse_str(file_get_contents('php://input'), $data);
-                return $data;
             }
-        } elseif (0===strpos($_SERVER['CONTENT_TYPE'],'application/json')) {
-            return JSON::getRequestData();
-        } else {
-            throw new Exception('Incoming content type must be application/json or application/x-www-form-urlencoded');
+            $data = [];
+            parse_str(file_get_contents('php://input'), $data);
+            return $data;
         }
+        if (str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
+            return JSON::getRequestData();
+        }
+        throw new Exception('Incoming content type must be application/json or application/x-www-form-urlencoded');
     }
 }

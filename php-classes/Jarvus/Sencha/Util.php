@@ -10,8 +10,8 @@ class Util
      */
     public static function cleanJson($json)
     {
-        $json = preg_replace('#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#', '', $json); // comment stripper from http://php.net/manual/en/function.json-decode.php#112735
-        $json = preg_replace('#([^\\\\])\\\\\\.#', '$1\\\\\\.', $json); // replace sencha-included "\." with "\\."
+        $json = preg_replace('#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#', '', (string) $json); // comment stripper from http://php.net/manual/en/function.json-decode.php#112735
+        $json = preg_replace('#([^\\\\])\\\\\\.#', '$1\\\\\\.', (string) $json); // replace sencha-included "\." with "\\."
 
         return $json;
     }
@@ -27,7 +27,7 @@ class Util
             $line = preg_replace('/\s*([^#\n\r]*)\s*(#.*)?/', '$1', $line);
 
             if ($line) {
-                list($key, $value) = explode('=', $line, 2);
+                [$key, $value] = explode('=', $line, 2);
                 $properties[$key] = $value;
             }
         }
@@ -45,7 +45,7 @@ class Util
         // transfer existing properties, replacing matching ones with new value
         while ($line = fgetss($inputFile)) {
             foreach ($properties AS $key => $value) {
-                if (strpos(ltrim($line), $key) === 0) {
+                if (str_starts_with(ltrim($line), (string) $key)) {
                     fwrite($outputFile, "#$line$key=$value\n");
                     unset($properties[$key]);
                     continue 2;
@@ -58,7 +58,7 @@ class Util
         fclose($inputFile);
 
         // append remaining properties to end of file
-        if (count($properties)) {
+        if (count($properties) > 0) {
             fwrite($outputFile, "\n\n");
             foreach ($properties AS $key => $value) {
                 fwrite($outputFile, "$key=$value\n");

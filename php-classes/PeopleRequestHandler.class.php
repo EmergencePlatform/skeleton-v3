@@ -40,40 +40,36 @@ class PeopleRequestHandler extends RecordsRequestHandler
         $interface = empty($_GET['interface']) || $_GET['interface'] != 'user' ? IPerson::class : IUser::class;
         $baseClass = $interface == IPerson::class ? $personClass : $userClass;
 
-        $classes = array_values(array_filter(Person::getSubClasses(), function($class) use ($interface) {
-            return is_a($class, $interface, true);
-        }));
+        $classes = array_values(array_filter(Person::getSubClasses(), fn($class) => is_a($class, $interface, true)));
 
         $defaultClass = $baseClass::getDefaultClass();
         $defaultPersonClass = $personClass::getDefaultClass();
         $defaultUserClass = $userClass::getDefaultClass();
 
-        return static::respond('classes', array(
-            'data' => array_map(function ($class) use ($defaultClass, $defaultPersonClass, $defaultUserClass) {
-                return [
-                    'name' => $class,
-                    'label' => $class::$classLabel,
-                    'interfaces' => array_values(class_implements($class)),
-                    'default' => $class == $defaultClass,
-                    'personDefault' => $class == $defaultPersonClass,
-                    'userDefault' => $class == $defaultUserClass
-                ];
-            }, $classes),
+        return static::respond('classes', [
+            'data' => array_map(fn($class) => [
+                'name' => $class,
+                'label' => $class::$classLabel,
+                'interfaces' => array_values(class_implements($class)),
+                'default' => $class == $defaultClass,
+                'personDefault' => $class == $defaultPersonClass,
+                'userDefault' => $class == $defaultUserClass
+            ], $classes),
             'default' => $defaultClass,
             'personDefault' => $defaultPersonClass,
             'userDefault' => $defaultUserClass
-        ));
+        ]);
     }
 
     public static function handleAccountLevelsRequest()
     {
-        return static::respond('account-levels', array(
+        return static::respond('account-levels', [
             'data' => User::getFieldOptions('AccountLevel', 'values'),
             'default' => User::getFieldOptions('AccountLevel', 'default')
-        ));
+        ]);
     }
 
-    public static function handleBrowseRequest($options = array(), $conditions = array(), $responseID = null, $responseData = array())
+    public static function handleBrowseRequest($options = [], $conditions = [], $responseID = null, $responseData = [])
     {
         if ($_REQUEST['q'] != 'all' && $_REQUEST['status'] != '*') {
             $conditions[] = 'AccountLevel != "Disabled"';
@@ -93,11 +89,10 @@ class PeopleRequestHandler extends RecordsRequestHandler
 
     public static function getRecordByHandle($handle)
     {
-        if (ctype_digit($handle) || is_int($handle)) {
+        if (ctype_digit((string) $handle) || is_int($handle)) {
             return Person::getByID($handle);
-        } else {
-            return User::getByUsername($handle);
         }
+        return User::getByUsername($handle);
     }
 
     public static function handleRecordRequest(ActiveRecord $Person, $action = false)
@@ -130,10 +125,10 @@ class PeopleRequestHandler extends RecordsRequestHandler
             $Person->save();
         }
 
-        return static::respond('temporaryPassword', array(
+        return static::respond('temporaryPassword', [
             'success' => true,
             'temporaryPassword' => $Person->TemporaryPassword
-        ));
+        ]);
     }
 
     public static function handleThumbnailRequest(IPerson $Person)

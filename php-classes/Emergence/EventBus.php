@@ -8,14 +8,14 @@ use Emergence_FS;
 
 class EventBus
 {
-    public static function fireEvent($name, $context, $payload = array())
+    public static function fireEvent($name, $context, $payload = [])
     {
-        $_EVENT = array_merge($payload, array(
+        $_EVENT = array_merge($payload, [
             'NAME' => $name,
             'CONTEXT' => $context,
             'HANDLERS' => static::getHandlers($name, $context),
-            'RESULTS' => array()
-        ));
+            'RESULTS' => []
+        ]);
 
         foreach ($_EVENT['HANDLERS'] AS $handlerPath => $handlerNodeID) {
             $_EVENT['CURRENT_HANDLER_PATH'] = $handlerPath;
@@ -49,13 +49,13 @@ class EventBus
         }
 
         $contextOriginalLength = count($context);
-        $handlers = array();
+        $handlers = [];
         Emergence_FS::cacheTree($rootCollection);
 
         while (true) {
             $contextPath = $rootCollection;
 
-            if (count($context)) {
+            if (count($context) > 0) {
                 $contextPath .= '/'.implode('/', $context);
             }
 
@@ -81,7 +81,7 @@ class EventBus
                 }
             }
 
-            if (count($context)) {
+            if (count($context) > 0) {
                 array_pop($context);
             } else {
                 break;

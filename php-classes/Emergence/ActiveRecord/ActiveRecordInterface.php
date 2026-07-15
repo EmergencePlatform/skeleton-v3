@@ -19,7 +19,7 @@ interface ActiveRecordInterface
 
     // static configuration modifiers
     public static function addField($name, $config);
-        
+
 
     // instance methods for managing record values
     public function getValue($name, array $options = null);
@@ -29,7 +29,7 @@ interface ActiveRecordInterface
 #    public function setValues(array $values);
 #
 #    public function changeClass($className = null, $setValues = null);
-    
+
     // getData/getSummary/getDetails ( -> getValues($options) ?)
 
 
@@ -73,7 +73,7 @@ interface ActiveRecordInterface
     public static function getAllByWhere(array $conditions = [], array $options = []);
 #    public static function getCountByField($field, $value);
 #    public static function getAllByField($field, $value);
-    
+
 
 
 

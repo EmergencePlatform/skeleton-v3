@@ -25,12 +25,12 @@ class RequestHandler extends \Emergence\Site\RequestHandler
         $requestPath = static::getPath();
 
         // ensure trailing slash
-        if (count($requestPath) == 0) {
+        if (count($requestPath) === 0) {
             Site::redirect(['webapps', $app->getName(), ''], $_GET);
         }
 
         // render app for requests to /webapps/{appName}/
-        if (count($requestPath) == 1 && !$requestPath[0]) {
+        if (count($requestPath) === 1 && !$requestPath[0]) {
             return static::sendResponse($app->render());
         }
 

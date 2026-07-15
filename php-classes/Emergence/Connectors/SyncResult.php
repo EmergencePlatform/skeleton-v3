@@ -45,9 +45,8 @@ class SyncResult
     {
         if (isset($key)) {
             return $this->context[$key];
-        } else {
-            return $this->context;
         }
+        return $this->context;
     }
 
 }

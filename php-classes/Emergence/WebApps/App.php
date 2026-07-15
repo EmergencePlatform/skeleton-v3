@@ -90,9 +90,8 @@ abstract class App implements IApp
 
         if ($path[0] == '/') {
             return "{$path}?_sha1={$node->SHA1}";
-        } else {
-            return $this->getUrl()."/{$path}?_sha1={$node->SHA1}";
         }
+        return $this->getUrl()."/{$path}?_sha1={$node->SHA1}";
     }
 
     public function renderAsset($path)

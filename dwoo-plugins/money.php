@@ -4,10 +4,8 @@ function Dwoo_Plugin_money(Dwoo_Core $dwoo, $value, $format = '%n', $avoidDecima
 {
     if ($avoidDecimal) {
         return '$'.($value + 0);
-    } else {
-        // strip non-digits
-        $value = preg_replace('/[^\d.]/','',$value);
-
-        return money_format($format, $value ? $value : 0);
     }
+    // strip non-digits
+    $value = preg_replace('/[^\d.]/','',(string) $value);
+    return money_format($format, $value ? $value : 0);
 }

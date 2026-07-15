@@ -7,7 +7,7 @@ class Format
         $mailto = 'mailto:'.$email;
 
         if ($subject) {
-            $mailto .= '?subject='.urlencode($subject);
+            $mailto .= '?subject='.urlencode((string) $subject);
         }
 
         return sprintf(
@@ -20,39 +20,37 @@ class Format
     public static function usPhone($input, $format = '(%s) %s-%s')
     {
         // strip non-digits
-        $numbers = preg_replace('/\D/','',$input);
+        $numbers = preg_replace('/\D/','',(string) $input);
 
         // strip prefixed 1
-        if ((strlen($numbers) == 11) && ($numbers[0] == '1')) {
-            $numbers = substr($numbers, 1);
+        if ((strlen((string) $numbers) === 11) && ($numbers[0] == '1')) {
+            $numbers = substr((string) $numbers, 1);
         }
 
         // return original input if result doesn't make sense
-        if (strlen($numbers) != 10) {
+        if (strlen((string) $numbers) !== 10) {
             return $input;
         }
 
         // return formatted string
         return sprintf(
             $format
-            , substr($numbers,0,3)
-            , substr($numbers,3,3)
-            , substr($numbers,6,4)
+            , substr((string) $numbers,0,3)
+            , substr((string) $numbers,3,3)
+            , substr((string) $numbers,6,4)
         );
     }
 
     public static function truncate($string, $limit=300, $break = '.', $pad = '...')
     {
         // return with no change if string is shorter than $limit
-        if (strlen($string) <= $limit) {
+        if (strlen((string) $string) <= $limit) {
             return $string;
         }
 
         // is $break present between $limit and the end of the string?
-        if (false !== ($breakpoint = strpos($string, $break, $limit))) {
-            if ($breakpoint < strlen($string) - 1) {
-                $string = substr($string, 0, $breakpoint).$pad;
-            }
+        if (false !== ($breakpoint = strpos((string) $string, (string) $break, $limit)) && $breakpoint < strlen((string) $string) - 1) {
+            return substr((string) $string, 0, $breakpoint).$pad;
         }
 
         return $string;
@@ -146,16 +144,19 @@ class Format
       return 'more than ten years ago';
       */
 
-        if (!ctype_digit($timestamp) && ($timestamp = strtotime($timestamp)) == false) {
+        if (!ctype_digit((string) $timestamp) && ($timestamp = strtotime((string) $timestamp)) == false) {
             echo $timestamp;
             return FALSE;
         }
         $diff = time() - $timestamp;
 
         $pre = 'a';
-        if ($diff < 60) { //Seconds
+        if ($diff < 60) {
+            //Seconds
             return 'less than a minute ago.';
-        } elseif ($diff < 3600) { //Minutes
+        }
+        if ($diff < 3600) {
+            //Minutes
             $val = round(($diff / 60));
             $unit = 'minute';
         } elseif ($diff < 86400) { //Hours
@@ -171,15 +172,15 @@ class Format
         } elseif ($diff < 77760000) { //Months (30 Days)
             $val = round(($diff / 2592000));
             $unit = 'month';
-        } else {
+        }
+        else {
             $val = round(($diff / 31104000));
             $unit = 'year';
         }
         if ($val>1) {
             return $val.' '.$unit.'s ago';
-        } else {
-            return $pre.' '.$unit.' ago';
         }
+        return $pre.' '.$unit.' ago';
     }
 
     public static function micsText($text, $mode = 'format')
@@ -188,74 +189,63 @@ class Format
         if (!isset($GLOBALS['bbcodeEngine'])) {
             function bbcode_clean_list($text)
             {
-                return preg_replace("/[\r\n]/",'',$text);
+                return preg_replace("/[\r\n]/",'',(string) $text);
             }
 
-            $GLOBALS['bbcodeEngine'] = bbcode_create(array(
-                '' => array('type'=>BBCODE_TYPE_ROOT,  'childs'=>'!*')
-                ,'h2' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h2>', 'close_tag'=>'</h2>')
-                ,'h3' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h3>', 'close_tag'=>'</h3>')
-                ,'h4' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h4>', 'close_tag'=>'</h4>')
-                ,'h5' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h5>', 'close_tag'=>'</h5>')
-                ,'h6' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h6>', 'close_tag'=>'</h6>')
-                ,'i' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<i>', 'close_tag'=>'</i>')
-                ,'cite' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<cite>', 'close_tag'=>'</cite>')
-                ,'b' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<b>', 'close_tag'=>'</b>')
-                ,'u' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<u>', 'close_tag'=>'</u>')
-                ,'s' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<s>', 'close_tag'=>'</s>')
-                ,'small' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<small>', 'close_tag'=>'</small>')
-                ,'quote' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<blockquote>', 'close_tag'=>'</blockquote>')
-                ,'sig' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<div class="sig">', 'close_tag'=>'</div>')
-                ,'url' => array('type'=>BBCODE_TYPE_OPTARG, 'open_tag'=>'<a href="{PARAM}" target="_blank">', 'close_tag'=>'</a>', 'default_arg'=>'{CONTENT}', 'childs'=>'b,i')
-                ,'img' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<img src="', 'close_tag'=>'" />', 'childs'=>'')
-                ,'list'=> array(
+            $GLOBALS['bbcodeEngine'] = bbcode_create([
+                '' => ['type'=>BBCODE_TYPE_ROOT,  'childs'=>'!*']
+                ,'h2' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h2>', 'close_tag'=>'</h2>']
+                ,'h3' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h3>', 'close_tag'=>'</h3>']
+                ,'h4' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h4>', 'close_tag'=>'</h4>']
+                ,'h5' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h5>', 'close_tag'=>'</h5>']
+                ,'h6' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h6>', 'close_tag'=>'</h6>']
+                ,'i' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<i>', 'close_tag'=>'</i>']
+                ,'cite' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<cite>', 'close_tag'=>'</cite>']
+                ,'b' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<b>', 'close_tag'=>'</b>']
+                ,'u' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<u>', 'close_tag'=>'</u>']
+                ,'s' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<s>', 'close_tag'=>'</s>']
+                ,'small' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<small>', 'close_tag'=>'</small>']
+                ,'quote' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<blockquote>', 'close_tag'=>'</blockquote>']
+                ,'sig' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<div class="sig">', 'close_tag'=>'</div>']
+                ,'url' => ['type'=>BBCODE_TYPE_OPTARG, 'open_tag'=>'<a href="{PARAM}" target="_blank">', 'close_tag'=>'</a>', 'default_arg'=>'{CONTENT}', 'childs'=>'b,i']
+                ,'img' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<img src="', 'close_tag'=>'" />', 'childs'=>'']
+                ,'list'=> [
                     'type' => BBCODE_TYPE_NOARG
                     ,'open_tag' => '<ul>'
                     ,'close_tag' => '</ul>'
                     ,'childs' => '*'
                     ,'content_handling' => 'bbcode_clean_list'
-                )
-                ,'*' => array('type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<li>', 'close_tag'=>'</li>', 'parent'=>'list', 'flags'=>BBCODE_FLAGS_ONE_OPEN_PER_LEVEL)
-                ,'l' => array('type'=>BBCODE_TYPE_SINGLE, 'open_tag' => '[')
-                ,'r' => array('type'=>BBCODE_TYPE_SINGLE, 'open_tag' => ']')
-            ));
+                ]
+                ,'*' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<li>', 'close_tag'=>'</li>', 'parent'=>'list', 'flags'=>BBCODE_FLAGS_ONE_OPEN_PER_LEVEL]
+                ,'l' => ['type'=>BBCODE_TYPE_SINGLE, 'open_tag' => '[']
+                ,'r' => ['type'=>BBCODE_TYPE_SINGLE, 'open_tag' => ']']
+            ]);
         }
 
         if ($mode == 'strip') {
-            return preg_replace('/\[[^\[]+\]/', '', htmlspecialchars($text));
-        } else {
-            // block elements
-            $blockEls = 'h[1-6]|ul';
-
-            // encode and parse bbcode
-            $text = @bbcode_parse($GLOBALS['bbcodeEngine'], htmlspecialchars($text));
-
-            // pad block elements with double newlines to break paragraphs
-            $text = preg_replace('/\s*<('.$blockEls.')>(.*?)<\/\1>\s*/i', "\n\n<\$1>\$2</\$1>\n\n", $text);
-
-            // trim ends
-            $text = trim($text);
-
-            // replace 4+ dashes with <hr>
-            $text = preg_replace('/-{4,}/i', '<hr />', $text);
-
-            // turn 2+ newlines into paragraphs
-            $text = '<p>'.preg_replace('/\s*\n\s*\n\s*/', '</p><p>', $text).'</p>';
-
-            // remove paragraphs and newlines wrapping block-level elements
-            $text = preg_replace('/\s*<p>\s*<('.$blockEls.')>(.*?)<\/\1>\s*<\/p>\s*/i', '<$1>$2</$1>', $text);
-
-            // simple character replacements
-            $text = str_replace(array('--','(r)','(tm)','(c)'), array('&mdash;','&reg;','&trade;','&copy;'), $text);
-
-            // ordinals
-            $text = preg_replace('/(\d+)(st|nd|rd|th|st)\b/i', '$1<sup>$2</sup>',$text);
-
-            // turn remaining single newlines into brs
-            $text = nl2br($text);
-
-            return $text;
+            return preg_replace('/\[[^\[]+\]/', '', htmlspecialchars((string) $text));
         }
+        // block elements
+        $blockEls = 'h[1-6]|ul';
+        // encode and parse bbcode
+        $text = @bbcode_parse($GLOBALS['bbcodeEngine'], htmlspecialchars((string) $text));
+        // pad block elements with double newlines to break paragraphs
+        $text = preg_replace('/\s*<('.$blockEls.')>(.*?)<\/\1>\s*/i', "\n\n<\$1>\$2</\$1>\n\n", $text);
+        // trim ends
+        $text = trim((string) $text);
+        // replace 4+ dashes with <hr>
+        $text = preg_replace('/-{4,}/i', '<hr />', $text);
+        // turn 2+ newlines into paragraphs
+        $text = '<p>'.preg_replace('/\s*\n\s*\n\s*/', '</p><p>', (string) $text).'</p>';
+        // remove paragraphs and newlines wrapping block-level elements
+        $text = preg_replace('/\s*<p>\s*<('.$blockEls.')>(.*?)<\/\1>\s*<\/p>\s*/i', '<$1>$2</$1>', $text);
+        // simple character replacements
+        $text = str_replace(['--','(r)','(tm)','(c)'], ['&mdash;','&reg;','&trade;','&copy;'], $text);
+        // ordinals
+        $text = preg_replace('/(\d+)(st|nd|rd|th|st)\b/i', '$1<sup>$2</sup>',(string) $text);
+        // turn remaining single newlines into brs
+        $text = nl2br((string) $text);
+        return $text;
     }
 
     public static function twitterText($text)

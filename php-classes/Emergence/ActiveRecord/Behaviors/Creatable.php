@@ -11,12 +11,11 @@ class Creatable implements BehaviorInterface
                 'created' => 'Created',
                 'creator_id' => 'CreatorID'
             ];
-        } else {
-            return [
-                'created' => 'created',
-                'creator_id' => 'creator_id'
-            ];
         }
+        return [
+            'created' => 'created',
+            'creator_id' => 'creator_id'
+        ];
     }
 
     public static function beforeInitFields(array &$arguments = [], array &$options = [])

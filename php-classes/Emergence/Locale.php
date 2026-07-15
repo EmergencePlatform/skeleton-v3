@@ -63,7 +63,7 @@ class Locale
     {
         $locale = strtr($locale, '-', '_');
 
-        if (strpos($locale, '.') === false) {
+        if (!str_contains($locale, '.')) {
             $locale .= '.utf8';
         }
 

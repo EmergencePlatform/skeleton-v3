@@ -6,29 +6,29 @@ class PostmarkMailer extends AbstractMailer
 {
     public static $apiKey = '';
 
-    public static function send($to, $subject, $body, $from = false, $options = array())
+    public static function send($to, $subject, $body, $from = false, $options = [])
     {
         if (!$from) {
             $from = static::getDefaultFrom();
         }
 
-        return static::apiPost(array_merge($options, array(
+        return static::apiPost(array_merge($options, [
             'To' => $to
             ,'From' => $from
             ,'Subject' => $subject
             ,'HtmlBody' => $body
-        )));
+        ]));
     }
 
 
     protected static function apiPost($data)
     {
         $ch = curl_init('https://api.postmarkapp.com/email');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json'
             ,'Accept: application/json'
             ,'X-Postmark-Server-Token: '.static::$apiKey
-        ));
+        ]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -44,14 +44,12 @@ class PostmarkMailer extends AbstractMailer
 
         if ($httpStatus == 200) {
             return json_decode($result, true);
-        } else {
-            \Emergence\Logger::general_error('PostmarkMailer Delivery Error', [
-                'exceptionClass' => \PostmarkMailer::class,
-                'exceptionMessage' => $result,
-                'exceptionCode' => $httpStatus
-            ]);
-
-            return false;
         }
+        \Emergence\Logger::general_error('PostmarkMailer Delivery Error', [
+            'exceptionClass' => \PostmarkMailer::class,
+            'exceptionMessage' => $result,
+            'exceptionCode' => $httpStatus
+        ]);
+        return false;
     }
 }

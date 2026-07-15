@@ -52,7 +52,7 @@ class Request implements RequestInterface
         if ($body !== '' && $body !== null) {
             if ($body instanceof StreamInterface) {
                 $this->stream = $body;
-            } elseif (gettype($body) == 'resource') {
+            } elseif (gettype($body) === 'resource') {
                 $this->stream = new Stream($resource);
             } else {
                 $stream = fopen('php://temp', 'r+');

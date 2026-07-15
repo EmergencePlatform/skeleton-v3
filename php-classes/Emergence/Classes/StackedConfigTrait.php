@@ -8,7 +8,7 @@ trait StackedConfigTrait
 
     protected static function initStackedConfig($propertyName)
     {
-        $className = get_called_class();
+        $className = static::class;
 
         // merge fields from first ancestor up
         $classes = class_parents($className);
@@ -23,9 +23,9 @@ trait StackedConfigTrait
         }
 
         // apply property-specific initialization
-        $initMethodName = 'init'.ucfirst($propertyName);
+        $initMethodName = 'init'.ucfirst((string) $propertyName);
         if (method_exists($className, $initMethodName)) {
-            $config = call_user_func([$className, $initMethodName], $config);
+            return call_user_func([$className, $initMethodName], $config);
         }
 
         return $config;
@@ -33,7 +33,7 @@ trait StackedConfigTrait
 
     public static function &getStackedConfig($propertyName, $key = null)
     {
-        $className = get_called_class();
+        $className = static::class;
 
         if (!isset(static::$stackedConfigs[$className][$propertyName])) {
             static::$stackedConfigs[$className][$propertyName] = static::initStackedConfig($propertyName);
@@ -42,12 +42,10 @@ trait StackedConfigTrait
         if ($key) {
             if (array_key_exists($key, static::$stackedConfigs[$className][$propertyName])) {
                 return static::$stackedConfigs[$className][$propertyName][$key];
-            } else {
-                return null;
             }
-        } else {
-            return static::$stackedConfigs[$className][$propertyName];
+            return null;
         }
+        return static::$stackedConfigs[$className][$propertyName];
     }
 
     public static function aggregateStackedConfig($propertyName, array $classes)

@@ -4,52 +4,51 @@ namespace Emergence\Util;
 
 class Capitalizer
 {
-    public static $familyNamePrefixes = array(
+    public static $familyNamePrefixes = [
         'Mc',
         'Mac',
         'Van',
         // these don't work consistently:
 #        'De',
 #        'Di',
-    );
+    ];
 
     public static function capitalizePronoun($word, $familyName = false)
     {
-        $me = get_called_class();
-        $_recurse = function($word) use ($me, $familyName) {
-            return $me::capitalizePronoun($word, $familyName);
-        };
-
-        if (preg_match('/^[ea]l-\pL/u', $word)) {
+        $me = static::class;
+        $_recurse = (fn($word) => $me::capitalizePronoun($word, $familyName));
+        if (preg_match('/^[ea]l-\pL/u', (string) $word)) {
             // el- / al- prefixes stay lowercase
-            return strtolower(substr($word, 0, 2)).'-'.static::capitalizePronoun(substr($word, 3));
-        } elseif (strpos($word, '-') !== false) {
+            return strtolower(substr((string) $word, 0, 2)).'-'.static::capitalizePronoun(substr((string) $word, 3));
+        }
+
+        if (str_contains((string) $word, '-')) {
             // process hyphenated-separated bits independently
-            return implode('-', array_map($_recurse, explode('-', $word)));
+            return implode('-', array_map($_recurse, explode('-', (string) $word)));
         }
 
-        if (strpos($word, ' ') !== false) {
+        if (str_contains((string) $word, ' ')) {
             // process space-separated bits independently
-            return implode(' ', array_map($_recurse, explode(' ', $word)));
+            return implode(' ', array_map($_recurse, explode(' ', (string) $word)));
         }
 
-        if (strpos($word, '\'') !== false) {
+        if (str_contains((string) $word, '\'')) {
             // process apostrophe-separated bits independently
-            return implode('\'', array_map($_recurse, explode('\'', $word)));
+            return implode('\'', array_map($_recurse, explode('\'', (string) $word)));
         }
 
-        if (strpos($word, '.') !== false) {
+        if (str_contains((string) $word, '.')) {
             // process .-separated bits independently
-            return implode('.', array_map($_recurse, explode('.', $word)));
+            return implode('.', array_map($_recurse, explode('.', (string) $word)));
         }
 
         // roman numerals (only detects 1-14) should be all caps
-        if (preg_match('/^(i{1,3}|i?vi{0,3}|i?xi{0,3})$/i', $word)) {
-            return strtoupper($word);
+        if (preg_match('/^(i{1,3}|i?vi{0,3}|i?xi{0,3})$/i', (string) $word)) {
+            return strtoupper((string) $word);
         }
 
         // start out all-lowercase
-        $word = strtolower($word);
+        $word = strtolower((string) $word);
 
         // first letter always capitalized
         $word = ucfirst($word);
@@ -57,8 +56,8 @@ class Capitalizer
         // handly family name prefixes
         if ($familyName) {
             foreach (static::$familyNamePrefixes AS $prefix) {
-                if (strpos($word, $prefix) === 0) {
-                    $prefixLen = strlen($prefix);
+                if (str_starts_with($word, (string) $prefix)) {
+                    $prefixLen = strlen((string) $prefix);
 
                     if (
                         // skip if a double letter follows the prefix (e.g. Derry)

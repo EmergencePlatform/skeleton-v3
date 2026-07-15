@@ -8,7 +8,7 @@ class PhotoMedia extends Media
     // magic methods
     public static function __classLoaded()
     {
-        $className = get_called_class();
+        $className = static::class;
 
         Media::$mimeHandlers['image/gif'] = $className;
         Media::$mimeHandlers['image/jpeg'] = $className;
@@ -65,7 +65,7 @@ class PhotoMedia extends Media
 
 
     // static methods
-    public static function analyzeFile($filename, $mediaInfo = array())
+    public static function analyzeFile($filename, $mediaInfo = [])
     {
         if (!$mediaInfo['imageInfo'] = @getimagesize($filename)) {
             throw new Exception('Failed to read image file information');

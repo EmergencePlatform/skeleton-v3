@@ -13,60 +13,60 @@ class User extends Person implements IUser
 
     public static $classLabel = 'User';
 
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__);
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class];
     public static $singularNoun = 'user';
     public static $pluralNoun = 'users';
 
     // ActiveRecord configuration
-    public static $fields = array(
-        'Username' => array(
+    public static $fields = [
+        'Username' => [
             'unique' => true
             ,'includeInSummary' => true
-        )
-        ,'Password' => array(
+        ]
+        ,'Password' => [
             'type' => 'string'
             ,'excludeFromData' => true
-        )
-        ,'AccountLevel' => array(
+        ]
+        ,'AccountLevel' => [
             'type' => 'enum'
-            ,'values' => array('Disabled','Contact','User','Staff','Administrator','Developer')
+            ,'values' => ['Disabled','Contact','User','Staff','Administrator','Developer']
             ,'default' => 'User'
-        )
-    );
+        ]
+    ];
 
-    public static $searchConditions = array(
-        'Username' => array(
-            'qualifiers' => array('any','username','uname','user')
+    public static $searchConditions = [
+        'Username' => [
+            'qualifiers' => ['any','username','uname','user']
             ,'points' => 3
             ,'sql' => 'Username LIKE "%%%s%%"'
-        )
-        ,'AccountLevel' => array(
-            'qualifiers' => array('accountlevel')
+        ]
+        ,'AccountLevel' => [
+            'qualifiers' => ['accountlevel']
             ,'points' => 2
             ,'sql' => 'AccountLevel LIKE "%%%s%%"'
-        )
-    );
+        ]
+    ];
 
-    public static $validators = array(
-        'Username' => array(
+    public static $validators = [
+        'Username' => [
             'validator' => 'handle'
             ,'required' => true
             ,'errorMessage' => 'Username can only contain letters, numbers, hyphens, and underscores.'
-        )
-        ,'AccountLevel' => array(
+        ]
+        ,'AccountLevel' => [
             'validator' => 'selection'
-            ,'choices' => array() // filled dynamically in __classLoaded
+            ,'choices' => [] // filled dynamically in __classLoaded
             ,'required' => false
-        )
-    );
+        ]
+    ];
 
     public static $dynamicFields = [];
 
     public static function __classLoaded()
     {
         // merge User classes into valid Person classes, but not again when child classes are loaded
-        if (get_called_class() == __CLASS__) {
+        if (static::class == self::class) {
             Person::$subClasses = static::$subClasses = array_merge(Person::$subClasses, static::$subClasses);
             self::$validators['AccountLevel']['choices'] = self::$fields['AccountLevel']['values'];
         }
@@ -145,36 +145,33 @@ class User extends Person implements IUser
     {
         $User = static::getByUsername($username);
 
-        if ($User && is_a($User, __CLASS__) && $User->hasAccountLevel('User') && $User->verifyPassword($password)) {
+        if ($User && is_a($User, self::class) && $User->hasAccountLevel('User') && $User->verifyPassword($password)) {
             return $User;
-        } else {
-            return null;
         }
+        return null;
     }
 
     public static function getByUsername($username)
     {
         if (static::fieldExists('Email')) {
-            return static::getByWhere(array(
+            return static::getByWhere([
                 sprintf('`%2$s` = "%1$s" OR `%3$s` = "%1$s"', DB::escape($username), static::_cn('Username'), static::_cn('Email'))
-            ));
-        } else {
-            return static::getByField('Username', $username);
+            ]);
         }
+        return static::getByField('Username', $username);
     }
 
     public function verifyPassword($password)
     {
         if ($this->Password[0] == '$') {
-            return password_verify($password, $this->Password);
-        } elseif (SHA1($password) == $this->Password) {
+            return password_verify((string) $password, $this->Password);
+        }
+        if (SHA1((string) $password) == $this->Password) {
             $wasDirty = $this->isDirty;
             $this->setClearPassword($password);
-
             if (!$wasDirty) {
                 $this->save();
             }
-
             return true;
         }
 
@@ -183,7 +180,7 @@ class User extends Person implements IUser
 
     public function setClearPassword($password)
     {
-        $this->Password = password_hash($password, PASSWORD_DEFAULT);
+        $this->Password = password_hash((string) $password, PASSWORD_DEFAULT);
 
         if (is_callable(static::$onPasswordSet)) {
             call_user_func(static::$onPasswordSet, $password, $this);
@@ -196,19 +193,18 @@ class User extends Person implements IUser
 
         if ($accountLevelIndex === false) {
             return false;
-        } else {
-            return ($this->AccountLevelNumeric >= $accountLevelIndex);
         }
+        return ($this->AccountLevelNumeric >= $accountLevelIndex);
     }
 
-    public static function getUniqueUsername($firstName, $lastName, $options = array())
+    public static function getUniqueUsername($firstName, $lastName, $options = [])
     {
         // apply default options
         $options = array_merge(
-            array('suffixFormat' => '%s%u'),
-            is_string(static::$usernameGenerator) || is_callable(static::$usernameGenerator) ? array('format' => static::$usernameGenerator) : static::$usernameGenerator,
+            ['suffixFormat' => '%s%u'],
+            is_string(static::$usernameGenerator) || is_callable(static::$usernameGenerator) ? ['format' => static::$usernameGenerator] : static::$usernameGenerator,
             $options,
-            array('handleField' => 'Username')
+            ['handleField' => 'Username']
         );
 
         // create seed username
@@ -231,7 +227,7 @@ class User extends Person implements IUser
         }
 
         // use HandleBehavior to transform characters and guarantee uniqueness
-        return HandleBehavior::getUniqueHandle(get_called_class(), $username, $options);
+        return HandleBehavior::getUniqueHandle(static::class, $username, $options);
     }
 
     protected static function _getAccountLevelIndex($accountLevel)
@@ -241,7 +237,7 @@ class User extends Person implements IUser
 
     protected static function generatePassword($length = 8)
     {
-        $chars = array('2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's' ,'t', 'u', 'v', 'w', 'x', 'y', 'z');
+        $chars = ['2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's' ,'t', 'u', 'v', 'w', 'x', 'y', 'z'];
         $password = '';
 
         for ($i=0; $i<$length; $i++) {

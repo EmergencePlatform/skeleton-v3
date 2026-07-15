@@ -8,28 +8,28 @@ use ActiveRecord;
 class Page extends AbstractContent
 {
     // ActiveRecord configuration
-    public static $defaultClass = __CLASS__;
+    public static $defaultClass = self::class;
     public static $singularNoun = 'page';
     public static $pluralNoun = 'pages';
     public static $collectionRoute = '/pages';
 
-    public static $fields = array(
-        'LayoutClass' => array(
+    public static $fields = [
+        'LayoutClass' => [
             'type' => 'enum'
-            ,'values' => array('OneColumn')
+            ,'values' => ['OneColumn']
             ,'default' => 'OneColumn'
-        )
+        ]
         ,'LayoutConfig'  => 'json'
-    );
+    ];
 
 
-    public static function getAllPublishedByContextObject(ActiveRecord $Context, $options = array())
+    public static function getAllPublishedByContextObject(ActiveRecord $Context, $options = [])
     {
-        $options = array_merge(array(
-            'conditions' => array()
-        ), $options);
+        $options = array_merge([
+            'conditions' => []
+        ], $options);
 
-        $options['conditions']['Class'] = __CLASS__;
+        $options['conditions']['Class'] = self::class;
 
         return parent::getAllPublishedByContextObject($Context, $options);
     }

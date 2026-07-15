@@ -1,18 +1,18 @@
 <?php
 
-function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = array())
+function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = [])
 {
     if (empty($GLOBALS['Session']) || !$GLOBALS['Session']->hasAccountLevel('Developer') || empty($_GET['log_report'])) {
         return '';
     }
 
-    $groupers = array_merge(array(
+    $groupers = array_merge([
         '/SELECT \* FROM `_e_file_collections` WHERE \(Handle = "[^"]+"\) AND .* LIMIT 1/'
         ,'/SELECT \* FROM `_e_files` WHERE CollectionID = \d+ AND Handle = "[^"]+\.config\.php" ORDER BY ID DESC LIMIT 1/'
         ,'/SELECT \* FROM `_e_files` WHERE CollectionID = \d+ AND Handle = "[^"]+\.class\.php" ORDER BY ID DESC LIMIT 1/'
         ,'/SELECT \* FROM `_e_files` WHERE CollectionID = \d+ AND Handle = "[^"]+" ORDER BY ID DESC LIMIT 1/'
         ,'/SELECT \* FROM `media` WHERE `ID` = "\d+" LIMIT 1/'
-    ), $groupers);
+    ], $groupers);
 
 
 
@@ -23,7 +23,7 @@ function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = array())
     $totalQueryTime = 0;
     $totalResults = 0;
     $totalAffected = 0;
-    $groups = array();
+    $groups = [];
     $reportStart = microtime(true);
 
     // analyze query stats
@@ -65,18 +65,15 @@ function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = array())
     $html .= sprintf('<tr><td align="center">%u</td><td align="center">%0.3fms</td><td align="center">%u</td><td align="center">%u</td></tr>', $totalQueries, $totalQueryTime, $totalResults, $totalAffected);
 
     foreach ($groups AS $query => $g) {
-        $html .= sprintf('<tr><td colspan="4">%s</td></tr>', htmlspecialchars($query));
+        $html .= sprintf('<tr><td colspan="4">%s</td></tr>', htmlspecialchars((string) $query));
         $html .= sprintf('<tr><td align="center">%u</td><td align="center">%0.3fms</td><td align="center">%u</td><td align="center">%u</td></tr>', $g['count'], $g['queryTime'], $g['results'], $g['affected']);
 
-        if (!empty($g['queries'])) {
-            foreach ($g['queries'] AS $query) {
-                $html .= '<tr><td colspan="4">'.htmlspecialchars($query).'</td></tr>';
-            }
+        foreach ($g['queries'] AS $query) {
+            $html .= '<tr><td colspan="4">'.htmlspecialchars((string) $query).'</td></tr>';
         }
     }
 
     $html .= sprintf('<tr><th colspan="4">Report took %0.3fms to generate</th></tr>', $reportEnd-$reportStart);
-    $html .= '</table>';
-    return $html;
+    return $html . '</table>';
 }
 

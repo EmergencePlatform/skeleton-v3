@@ -10,11 +10,11 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
     $appPath = "sencha-workspace/$appName";
 
     // include classpath files
-    $classPaths = explode(',', $App->getBuildCfg('app.classpath'));
+    $classPaths = explode(',', (string) $App->getBuildCfg('app.classpath'));
 
-    $srcCollections = array();
+    $srcCollections = [];
     foreach ($classPaths AS $classPath) {
-        if (substr($classPath, 0, 11) == '${app.dir}/') {
+        if (str_starts_with($classPath, '${app.dir}/')) {
             $classPath = $appPath.substr($classPath, 10);
         } else {
             continue;
@@ -23,7 +23,7 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
         try {
             $tree = Emergence_FS::getTree($classPath);
             $srcCollections = array_merge($srcCollections, array_keys($tree));
-        } catch (Exception $e) {
+        } catch (Exception) {
             continue;
         }
     }
@@ -32,7 +32,7 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
     $requiredPackages = $App->getAppCfg('requires');
 
     if (!is_array($requiredPackages)) {
-        $requiredPackages = array();
+        $requiredPackages = [];
     }
 
     if (($themeName = $App->getBuildCfg('app.theme')) && !in_array($themeName, $requiredPackages)) {
@@ -41,11 +41,11 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
 
     foreach ($requiredPackages AS $packageName) {
         $packagePath = "sencha-workspace/packages/$packageName";
-        foreach (array("$packagePath/src", "$packagePath/overrides") AS $classPath) {
+        foreach (["$packagePath/src", "$packagePath/overrides"] AS $classPath) {
             try {
                 $tree = Emergence_FS::getTree($classPath);
                 $srcCollections = array_merge($srcCollections, array_keys($tree));
-            } catch (Exception $e) {
+            } catch (Exception) {
                 continue;
             }
         }
@@ -77,22 +77,22 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
                 .') AS lastestFiles'
                 .' LEFT JOIN `%1$s` f2 USING (ID)'
                 .' WHERE f2.Status = "Normal" AND f2.Type = "application/javascript"'
-            ,array(
+            ,[
                 SiteFile::$tableName
                 ,SiteCollection::$tableName
-                ,join(',', $srcCollections)
-            )
+                ,implode(',', $srcCollections)
+            ]
         );
     } else {
-        $sources = array();
+        $sources = [];
     }
 
     // compile keyed manifest with localized paths
-    $manifest = array();
+    $manifest = [];
     foreach ($sources AS $source) {
-        if (strpos($source['Path'], "$appPath/") === 0) {
+        if (str_starts_with($source['Path'], "$appPath/")) {
             $manifest[substr($source['Path'], strlen($appPath) + 1)] = $source['SHA1'];
-        } elseif (strpos($source['Path'], 'sencha-workspace/packages/') === 0) {
+        } elseif (str_starts_with($source['Path'], 'sencha-workspace/packages/')) {
             $manifest['../'.substr($source['Path'], 17)] = $source['SHA1'];
         }
     }

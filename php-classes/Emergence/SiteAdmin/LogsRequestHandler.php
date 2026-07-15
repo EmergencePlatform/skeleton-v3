@@ -67,7 +67,7 @@ class LogsRequestHandler extends \RequestHandler
         if (!empty($_GET['download']) && $_GET['download'] == 'raw') {
             header('Content-Length: ' . $file['size']);
             header('Content-Type: text/plain; charset=utf-8');
-            header('Content-Disposition: attachment; filename="' . addslashes(basename($path)) . '"');
+            header('Content-Disposition: attachment; filename="' . addslashes(basename((string) $path)) . '"');
             readfile($file['realPath']);
             exit();
         }
@@ -97,14 +97,14 @@ class LogsRequestHandler extends \RequestHandler
                     $file['format'] = 'raw';
                 }
 
-                list ($pathPrefix, $pathSuffix) = explode('/', $path, 2);
+                [$pathPrefix, $pathSuffix] = explode('/', (string) $path, 2);
                 if (
-                    ($pathPrefix == 'logs' || $path == 'site-data/site.log')
+                    ($pathPrefix === 'logs' || $path == 'site-data/site.log')
                     && ($loggerConfig = \Site::getConfig('logger'))
                     && !empty($loggerConfig['root'])
                 ) {
                     $file['realPath'] = $loggerConfig['root'] . '/' . $pathSuffix;
-                } elseif ($pathPrefix == 'site-data') {
+                } elseif ($pathPrefix === 'site-data') {
                     $file['realPath'] = Storage::getLocalStorageRoot() . '/' . $pathSuffix;
                 } else {
                     $file['realPath'] = Site::$rootPath . '/' . $path;
@@ -115,8 +115,6 @@ class LogsRequestHandler extends \RequestHandler
             }
         }
 
-        return array_filter($files, function ($file) {
-            return $file['size'] !== null;
-        });
+        return array_filter($files, fn($file) => $file['size'] !== null);
     }
 }

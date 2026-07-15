@@ -9,9 +9,9 @@ use HandleBehavior;
 class Comment extends \VersionedRecord
 {
     // support subclassing
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__);
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class];
 
     // ActiveRecord configuration
     public static $tableName = 'comments';
@@ -19,48 +19,48 @@ class Comment extends \VersionedRecord
     public static $pluralNoun = 'comments';
     public static $collectionRoute = '/comments';
 
-    public static $fields = array(
+    public static $fields = [
         'ContextClass'
         ,'ContextID' => 'uint'
-        ,'Handle' => array(
+        ,'Handle' => [
             'unique' => true
-        )
-        ,'ReplyToID' => array(
+        ]
+        ,'ReplyToID' => [
             'type' => 'uint'
             ,'notnull' => false
-        )
-        ,'Message' => array(
+        ]
+        ,'Message' => [
             'type' => 'clob'
             ,'fulltext' => true
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'Context' => array(
+    public static $relationships = [
+        'Context' => [
             'type' => 'context-parent'
-        )
-        ,'ReplyTo' => array(
+        ]
+        ,'ReplyTo' => [
             'type' => 'one-one'
-            ,'class' => __CLASS__
-        )
-    );
+            ,'class' => self::class
+        ]
+    ];
 
-    public static $validators = array(
-        'Context' => array(
+    public static $validators = [
+        'Context' => [
             'validator' => 'require-relationship',
             'required' => true
-        ),
-        'Message' => array(
+        ],
+        'Message' => [
             'validator' => 'string_multiline',
             'errorMessage' => 'You must provide a message.'
-        )
-    );
+        ]
+    ];
 
-    public static $searchConditions = array(
-        'Message' => array(
-            'qualifiers' => array('any','message')
-        )
-    );
+    public static $searchConditions = [
+        'Message' => [
+            'qualifiers' => ['any','message']
+        ]
+    ];
 
     public function validate($deep = true)
     {
@@ -78,7 +78,7 @@ class Comment extends \VersionedRecord
     {
         // set handle
         if (!$this->Handle) {
-            $this->Handle = HandleBehavior::generateRandomHandle(__CLASS__, 12);
+            $this->Handle = HandleBehavior::generateRandomHandle(self::class, 12);
         }
 
         parent::save();

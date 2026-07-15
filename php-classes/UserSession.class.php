@@ -8,7 +8,7 @@ class UserSession extends Session
      // ActiveRecord configuration
     public static $subClasses = [
         Session::class,
-        __CLASS__
+        self::class
     ];
 
     public static $fields = [

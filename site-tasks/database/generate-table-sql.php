@@ -23,7 +23,7 @@ return [
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mysqli = DB::getMysqli();
-            $sql = preg_replace('/^--.*/m', '', $sql);
+            $sql = preg_replace('/^--.*/m', '', (string) $sql);
 
             if (!$success = $mysqli->multi_query($sql)) {
                 $error = $mysqli->error;

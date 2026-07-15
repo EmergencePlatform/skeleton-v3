@@ -11,34 +11,34 @@ abstract class Token extends ActiveRecord
     public static $collectionRoute = '/tokens';
 
     // support subclassing
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__, 'PasswordToken');
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class, 'PasswordToken'];
 
 
-    public static $fields = array(
-        'Handle' => array(
+    public static $fields = [
+        'Handle' => [
             'type' => 'string'
             ,'unique' => true
-        )
-        ,'Expires' => array(
+        ]
+        ,'Expires' => [
             'type' => 'timestamp'
             ,'notnull' => false
-        )
-        ,'Used' => array(
+        ]
+        ,'Used' => [
             'type' => 'timestamp'
             ,'notnull' => false
-        )
-    );
+        ]
+    ];
 
 
-    public static $relationships = array(
-        'Creator' => array(
+    public static $relationships = [
+        'Creator' => [
             'type' => 'one-one'
             ,'class' => Person::class
             ,'local' => 'CreatorID'
-        )
-    );
+        ]
+    ];
 
     public function handleRequest($data)
     {
@@ -74,8 +74,8 @@ abstract class Token extends ActiveRecord
 
     public function sendEmail($email)
     {
-        return Emergence\Mailer\Mailer::sendFromTemplate($email, static::$emailTemplate, array(
+        return Emergence\Mailer\Mailer::sendFromTemplate($email, static::$emailTemplate, [
             'Token' => $this
-        ));
+        ]);
     }
 }

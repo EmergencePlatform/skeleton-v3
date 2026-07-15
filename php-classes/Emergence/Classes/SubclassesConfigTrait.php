@@ -4,18 +4,18 @@ namespace Emergence\Classes;
 
 trait SubclassesConfigTrait
 {
-	public static $rootClass = null;
-    public static $defaultClass = null;
-    public static $subClasses = null;
+	public static $rootClass;
+    public static $defaultClass;
+    public static $subClasses;
 
-    public static function getStaticRootClass($boundingParentClass = __CLASS__)
+    public static function getStaticRootClass($boundingParentClass = self::class)
     {
         if (static::$rootClass) {
             return static::$rootClass;
         }
 
         // detect root class by crawling up the inheritence tree until an abstract parent is found
-        $class = new \ReflectionClass(get_called_class());
+        $class = new \ReflectionClass(static::class);
         while ($parentClass = $class->getParentClass()) {
             
             if ($parentClass->isAbstract()) {
@@ -41,12 +41,12 @@ trait SubclassesConfigTrait
             return static::$subClasses;
         }
 
-        return array_unique([static::getStaticRootClass(), get_called_class()]);
+        return array_unique([static::getStaticRootClass(), static::class]);
     }
 
 
     // instance wrappers
-    public function getRootClass($boundingParentClass = __CLASS__)
+    public function getRootClass($boundingParentClass = self::class)
     {
         return static::getStaticRootClass($boundingParentClass);
     }

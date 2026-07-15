@@ -112,7 +112,7 @@ class Tree implements HashableInterface
                     if ($node instanceof self || $node instanceof File) {
                         $node = (string) $node;
                     } elseif (is_object($node)) {
-                        $node = get_class($node)."($node".($node instanceof HashableInterface ? ", {$node->getRepository()->getGitDir()}, {$node->getObjectType()}, {$node->getHash()}" : '').')';
+                        $node = $node::class."($node".($node instanceof HashableInterface ? ", {$node->getRepository()->getGitDir()}, {$node->getObjectType()}, {$node->getHash()}" : '').')';
                     }
 
                     $output .= "$node\n";
@@ -126,14 +126,14 @@ class Tree implements HashableInterface
 
         if ($return) {
             return $output;
-        } else {
-            echo $output;
         }
+        echo $output;
+        return null;
     }
 
     public function commit($message = 'Commit tree')
     {
-        return trim($this->getRepository()->run('commit-tree', [
+        return trim((string) $this->getRepository()->run('commit-tree', [
             '-m', $message,
             $this->write(),
         ]));
@@ -142,7 +142,7 @@ class Tree implements HashableInterface
     // internal library
     protected function &getNodeRef($path)
     {
-        $path = explode('/', $path);
+        $path = explode('/', (string) $path);
         $tree = &$this->root;
 
         while (($name = array_shift($path)) && count($path)) {
@@ -167,7 +167,8 @@ class Tree implements HashableInterface
         foreach ($tree as $name => &$content) {
             if (!$content) {
                 continue;
-            } elseif (is_string($content)) {
+            }
+            if (is_string($content)) {
                 $type = 'tree';
                 $hash = $content;
             } elseif (is_array($content)) {
@@ -190,7 +191,8 @@ class Tree implements HashableInterface
                 if ('tree' == $type) {
                     $content = $hash;
                 }
-            } else {
+            }
+            else {
                 throw new \Exception('unhandlable content for '.$name);
             }
 
@@ -205,7 +207,7 @@ class Tree implements HashableInterface
         }
 
         // short-circuit for empty trees
-        if (!$treeContent) {
+        if ($treeContent === '' || $treeContent === '0') {
             return static::EMPTY_TREE_HASH;
         }
 

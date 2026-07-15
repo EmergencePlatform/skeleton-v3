@@ -23,7 +23,7 @@ class PasswordAuthenticator extends Authenticator
      */
     public function checkAuthentication()
     {
-        if (isset($this->_authenticatedPerson)) {
+        if ($this->_authenticatedPerson !== null) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class PasswordAuthenticator extends Authenticator
                 Emergence\EventBus::fireEvent('personAuthenticate', 'Emergence/People', [
                     'Person' => $this->_authenticatedPerson,
                     'requestData' => $requestData,
-                    'authenticatorClass' => get_called_class()
+                    'authenticatorClass' => static::class
                 ]);
 
                 // redirect if original request was GET
@@ -55,10 +55,9 @@ class PasswordAuthenticator extends Authenticator
                 }
 
                 return true;
-            } else {
-                $this->respondLoginPrompt(new PasswordAuthenticationFailedException(_('The username or password you entered was incorrect.')));
-                return false;
             }
+            $this->respondLoginPrompt(new PasswordAuthenticationFailedException(_('The username or password you entered was incorrect.')));
+            return false;
         }
 
         return false;
@@ -72,13 +71,14 @@ class PasswordAuthenticator extends Authenticator
     protected function getAuthenticatedPerson()
     {
         // check if session is already authenticated
-        if (isset($this->_authenticatedPerson)) {
+        if ($this->_authenticatedPerson !== null) {
             return $this->_authenticatedPerson;
-        } elseif ($this->_session->PersonID) {
-            return Person::getByID($this->_session->PersonID);
-        } else {
-            return null;
         }
+        // check if session is already authenticated
+        if ($this->_session->PersonID) {
+            return Person::getByID($this->_session->PersonID);
+        }
+        return null;
     }
 
 

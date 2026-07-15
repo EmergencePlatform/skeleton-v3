@@ -96,9 +96,6 @@ class HttpBackend
 
             throw new \Exception("git exited with code {$exitCode}: {$error}");
         }
-
-        // read and set headers first
-        $headers = [];
         while ($header = trim(fgets($pipes[1]))) {
             header($header, true);
         }
@@ -108,7 +105,7 @@ class HttpBackend
         fclose($pipes[1]);
 
         // clean up
-        $exitCode = proc_close($process);
+        proc_close($process);
 
         // if ($exitCode != 0) {
         //     throw new \Exception("git exited with code {$exitCode}");

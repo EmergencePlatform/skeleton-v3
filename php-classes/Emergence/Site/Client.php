@@ -18,7 +18,7 @@ class Client
         }
 
         if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            list ($clientIp) = preg_split('/\s*,\s*/', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            [$clientIp] = preg_split('/\s*,\s*/', $_SERVER['HTTP_X_FORWARDED_FOR']);
             return $clientIp;
         }
 

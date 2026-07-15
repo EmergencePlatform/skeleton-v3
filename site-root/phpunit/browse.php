@@ -21,7 +21,7 @@ $GLOBALS['Session']->requireAccountLevel('Developer');
         </ul>
     <?php
 
-    } elseif (count($testNodes = Emergence_FS::getAggregateChildren("phpunit-tests/$_GET[suite]"))) {
+    } elseif (count($testNodes = Emergence_FS::getAggregateChildren("phpunit-tests/$_GET[suite]")) > 0) {
         ?>
         <h1>Tests in suite <?=htmlspecialchars($_GET['suite'])?></h1>
         <form action="/phpunit/run?suite=<?=urlencode($_GET['suite'])?>"" method='POST'>
@@ -31,12 +31,18 @@ $GLOBALS['Session']->requireAccountLevel('Developer');
         <?php
         foreach ($testNodes AS $testNode) {
             if (is_a($testNode, 'SiteCollection')) {
-                if ($testNode->Handle == 'src' || $testNode->Handle == 'data') {
+                if ($testNode->Handle == 'src') {
+                    continue;
+                }
+                if ($testNode->Handle == 'data') {
                     continue;
                 }
                 print "<li><a href='?suite=$_GET[suite]/$testNode->Handle'>$testNode->Handle</a> <form action='/phpunit/run?suite=$_GET[suite]/$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run All Tests'></form></li>";
             } else {
-                if (!preg_match('/Test\\.php$/', $testNode->Handle) || preg_match('/^Abstract/', $testNode->Handle)) {
+                if (!preg_match('/Test\\.php$/', (string) $testNode->Handle)) {
+                    continue;
+                }
+                if (preg_match('/^Abstract/', (string) $testNode->Handle)) {
                     continue;
                 }
                 print "<li>$testNode->Handle <form action='/phpunit/run?suite=$_GET[suite]&test=$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run Test'></form></li>";

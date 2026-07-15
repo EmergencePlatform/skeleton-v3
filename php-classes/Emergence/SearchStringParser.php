@@ -10,7 +10,7 @@ class SearchStringParser
     // parser state
     protected $string;
     protected $cursorMax;
-    protected $terms = array();
+    protected $terms = [];
 
     // scanning state
     protected $qualifier = '';
@@ -27,7 +27,7 @@ class SearchStringParser
     function __construct($string)
     {
         $this->string = $string;
-        $this->cursorMax = strlen($string) - 1;
+        $this->cursorMax = strlen((string) $string) - 1;
     }
 
     public static function parseString($string)
@@ -38,12 +38,12 @@ class SearchStringParser
 
     protected static function isQuote($character)
     {
-        return strpos(static::$quotes, $character) !== false;
+        return str_contains((string) static::$quotes, (string) $character);
     }
 
     protected static function isSpace($character)
     {
-        return ctype_space($character);
+        return ctype_space((string) $character);
     }
 
     protected static function isDelimiter($character)
@@ -145,10 +145,10 @@ class SearchStringParser
      protected function flushTerm()
      {
         if ($this->term || $this->qualifier) {
-            $this->terms[] = array(
+            $this->terms[] = [
                 'qualifier' => $this->qualifier ?: null,
                 'term' => $this->term ?: null
-            );
+            ];
 
             $this->qualifier = '';
             $this->term = '';

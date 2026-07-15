@@ -13,38 +13,38 @@ class ContentBlock extends \VersionedRecord
     public static $collectionRoute = '/content-blocks';
     public static $useCache = true;
 
-    public static $fields = array(
-        'Handle' => array(
+    public static $fields = [
+        'Handle' => [
             'unique' => true
-        )
-        ,'Renderer' => array(
+        ]
+        ,'Renderer' => [
             'type' => 'enum'
-            ,'values' => array('text', 'html', 'markdown')
+            ,'values' => ['text', 'html', 'markdown']
             ,'default' => 'markdown'
-        )
-        ,'Content' => array(
+        ]
+        ,'Content' => [
             'type' => 'clob'
-        )
-    );
+        ]
+    ];
 
-    public static $dynamicFields = array(
-        'html' => array(
+    public static $dynamicFields = [
+        'html' => [
             'getter' => 'getHtml'
-        )
-    );
+        ]
+    ];
 
-    public static $searchConditions = array(
-        'Content' => array(
-            'qualifiers' => array('any', 'content')
+    public static $searchConditions = [
+        'Content' => [
+            'qualifiers' => ['any', 'content']
             ,'points' => 2
             ,'sql' => 'Content Like "%%%s%%"'
-        )
-        ,'Handle' => array(
-            'qualifiers' => array('any', 'handle')
+        ]
+        ,'Handle' => [
+            'qualifiers' => ['any', 'handle']
             ,'points' => 2
             ,'sql' => 'Handle Like "%%%s%%"'
-        )
-    );
+        ]
+    ];
 
 
     public static function getByHandle($contentHandle)
@@ -57,11 +57,11 @@ class ContentBlock extends \VersionedRecord
         // call parent
         parent::validate($deep);
 
-        $this->_validator->validate(array(
+        $this->_validator->validate([
             'field' => 'Handle'
             ,'validator' => 'handle'
             ,'errorMessage' => 'Handle can only contain letters, numbers, hyphens, and underscores'
-        ));
+        ]);
 
         // save results
         return $this->finishValidation();

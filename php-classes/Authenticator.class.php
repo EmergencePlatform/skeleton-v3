@@ -24,7 +24,7 @@ abstract class Authenticator
                 return $this->_session;
 
             case 'AuthenticatedPerson':
-                if (!isset($this->_authenticatedPerson)) {
+                if ($this->_authenticatedPerson === null) {
                     $this->_authenticatedPerson = $this->getAuthenticatedPerson();
                 }
 

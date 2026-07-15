@@ -34,14 +34,14 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
 #    );
 
     // RecordsRequestHandler config
-    public static $recordClass = 'Emergence\CMS\AbstractContent';
+    public static $recordClass = \Emergence\CMS\AbstractContent::class;
     public static $accountLevelRead = false;
     public static $accountLevelBrowse = false;
     public static $accountLevelWrite = 'Staff';
     public static $accountLevelAPI = 'Staff';
-    public static $browseOrder = array('Published' => 'DESC');
+    public static $browseOrder = ['Published' => 'DESC'];
 
-    public static function handleBrowseRequest($options = array(), $conditions = array(), $responseID = null, $responseData = array())
+    public static function handleBrowseRequest($options = [], $conditions = [], $responseID = null, $responseData = [])
     {
         if (!$GLOBALS['Session']->hasAccountLevel('Staff') || empty($_GET['showall'])) {
             $conditions['Status'] = 'Published';
@@ -86,15 +86,15 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
     // TODO: migrate most of this to applyRecordDelta
     protected static function onRecordSaved(ActiveRecord $Content, $requestData)
     {
-        $responseData = array();
+        $responseData = [];
 
         // save items
         if (is_array($requestData['items'])) {
-            $responseData['changedItems'] = array();
-            $responseData['newItems'] = array();
-            $responseData['deletedItems'] = array();
-            $responseData['invalidItems'] = array();
-            $responseData['phantomsMap'] = array();
+            $responseData['changedItems'] = [];
+            $responseData['newItems'] = [];
+            $responseData['deletedItems'] = [];
+            $responseData['invalidItems'] = [];
+            $responseData['phantomsMap'] = [];
 
             // sort and save items
             foreach ($requestData['items'] AS $itemData) {
@@ -136,9 +136,7 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
             // remove deleted items
             $currentItemIDs = array_merge(array_keys($responseData['changedItems']), array_keys($responseData['newItems']));
 
-            $responseData['deletedItems'] = array_filter($Content->Items, function($Item) use ($currentItemIDs) {
-                return !in_array($Item->ID, $currentItemIDs);
-            });
+            $responseData['deletedItems'] = array_filter($Content->Items, fn($Item) => !in_array($Item->ID, $currentItemIDs));
 
             if ($responseData['deletedItems']) {
                 foreach ($responseData['deletedItems'] AS $Item) {
@@ -146,9 +144,7 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
                     $Item->save();
                 }
 
-                $Content->Items = array_filter($Content->Items, function($Item) {
-                    return $Item->Status != 'Deleted';
-                });
+                $Content->Items = array_filter($Content->Items, fn($Item) => $Item->Status != 'Deleted');
             }
 
             // update layout if there were phantoms

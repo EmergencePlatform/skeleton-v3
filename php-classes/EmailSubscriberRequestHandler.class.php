@@ -26,27 +26,26 @@ class EmailSubscriberRequestHandler extends RequestHandler
 
             if (!$Submission->validate()) {
                 // respond invalid
-                return static::respond('emailSubscriberInvalid', array(
+                return static::respond('emailSubscriberInvalid', [
                     'success' => false
-                ));
-            } else {
-                try {
-                    $Submission->save();
+                ]);
+            }
+            try {
+                $Submission->save();
 
-                    if (static::$onSubscribe) {
-                        call_user_func(static::$onSubscribe, $Submission, $_REQUEST);
-                    }
-
-                    // respond success
-                    return static::respond('emailSubscriberSubmitted', array(
-                        'success' => true
-                    ));
-                } catch (DuplicateKeyException $e) {
-                    // respond invalid
-                    return static::respond('emailSubscriberExisting', array(
-                        'success' => false
-                    ));
+                if (static::$onSubscribe) {
+                    call_user_func(static::$onSubscribe, $Submission, $_REQUEST);
                 }
+
+                // respond success
+                return static::respond('emailSubscriberSubmitted', [
+                    'success' => true
+                ]);
+            } catch (DuplicateKeyException) {
+                // respond invalid
+                return static::respond('emailSubscriberExisting', [
+                    'success' => false
+                ]);
             }
         }
 

@@ -142,7 +142,7 @@ abstract class Package implements IPackage
     public function getClassPaths()
     {
         if (!$this->classPaths) {
-            $this->classPaths = array_filter(explode(',', $this->getAntConfig('package.classpath')));
+            $this->classPaths = array_filter(explode(',', (string) $this->getAntConfig('package.classpath')));
         }
 
         return $this->classPaths;
@@ -156,7 +156,7 @@ abstract class Package implements IPackage
             $packagePath = $packagePath->RealPath;
         }
 
-        $packageConfig = json_decode(Util::cleanJson(file_get_contents($packagePath)), true);
+        $packageConfig = json_decode((string) Util::cleanJson(file_get_contents($packagePath)), true);
 
         if (!$packageConfig || empty($packageConfig['name'])) {
             throw new \Exception("Could not parse package.json for $packagePath");

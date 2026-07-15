@@ -26,40 +26,38 @@ function Dwoo_Plugin_refill(Dwoo_Core $dwoo, $field = null, $assign = null, $mod
             $value = call_user_func('Dwoo_Plugin_'.$modifier, $dwoo, $value);
         }
     }
-
     // handle selection
     if (isset($selected)) {
         if (($value == $selected) || (is_array($value) && in_array($selected, $value))) {
             return 'selected="SELECTED"';
-        } else {
-            return '';
         }
-    }
-    // handle checkiness
-    elseif (isset($checked)) {
-        if (($value == $checked) || (is_array($value) && in_array($checked, $value))) {
-            return 'checked="CHECKED"';
-        } else {
-            return '';
-        }
+        return '';
     }
 
+    // handle selection
+    if (isset($checked)) {
+        if (($value == $checked) || (is_array($value) && in_array($checked, $value))) {
+            return 'checked="CHECKED"';
+        }
+        return '';
+    }
     // handle assignment
     if (isset($assign)) {
         $dwoo->assignInScope($value, $assign);
-
         return '';
-    } elseif (empty($value)) {
-        return '';
-    } else {
-        if ($escape == 'html') {
-            return htmlspecialchars($value);
-        } elseif ($escape == 'url') {
-            return urlencode($value);
-        } else {
-            return $value;
-        }
     }
+    if (empty($value)) {
+        return '';
+    }
+    if ($escape == 'html') {
+        return htmlspecialchars((string) $value);
+    }
+
+    // handle assignment
+    if ($escape == 'url') {
+        return urlencode((string) $value);
+    }
+    return $value;
 
     /*
     if(isset($params['checked'])) {
@@ -92,10 +90,10 @@ if (!function_exists('refill_resolve_array_dot_path')) {
     function refill_resolve_array_dot_path($path, &$array)
     {
         // convert bracket notation to dot notation
-        $path = preg_replace('/\[([^\]]+)\]/', '.$1', $path);
+        $path = preg_replace('/\[([^\]]+)\]/', '.$1', (string) $path);
 
         //Break apart path
-        $parts = explode('.', $path);
+        $parts = explode('.', (string) $path);
 
         $target = &$array;
         while (false !== ($part = array_shift($parts)) && is_array($target)) {

@@ -8,7 +8,7 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
     }
 
     // load workspace classpaths
-    $classPaths = array_merge($classPaths, explode(',', Sencha::getWorkspaceCfg('workspace.classpath')));
+    $classPaths = array_merge($classPaths, explode(',', (string) Sencha::getWorkspaceCfg('workspace.classpath')));
 
     // if app provided, load classpaths and packages
     if ($App) {
@@ -25,11 +25,11 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
         }
 
         // include classpath files
-        $classPaths = array_merge($classPaths, explode(',', $App->getBuildCfg('app.classpath')));
+        $classPaths = array_merge($classPaths, explode(',', (string) $App->getBuildCfg('app.classpath')));
 
         // include override files
         if ($overridesPath = $App->getBuildCfg('app.overrides')) {
-            $classPaths = array_merge($classPaths, explode(',', $overridesPath));
+            $classPaths = array_merge($classPaths, explode(',', (string) $overridesPath));
         }
     }
 
@@ -77,8 +77,8 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
                 throw new Exception("Source for package $packageName not found in workspace or framework");
             }
         }
-
-        array_push($classPaths, "$packagePath/src", "$packagePath/overrides");
+        $classPaths[] = "$packagePath/src";
+        $classPaths[] = "$packagePath/overrides";
     }
 
     // include classpaths from packages
@@ -90,12 +90,12 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
     // build list of all source trees, resolving CMD variables and children
     $sources = [];
     foreach ($classPaths AS $classPath) {
-        if (strpos($classPath, '${app.dir}/') === 0) {
-            $classPath = $appPath.substr($classPath, 10);
-        } elseif (strpos($classPath, '${ext.dir}/') === 0) {
-            $classPath = $frameworkPath.substr($classPath, 10);
-        } elseif (strpos($classPath, '${touch.dir}/') === 0) {
-            $classPath = $frameworkPath.substr($classPath, 12);
+        if (str_starts_with((string) $classPath, '${app.dir}/')) {
+            $classPath = $appPath.substr((string) $classPath, 10);
+        } elseif (str_starts_with((string) $classPath, '${ext.dir}/')) {
+            $classPath = $frameworkPath.substr((string) $classPath, 10);
+        } elseif (str_starts_with((string) $classPath, '${touch.dir}/')) {
+            $classPath = $frameworkPath.substr((string) $classPath, 12);
         }
 
         Emergence_FS::cacheTree($classPath);
@@ -103,7 +103,7 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
     }
 
     // skip patching loader if manifest will be empty
-    if (empty($sources)) {
+    if ($sources === []) {
         return '';
     }
 
@@ -113,34 +113,34 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
         $addToManifest = true;
 
         // rewrite path to canonican external URL
-        if ($appPath && strpos($path, "$appPath/") === 0) {
-            $webPath = '/app/'.substr($path, 17);
+        if ($appPath && str_starts_with((string) $path, "$appPath/")) {
+            $webPath = '/app/'.substr((string) $path, 17);
 
             // app overrides should automatically be loaded
-            if (substr($path, strlen($appPath), 11)== '/overrides/') {
+            if (substr((string) $path, strlen($appPath), 11) === '/overrides/') {
                 $autoLoad = true;
                 $addToManifest = false;
             }
-        } elseif (strpos($path, 'sencha-workspace/packages/') === 0) {
-            $webPath = '/app/'.substr($path, 17);
+        } elseif (str_starts_with((string) $path, 'sencha-workspace/packages/')) {
+            $webPath = '/app/'.substr((string) $path, 17);
 
             // package overrides should automatically be loaded
-            if (substr($path, strpos($path, '/', 26), 11) == '/overrides/') {
+            if (substr((string) $path, strpos((string) $path, '/', 26), 11) === '/overrides/') {
                 $autoLoad = true;
                 $addToManifest = false;
             }
-        } elseif (strpos($path, $frameworkPath) === 0) {
-            $webPath = "/app/$framework-$frameworkVersion/".substr($path, strlen($frameworkPath) + 1);
+        } elseif (str_starts_with((string) $path, $frameworkPath)) {
+            $webPath = "/app/$framework-$frameworkVersion/".substr((string) $path, strlen($frameworkPath) + 1);
 
             // package overrides should automatically be loaded
-            if (substr($path, strpos($path, '/', strlen($frameworkPath) + 10), 11) == '/overrides/') {
+            if (substr((string) $path, strpos((string) $path, '/', strlen($frameworkPath) + 10), 11) === '/overrides/') {
                 $autoLoad = true;
                 $addToManifest = false;
             }
-        } elseif (strpos($path, 'sencha-workspace/pages/') === 0) {
-            $webPath = '/app/'.substr($path, 17);
-        } elseif (strpos($path, $frameworkPath) === 0) {
-            $webPath = '/app/'.substr($path, 17);
+        } elseif (str_starts_with((string) $path, 'sencha-workspace/pages/')) {
+            $webPath = '/app/'.substr((string) $path, 17);
+        } elseif (str_starts_with((string) $path, $frameworkPath)) {
+            $webPath = '/app/'.substr((string) $path, 17);
         } else {
             // this class was not in a recognized externally loadable collection
             continue;
@@ -255,9 +255,7 @@ function Dwoo_Plugin_sencha_bootstrap(Dwoo_Core $dwoo, $App = null, $classPaths 
                 implode(
                     '',
                     array_map(
-                        function($url) {
-                            return '<script type="text/javascript" src="'.$url.'"></script>';
-                        },
+                        fn($url) => '<script type="text/javascript" src="'.$url.'"></script>',
                         $autoLoadPaths
                     )
                 )

@@ -20,76 +20,76 @@ class Group extends ActiveRecord
 
     // the lowest-level class in your table requires these lines,
     // they can be manipulated via config files to plug in same-table subclasses
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__, 'Emergence\People\Groups\Organization');
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class, \Emergence\People\Groups\Organization::class];
 
-    public static $fields = array(
+    public static $fields = [
         'Name'
-        ,'Handle' => array(
+        ,'Handle' => [
             'unique' => true
-        )
-        ,'Status' => array(
+        ]
+        ,'Status' => [
             'type' => 'enum'
-            ,'values' => array('Active', 'Disabled')
+            ,'values' => ['Active', 'Disabled']
             ,'default' => 'Active'
-        )
-        ,'ParentID' => array(
+        ]
+        ,'ParentID' => [
             'type' => 'uint'
             ,'notnull' => false
-        )
-        ,'Left' => array(
+        ]
+        ,'Left' => [
             'type' => 'uint'
             ,'notnull' => false
             ,'unique' => true
-        )
-        ,'Right' => array(
+        ]
+        ,'Right' => [
             'type' => 'uint'
             ,'notnull' => false
-        )
-        ,'Founded' => array(
+        ]
+        ,'Founded' => [
             'type' => 'timestamp'
             ,'default' => null
-        )
-        ,'About' => array(
+        ]
+        ,'About' => [
             'type' => 'clob'
             ,'notnull' => false
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'Members' => array(
+    public static $relationships = [
+        'Members' => [
             'type' => 'one-many'
-            ,'class' => 'Emergence\People\Groups\GroupMember'
+            ,'class' => \Emergence\People\Groups\GroupMember::class
             ,'foreign' => 'GroupID'
-        )
-        ,'Parent' => array(
+        ]
+        ,'Parent' => [
             'type' => 'one-one'
-            ,'class' => __CLASS__
-        )
-        ,'People' => array(
+            ,'class' => self::class
+        ]
+        ,'People' => [
             'type' => 'many-many'
             ,'class' => Person::class
-            ,'linkClass' => 'Emergence\People\Groups\GroupMember'
+            ,'linkClass' => \Emergence\People\Groups\GroupMember::class
             ,'linkLocal' => 'GroupID'
             ,'linkForeign' => 'PersonID'
-        )
-    );
+        ]
+    ];
 
-    public static $dynamicFields = array(
-        'FullPath' => array(
+    public static $dynamicFields = [
+        'FullPath' => [
             'method' => 'getFullPath'
-        )
-        ,'Population' => array(
+        ]
+        ,'Population' => [
             'method' => 'getPopulation'
-        )
-    );
+        ]
+    ];
 
-    public static $validators = array(
-        'Name' => array(
+    public static $validators = [
+        'Name' => [
             'errorMessage' => 'A name is required'
-        )
-    );
+        ]
+    ];
 
     public static function getByHandle($handle)
     {
@@ -133,7 +133,7 @@ class Group extends ActiveRecord
 
     public function getAllPeople()
     {
-        $order = PeopleRequestHandler::$browseOrder ? Person::mapFieldOrder(PeopleRequestHandler::$browseOrder) : array();
+        $order = PeopleRequestHandler::$browseOrder ? Person::mapFieldOrder(PeopleRequestHandler::$browseOrder) : [];
 
         array_unshift($order, 'GroupMember.Rank DESC');
 
@@ -142,14 +142,14 @@ class Group extends ActiveRecord
             .' FROM `%s` GroupMember'
             .' JOIN `%s` Person ON (Person.ID = GroupMember.PersonID)'
             .' WHERE GroupMember.GroupID IN (SELECT ID FROM `%s` WHERE `Left` BETWEEN %u AND %u)'
-            .' ORDER BY '.join(',', $order)
-            ,array(
+            .' ORDER BY '.implode(',', $order)
+            ,[
                 GroupMember::$tableName
                 ,Person::$tableName
                 ,Group::$tableName
                 ,$this->Left
                 ,$this->Right
-            )
+            ]
         );
     }
 
@@ -157,12 +157,12 @@ class Group extends ActiveRecord
     {
         return DB::oneValue(
             'SELECT GROUP_CONCAT(Name SEPARATOR "%s") FROM `%s` WHERE `Left` <= %u AND `Right` >= %u ORDER BY `Left`'
-            ,array(
+            ,[
                 DB::escape($separator)
                 ,static::$tableName
                 ,$this->Left
                 ,$this->Right
-            )
+            ]
         );
     }
 
@@ -171,21 +171,21 @@ class Group extends ActiveRecord
         try {
             return (integer)DB::oneValue(
                 'SELECT COUNT(*) FROM (SELECT ID FROM `%s` WHERE `Left` BETWEEN %u AND %u) `Group` JOIN `%s` GroupMember ON GroupID = `Group`.ID'
-                ,array(
+                ,[
                     static::$tableName
                     ,$this->Left
                     ,$this->Right
                     ,GroupMember::$tableName
-                )
+                ]
             );
-        } catch (TableNotFoundException $e) {
+        } catch (TableNotFoundException) {
             return 0;
         }
     }
 
     public static function setPersonGroups(IPerson $Person, $groupIDs)
     {
-        $assignedGroups = array();
+        $assignedGroups = [];
 
         if (is_string($groupIDs)) {
             $groupIDs = preg_split('/\s*[,]+\s*/', trim($groupIDs));
@@ -206,27 +206,27 @@ class Group extends ActiveRecord
         try {
             DB::query(
                 'DELETE FROM `%s` WHERE PersonID = %u AND GroupID NOT IN (%s)'
-                ,array(
+                ,[
                     GroupMember::$tableName
                     ,$Person->ID
-                    ,count($assignedGroups) ? join(',', $assignedGroups) : '0'
-                )
+                    ,count($assignedGroups) ? implode(',', $assignedGroups) : '0'
+                ]
             );
-        } catch (TableNotFoundException $e) {
+        } catch (TableNotFoundException) {
             // no groups need to be deleted
         }
 
         return $assignedGroups;
     }
 
-    public function assignMember(IPerson $Person, $memberData = array())
+    public function assignMember(IPerson $Person, $memberData = [])
     {
         $memberData['GroupID'] = $this->ID;
         $memberData['PersonID'] = $Person->ID;
 
         try {
             return GroupMember::create($memberData, true);
-        } catch (DuplicateKeyException $e) {
+        } catch (DuplicateKeyException) {
             // TODO: should an existing group be updated by $memberData fields?
             return GroupMember::getByWhere($memberData);
         }

@@ -41,7 +41,7 @@ class TasksRequestHandler extends RequestHandler
         $taskNodes = Emergence_FS::getTreeFiles($rootCollection);
 
         foreach ($taskNodes AS $taskNodePath => $taskNode) {
-            $taskPath = substr($taskNodePath, $prefixLength, -4);
+            $taskPath = substr((string) $taskNodePath, $prefixLength, -4);
 
             $taskConfig = include(SiteFile::getRealPathByID($taskNode['ID']));
 

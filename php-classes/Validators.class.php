@@ -2,54 +2,53 @@
 
 class Validators
 {
-    public static function is($string, array $options = array())
+    public static function is($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'value' => false
-        ), $options);
+        ], $options);
 
         if ($options['value']) {
             return ($string == $options['value']);
-        } else {
-            return ($string == true);
         }
+        return ($string == true);
     }
 
-    public static function string($string, array $options = array())
+    public static function string($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'minlength' => 1
             ,'maxlength' => false
-        ), $options);
+        ], $options);
 
         return !empty($string) && is_string($string)
             && (strlen($string) >= $options['minlength'])
             && (($options['maxlength'] == false) || (strlen($string) <= $options['maxlength']));
     }
 
-    public static function string_multiline($string, array $options = array())
+    public static function string_multiline($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'maxlength' => false,
             'maxwords' => false
-        ), $options);
+        ], $options);
 
         return !empty($string)
-                && (($options['maxlength'] == false) || (strlen($string) <= $options['maxlength']))
-                && (($options['maxwords'] == false) || (str_word_count($string) <= $options['maxwords']));
+                && (($options['maxlength'] == false) || (strlen((string) $string) <= $options['maxlength']))
+                && (($options['maxwords'] == false) || (str_word_count((string) $string) <= $options['maxwords']));
     }
 
     public static function full_name($string)
     {
-        return !empty($string) && ctype_print($string) && preg_match('/[a-zA-Z][a-zA-Z\']+\s+([a-zA-Z][a-zA-Z\'.]*\s+)*[a-zA-Z][a-zA-Z\']+/', $string);
+        return !empty($string) && ctype_print((string) $string) && preg_match('/[a-zA-Z][a-zA-Z\']+\s+([a-zA-Z][a-zA-Z\'.]*\s+)*[a-zA-Z][a-zA-Z\']+/', (string) $string);
     }
 
-    public static function number($number, array $options = array())
+    public static function number($number, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'min' => false
             ,'max' => false
-        ), $options);
+        ], $options);
 
         return is_numeric($number)
             && (($options['min'] === false) || ($number >= $options['min']))
@@ -66,97 +65,97 @@ class Validators
             $pattern .= preg_quote($options['domain']);
         }
 
-        return $email && preg_match('/^'.$pattern.'$/', $email);
+        return $email && preg_match('/^'.$pattern.'$/', (string) $email);
     }
 
-    public static function URL($url, array $options = array())
+    public static function URL($url, array $options = [])
     {
-        $options = array_merge(array(
-            'schemes' => array('http', 'https')
-        ), $options);
+        $options = array_merge([
+            'schemes' => ['http', 'https']
+        ], $options);
 
-        $scheme = parse_url($url, PHP_URL_SCHEME);
+        $scheme = parse_url((string) $url, PHP_URL_SCHEME);
 
         return $scheme
             && (empty($options['schemes']) || in_array(strtolower($scheme), $options['schemes']));
     }
 
-    public static function datetime($datetime, array $options = array())
+    public static function datetime($datetime, array $options = [])
     {
         return !empty($datetime)
-            && preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}(\s*T?[0-9]{2}:[0-9]{2}(:[0-9]{2})?)?$/', $datetime);
+            && preg_match('/^\d{4}-\d{2}-\d{2}(\s*T?\d{2}:\d{2}(:\d{2})?)?$/', (string) $datetime);
     }
 
-    public static function date_dmy($date, array $options = array())
+    public static function date_dmy($date, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'tokens' => '\\/-'
-        ), $options);
+        ], $options);
 
         if (!is_array($date)) {
-            $date = array(strtok($date, $options['tokens']));
+            $date = [strtok($date, $options['tokens'])];
             while (($part = strtok($options['tokens'])) !== false) {
                 $date[] = $part;
             }
         }
 
         return is_array($date)
-            && (count($date) == 3)
+            && (count($date) === 3)
             && ctype_digit($date[0])
             && ctype_digit($date[1])
             && ctype_digit($date[2])
             && checkdate($date[1], $date[0], $date[2]);
     }
 
-    public static function date_mdy($date, array $options = array())
+    public static function date_mdy($date, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'tokens' => '\\/-'
-        ), $options);
+        ], $options);
 
         if (!is_array($date)) {
-            $date = array(strtok($date, $options['tokens']));
+            $date = [strtok($date, $options['tokens'])];
             while (($part = strtok($options['tokens'])) !== false) {
                 $date[] = $part;
             }
         }
 
         return is_array($date)
-            && (count($date) == 3)
+            && (count($date) === 3)
             && ctype_digit($date[0])
             && ctype_digit($date[1])
             && ctype_digit($date[2])
             && checkdate($date[0], $date[1], $date[2]);
     }
 
-    public static function date_ymd($date, array $options = array())
+    public static function date_ymd($date, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'tokens' => '\\/-'
-        ), $options);
+        ], $options);
 
         if (!is_array($date)) {
-            $date = array(strtok($date, $options['tokens']));
+            $date = [strtok($date, $options['tokens'])];
             while (($part = strtok($options['tokens'])) !== false) {
                 $date[] = $part;
             }
         }
 
         return is_array($date)
-            && (count($date) == 3)
+            && (count($date) === 3)
             && ctype_digit($date[0])
             && ctype_digit($date[1])
             && ctype_digit($date[2])
             && checkdate($date[1], $date[2], $date[0]);
     }
 
-    public static function creditcard($cc, array $options = array())
+    public static function creditcard($cc, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'type' => false
-        ), $options);
+        ], $options);
 
-        if (!ctype_digit($cc)) {
+        if (!ctype_digit((string) $cc)) {
             return false;
         }
 
@@ -164,39 +163,39 @@ class Validators
         if ($options['type'] !== false) {
             switch ($options['type']) {
                 case 'visa':
-                    if (substr($cc, 0, 1) != 4) {
+                    if (substr((string) $cc, 0, 1) != 4) {
                         return false;
                     }
-                    if ((strlen($cc) != 13) && (strlen($cc) != 16)) {
+                    if ((strlen((string) $cc) !== 13) && (strlen((string) $cc) !== 16)) {
                         return false;
                     }
                     break;
 
                 case 'mc':
-                    $prefix = substr($cc, 0, 2);
+                    $prefix = substr((string) $cc, 0, 2);
                     if (($prefix < 51) || ($prefix > 55)) {
                         return false;
                     }
-                    if (strlen($cc) != 16) {
+                    if (strlen((string) $cc) !== 16) {
                         return false;
                     }
                     break;
 
                 case 'amex':
-                    $prefix = substr($cc, 0, 2);
-                    if (($prefix != '34') && ($prefix != '37')) {
+                    $prefix = substr((string) $cc, 0, 2);
+                    if (($prefix !== '34') && ($prefix !== '37')) {
                         return false;
                     }
-                    if (strlen($cc) != 15) {
+                    if (strlen((string) $cc) !== 15) {
                         return false;
                     }
                     break;
 
                 case 'disc':
-                    if ((substr($cc, 0, 2) != '65') && (substr($cc, 0, 4) != '6011')) {
+                    if ((!str_starts_with((string) $cc, '65')) && (!str_starts_with((string) $cc, '6011'))) {
                         return false;
                     }
-                    if (strlen($cc) != 16) {
+                    if (strlen((string) $cc) !== 16) {
                         return false;
                     }
                     break;
@@ -206,214 +205,200 @@ class Validators
         $odd = true;
         $sum = 0;
 
-        foreach (array_reverse(str_split($cc)) as $num) {
+        foreach (array_reverse(str_split((string) $cc)) as $num) {
             $sum += array_sum(str_split(($odd = !$odd) ? $num*2 : $num));
         }
 
-        return (($sum % 10 == 0) && ($sum != 0));
+        return (($sum % 10 === 0) && ($sum != 0));
     }
 
-    public static function cvv($cvv, array $options = array())
+    public static function cvv($cvv, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'type' => false
-        ), $options);
+        ], $options);
 
-        if (!ctype_digit($cvv)) {
+        if (!ctype_digit((string) $cvv)) {
             return false;
         }
 
         switch ($options['type']) {
             case 'visa':
-                return (strlen($cvv) == 3);
 
             case 'mc':
-                return (strlen($cvv) == 3);
-
-            case 'amex':
-                return (strlen($cvv) == 4);
 
             case 'disc':
-                return (strlen($cvv) == 3);
+                return (strlen((string) $cvv) === 3);
+            case 'amex':
+                return (strlen((string) $cvv) === 4);
 
             default:
-                return ((strlen($cvv) == 3) || (strlen($cvv) == 4));
+                return ((strlen((string) $cvv) === 3) || (strlen((string) $cvv) === 4));
         }
     }
 
-    public static function csc($csc, array $options = array())
+    public static function csc($csc, array $options = [])
     {
         return self::cvv($csc, $options);
     }
 
 
-    public static function state($state, array $options = array())
+    public static function state($state, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'US'
-        ), $options);
+        ], $options);
 
         return self::state_province($state, $options);
     }
 
-    public static function province($state, array $options = array())
+    public static function province($state, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'CA'
-        ), $options);
+        ], $options);
 
         return self::state_province($state, $options);
     }
 
-    public static function state_province($state_province, array $options = array())
+    public static function state_province($state_province, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'US'
-        ), $options);
+        ], $options);
 
         // capitalize
-        $state_province = strtoupper($state_province);
+        $state_province = strtoupper((string) $state_province);
 
         switch ($options['country']) {
             case 'US':
-            {
-                return in_array($state_province, array_keys(Address::$usStates));
-            }
+            return in_array($state_province, array_keys(Address::$usStates));
 
             case 'AU':
-            {
-                return in_array($state_province, array_keys(Address::$auStates));
-            }
+            return in_array($state_province, array_keys(Address::$auStates));
 
             case 'CA':
-            {
-                return in_array($state_province, array_keys(Address::$caProvinces));
-            }
+            return in_array($state_province, array_keys(Address::$caProvinces));
 
             default:
-            {
-                return true;
-            }
+            return true;
         }
     }
 
-    public static function zip($zip, array $options = array())
+    public static function zip($zip, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'US'
-        ), $options);
+        ], $options);
 
         return self::zip_postal($zip, $options);
     }
 
-    public static function postal($postal, array $options = array())
+    public static function postal($postal, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'CA'
-        ), $options);
+        ], $options);
 
         return self::zip_postal($postal, $options);
     }
 
-    public static function zip_postal($postal, array $options = array())
+    public static function zip_postal($postal, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'US'
-        ), $options);
-
+        ], $options);
         if ($options['country'] == 'US') {
-            return !empty($postal) && preg_match('/^[0-9]{5}([^a-zA-Z0-9]*[0-9]{4})?$/', $postal);
-        } elseif ($options['country'] == 'CA') {
-            return !empty($postal) && preg_match('/^[a-zA-Z][0-9][a-zA-Z][[:space:]]?[0-9][a-zA-Z][0-9]$/', $postal);
-        } elseif (in_array($options['country'], array('AD','AR', 'BM', 'BN', 'JM', 'MT', 'MD', 'NL', 'GB', 'VE'))) {
-            return !empty($postal) && preg_match('/^[a-zA-Z0-9 \-]+$/', $postal);
-        } else {
-            return true;
+            return !empty($postal) && preg_match('/^\d{5}([^a-zA-Z0-9]*\d{4})?$/', (string) $postal);
         }
+        if ($options['country'] == 'CA') {
+            return !empty($postal) && preg_match('/^[a-zA-Z]\d[a-zA-Z][[:space:]]?\d[a-zA-Z]\d$/', (string) $postal);
+        }
+
+        if (in_array($options['country'], ['AD','AR', 'BM', 'BN', 'JM', 'MT', 'MD', 'NL', 'GB', 'VE'])) {
+            return !empty($postal) && preg_match('/^[a-zA-Z0-9 \-]+$/', (string) $postal);
+        }
+        return true;
     }
 
     public static function address($address)
     {
         return !empty($address)
-            && preg_match('/[0-9]+/', $address) && preg_match('/[a-zA-Z]+/', $address);
+            && preg_match('/\d+/', $address) && preg_match('/[a-zA-Z]+/', $address);
     }
 
     public static function aim($screenname)
     {
         return !empty($screenname)
-            && preg_match('/^[a-zA-Z][a-zA-Z0-9 ]{2,15}$/', $screenname);
+            && preg_match('/^[a-zA-Z][a-zA-Z0-9 ]{2,15}$/', (string) $screenname);
     }
 
-    public static function phone($phone, array $options = array())
+    public static function phone($phone, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'country' => 'US'
             ,'fakeDetector' => false
-        ), $options);
+        ], $options);
 
 
         // flatten array
         if (is_array($phone)) {
-            $phone = join('', $phone);
+            $phone = implode('', $phone);
         }
 
         //Strip all non-numeric characters
-        $phone = preg_replace('/\D/', '', $phone);
+        $phone = preg_replace('/\D/', '', (string) $phone);
 
         // validate based on counttry
         switch ($options['country']) {
             case 'US':
             case 'CA':
-            {
                 // strip leading 1
-                if ((strlen($phone) == 11) && ($phone[0] == '1')) {
-                    $phone = substr($phone, 1);
+                if ((strlen((string) $phone) === 11) && ($phone[0] == '1')) {
+                    $phone = substr((string) $phone, 1);
                 }
-
                 return
                 (
-                    (strlen($phone) == 10)
-                    && (!$options['fakeDetector'] || substr($phone, 3, 3) != '555')
+                    (strlen((string) $phone) === 10)
+                    && (!$options['fakeDetector'] || substr((string) $phone, 3, 3) !== '555')
                 );
-            }
 
             default:
-            {
-                return
-                (
-                    (strlen($phone) >= 8)
-                    && (strlen($phone) <= 15)
-                );
-            }
+            return
+            (
+                (strlen((string) $phone) >= 8)
+                && (strlen((string) $phone) <= 15)
+            );
         }
+        return null;
     }
 
     public static function match($fields)
     {
         return is_array($fields)
-            && (count($fields) == 2)
+            && (count($fields) === 2)
             && ($fields[0] == $fields[1]);
     }
 
-    public static function selection($value, array $options = array())
+    public static function selection($value, array $options = [])
     {
-        $options = array_merge(array(
-            'choices' => array()
-        ), $options);
+        $options = array_merge([
+            'choices' => []
+        ], $options);
 
         return in_array($value, $options['choices']);
     }
 
-    public static function set($value, array $options = array())
+    public static function set($value, array $options = [])
     {
         if (is_string($value)) {
             $value = explode(',', $value);
         }
 
-        $options = array_merge(array(
-            'choices' => array()
+        $options = array_merge([
+            'choices' => []
             ,'minCount' => 0
-        ), $options);
+        ], $options);
 
         if (!$value) {
             return $options['minCount'] == 0;
@@ -422,27 +407,27 @@ class Validators
         return !count(array_diff($value, $options['choices'])) && (count($value) >= $options['minCount']);
     }
 
-    public static function time_hm($value, array $options = array())
+    public static function time_hm($value, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'delimiter' => ':'
             ,'24hour' => false
-        ), $options);
+        ], $options);
 
-        if (empty($value) || (substr_count($value, $options['delimiter']) != 1)) {
+        if (empty($value) || (substr_count((string) $value, $options['delimiter']) !== 1)) {
             return false;
         }
 
 
         if (!$options['24hour']) {
-            switch (strtolower(substr($value, -2))) {
+            switch (strtolower(substr((string) $value, -2))) {
                 case 'am': case 'pm':
-                    $value = substr($value, 0, -2);
+                    $value = substr((string) $value, 0, -2);
                     break;
             }
         }
 
-        list($hour, $minute) = explode($options['delimiter'], $value);
+        [$hour, $minute] = explode($options['delimiter'], (string) $value);
 
         return ctype_digit($hour)
             && ($hour >= 0)
@@ -452,66 +437,66 @@ class Validators
             && ($minute <= 59);
     }
 
-    public static function time_24hm($value, array $options = array())
+    public static function time_24hm($value, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'delimiter' => ':'
             ,'24hour' => true
-        ), $options);
+        ], $options);
 
         return self::time_hm($value, $options);
     }
 
-    public static function apple_serial($serial, array $options = array())
+    public static function apple_serial($serial, array $options = [])
     {
-        return preg_match('/^([a-z0-9]{2})([0-9])([0-9]{2})([a-z0-9]{6})$/i', $serial);
+        return preg_match('/^([a-z0-9]{2})([0-9])([0-9]{2})([a-z0-9]{6})$/i', (string) $serial);
     }
 
-    public static function identifier_string($string, array $options = array())
+    public static function identifier_string($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'minlength' => 0
             ,'maxlength' => false
-        ), $options);
+        ], $options);
 
-        return !empty($string) && ctype_print($string)
-            && (strlen($string) > $options['minlength'])
-            && (($options['maxlength'] == false) || (strlen($string) <= $options['maxlength']))
-            && preg_match('/^[a-zA-Z][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/', $string);
+        return !empty($string) && ctype_print((string) $string)
+            && (strlen((string) $string) > $options['minlength'])
+            && (($options['maxlength'] == false) || (strlen((string) $string) <= $options['maxlength']))
+            && preg_match('/^[a-zA-Z][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/', (string) $string);
     }
 
-    public static function regexp($string, array $options = array())
+    public static function regexp($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'regexp' => '/^[a-zA-Z][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/'
-        ), $options);
+        ], $options);
 
-        return preg_match($options['regexp'], $string);
+        return preg_match($options['regexp'], (string) $string);
     }
 
-    public static function ctype($string, array $options = array())
+    public static function ctype($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'ctype' => 'alnum'
-        ), $options);
+        ], $options);
 
         $func = 'ctype_'.$options['ctype'];
 
         return $func($string);
     }
 
-    public static function macaddr($string, array $options = array())
+    public static function macaddr($string, array $options = [])
     {
-        return preg_match('/^[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}$/i', $string);
+        return preg_match('/^[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}:?[0-9a-f]{2}$/i', (string) $string);
     }
 
-    public static function className($string, array $options = array())
+    public static function className($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'ancestor' => false
-        ), $options);
+        ], $options);
 
-        return preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*$/', $string) && class_exists($string)
+        return preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*$/', (string) $string) && class_exists($string)
             && (
                 empty($options['ancestor'])
                 || ($string == $options['ancestor'])
@@ -522,56 +507,59 @@ class Validators
     public static function SSN($string)
     {
         //Strip all non-numeric characters
-        $string = preg_replace('/\D/', '', $string);
+        $string = preg_replace('/\D/', '', (string) $string);
 
-        return (strlen($string) == 9);
+        return (strlen((string) $string) === 9);
     }
 
-    public static function handle($string, array $options = array())
+    public static function handle($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'pattern' => '/^[\\pL][\\pL\d_:\-\.]*$/u'
             ,'allowNumeric' => false
-        ), $options);
+        ], $options);
 
-        return ($options['allowNumeric'] || !is_numeric($string)) && preg_match($options['pattern'], $string);
+        return ($options['allowNumeric'] || !is_numeric($string)) && preg_match($options['pattern'], (string) $string);
     }
 
-    public static function FQDN($string, array $options = array())
+    public static function FQDN($string, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'pattern' => '/(?=^.{1,254}$)(^(?:(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)/'
-        ), $options);
+        ], $options);
 
-        return preg_match($options['pattern'], $string);
+        return preg_match($options['pattern'], (string) $string);
     }
 
-    public static function items($value, array $options = array())
+    public static function items($value, array $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'itemValidator' => 'string'
-            ,'itemValidatorOptions' => array()
+            ,'itemValidatorOptions' => []
             ,'delimiter' => '/\s*,\s*/'
             ,'minItems' => 0
             ,'maxItems' => 0
-        ), $options);
+        ], $options);
 
         if (is_string($value)) {
             $value = preg_split($options['delimiter'], $value);
         }
-
         if (!is_array($value)) {
             return false;
-        } elseif (!empty($options['minItems']) && count($value) < $options['minItems']) {
+        }
+        if (!empty($options['minItems']) && count($value) < $options['minItems']) {
             return false;
-        } elseif (!empty($options['maxItems']) && count($value) > $options['maxItems']) {
+        }
+        if (!empty($options['maxItems']) && count($value) > $options['maxItems']) {
             return false;
-        } elseif (empty($options['itemValidator'])) {
+        }
+
+        if (empty($options['itemValidator'])) {
             return true;
         }
 
         foreach ($value AS $item) {
-            if (!call_user_func(array(__CLASS__,$options['itemValidator']), $item, $options['itemValidatorOptions'])) {
+            if (!call_user_func([self::class,$options['itemValidator']], $item, $options['itemValidatorOptions'])) {
                 return false;
             }
         }

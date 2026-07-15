@@ -12,7 +12,7 @@ class MICS
     {
         static::$SiteName = Site::$title;
 
-        Emergence\Logger::general_warning('Deprecated class loaded: '.__CLASS__);
+        Emergence\Logger::general_warning('Deprecated class loaded: '.self::class);
     }
 
     /*
@@ -35,7 +35,7 @@ class MICS
         return $value;
     }
 
-    public static function prepareOptions($value, $defaults = array())
+    public static function prepareOptions($value, $defaults = [])
     {
         if (is_string($value)) {
             $value = json_decode($value, true);

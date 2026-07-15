@@ -4,7 +4,7 @@ namespace Emergence\Mailer;
 
 class PHPMailer extends AbstractMailer
 {
-    public static function send($to, $subject, $body, $from = false, $options = array())
+    public static function send($to, $subject, $body, $from = false, $options = [])
     {
         if (!$from) {
             $from = static::getDefaultFrom();
@@ -27,7 +27,7 @@ class PHPMailer extends AbstractMailer
         }
 
         // get sendmail params
-        $sendmailParams = !empty($options['SendmailParams']) ? $options['SendmailParams'] : '-t -i';
+        $sendmailParams = empty($options['SendmailParams']) ? '-t -i' : $options['SendmailParams'];
 
         // implode to addresses if array was provided
         if (is_array($to)) {
@@ -38,7 +38,7 @@ class PHPMailer extends AbstractMailer
         if ($from) {
             $headers .= "From: $from".PHP_EOL;
 
-            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', $from);
+            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', (string) $from);
             $sendmailParams .= sprintf(' -f%1$s -F%1$s', $fromAddress);
         }
 
@@ -46,6 +46,6 @@ class PHPMailer extends AbstractMailer
         $headers .= 'Content-Type: text/html; charset=utf-8'.PHP_EOL;
         $headers .= 'Content-Transfer-Encoding: base64'.PHP_EOL;
 
-        return @mail($to, $subject, chunk_split(base64_encode($body)), $headers, $sendmailParams);
+        return @mail((string) $to, (string) $subject, chunk_split(base64_encode((string) $body)), $headers, $sendmailParams);
     }
 }

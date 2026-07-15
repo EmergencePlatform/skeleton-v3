@@ -17,12 +17,11 @@ class Markdown extends \Michelf\MarkdownExtra
         $hashes    =& $this->html_hashes;
         $classname =& $matches[2];
         $attrs     =& $matches[3];
-        $codeblock = $matches[4];
 
 
         $html = parent::_doFencedCodeBlocks_callback($matches);
 
-        preg_replace_callback('/B\x1A[0-9]+B/', function($blockHashMatches) use (&$hashes) {
+        preg_replace_callback('/B\x1A\d+B/', function($blockHashMatches) use (&$hashes) {
             $hashId = $blockHashMatches[0];
 
             if (array_key_exists($hashId, $hashes)) {
@@ -37,7 +36,7 @@ class Markdown extends \Michelf\MarkdownExtra
 
                         $html = '';
 
-                        if ($shellUser) {
+                        if ($shellUser !== '' && $shellUser !== '0') {
                             $html .= '<span class="shell-user">'.$shellUser.'</span> ';
                         }
 

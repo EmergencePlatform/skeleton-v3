@@ -32,25 +32,25 @@ class JSON
             $siteDataPrefix = Site::$rootPath.'/'.SiteFile::$dataPath.'/';
             $siteDataPrefixLength = strlen($siteDataPrefix);
 
-            $data['_profile'] = array(
+            $data['_profile'] = [
                 'log' => Debug::$log,
-                'time' => array(
+                'time' => [
                     'initialized' => Site::$initializeTime,
                     'finished' => $now,
                     'elapsed' => $now - Site::$initializeTime
-                ),
-                'memory' => array(
+                ],
+                'memory' => [
                     'finished' => memory_get_usage(),
                     'peak' => memory_get_peak_usage()
-                ),
+                ],
                 'included' => array_map(function ($path) use ($siteDataPrefix, $siteDataPrefixLength) {
-                    if (substr($path, 0, $siteDataPrefixLength) == $siteDataPrefix) {
+                    if (substr($path, 0, $siteDataPrefixLength) === $siteDataPrefix) {
                         return 'site://'.SiteFile::getByID(substr($path, $siteDataPrefixLength))->FullPath;
                     }
 
                     return 'file://'.$path;
                 }, get_included_files())
-            );
+            ];
         }
 
         $text = json_encode($data);
@@ -95,10 +95,10 @@ class JSON
 
         $args = func_get_args();
 
-        self::respond(array(
+        self::respond([
             'success' => false
             ,'message' => vsprintf($message, array_slice($args, 1))
-        ));
+        ]);
     }
 
     public static function translateObjects($input, $summary = null, $include = null, $stringsOnly = false)
@@ -108,8 +108,8 @@ class JSON
                 !empty($include) &&
                 $summary ? method_exists($input, 'getSummary') : method_exists($input, 'getDetails')
             ) {
-                $includeThisLevel = array();
-                $includeLater = array();
+                $includeThisLevel = [];
+                $includeLater = [];
 
                 if (!empty($include)) {
                     if (is_string($include)) {
@@ -122,10 +122,10 @@ class JSON
                             continue;
                         }
 
-                        if (strpos($value, '.') !== false) {
-                            list($prefix, $rest) = explode('.', $value, 2);
+                        if (str_contains((string) $value, '.')) {
+                            [$prefix, $rest] = explode('.', (string) $value, 2);
 
-                            if ($prefix == '*') {
+                            if ($prefix === '*') {
                                 $includeThisLevel = '*';
                             } elseif ($includeThisLevel != '*' &&!in_array($prefix, $includeThisLevel)) {
                                 $includeThisLevel[] = $prefix;
@@ -135,7 +135,7 @@ class JSON
                         } else {
                             if ($value[0] == '~') {
                                 $includeLater['*'] = $value;
-                                $value = substr($value, 1);
+                                $value = substr((string) $value, 1);
                             }
 
                             if ($includeThisLevel != '*') {
@@ -154,7 +154,7 @@ class JSON
         if (is_array($input)) {
             foreach ($input AS $key => &$item) {
                 if (isset($includeLater)) {
-                    $includeNext = array_key_exists('*', $includeLater) ? $includeLater['*'] : array();
+                    $includeNext = array_key_exists('*', $includeLater) ? $includeLater['*'] : [];
 
                     if (array_key_exists($key, $includeLater)) {
                         $includeNext = array_merge($includeNext, $includeLater[$key]);
@@ -167,9 +167,8 @@ class JSON
             }
 
             return $input;
-        } else {
-            return $input;
         }
+        return $input;
     }
 
 #    public static function mapArrayToRecords($array)

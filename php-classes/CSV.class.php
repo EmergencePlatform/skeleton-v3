@@ -25,11 +25,12 @@ class CSV
     {
         if (!is_array($records)) {
             throw new Exception('fromRecords expects an array');
-        } elseif (empty($records)) {
+        }
+        if ($records === []) {
             return 'No data';
         }
 
-        if (is_string($columns) && $columns != '*') {
+        if (is_string($columns) && $columns !== '*') {
             $columns = explode(',', $columns);
         }
 
@@ -68,12 +69,13 @@ class CSV
                 )
             );
         }
+        return null;
     }
 
     public static function getColumns($array, $columns = null)
     {
         if (is_array($columns)) {
-            $newArray = array();
+            $newArray = [];
             foreach ($columns AS $key) {
                 $newArray[$key] = $array[$key];
             }

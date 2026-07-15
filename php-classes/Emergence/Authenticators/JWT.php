@@ -13,12 +13,6 @@ class JWT extends \PasswordAuthenticator
     public static $secretKey;
     public static $urlParameter = 'jwt';
     
-    public function __construct(UserSession $Session)
-    {
-        // require UserSession instead of Session
-        parent::__construct($Session);
-    }
-    
     public static function getUserByJWT($token, $key = null, $verify = true)
     {
         if (!$key) {
@@ -37,7 +31,7 @@ class JWT extends \PasswordAuthenticator
         }
         
         if (!$user && $jwt->email) {
-            $user = User::getByEmail($jwt->email);
+            return User::getByEmail($jwt->email);
         }
         
         return $user;
@@ -45,13 +39,13 @@ class JWT extends \PasswordAuthenticator
     
     public function checkAuthentication()
     {        
-        if (isset($this->_authenticatedPerson)) {
+        if ($this->_authenticatedPerson !== null) {
             return true;
         }
         
-        if (strpos($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ') === 0) {            
+        if (str_starts_with($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ')) {
             $token = substr($_SERVER['HTTP_AUTHORIZATION'], 7);
-        } else if (isset($_GET[self::$urlParameter])) {
+        } elseif (isset($_GET[self::$urlParameter])) {
             $token = $_GET[self::$urlParameter];
         }
         

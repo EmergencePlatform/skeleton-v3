@@ -6,7 +6,7 @@ return [
     'icon' => 'power-off',
     'handler' => function () {
         $config = Site::getConfig();
-        $degredations = !empty($config['degredations']) ? $config['degredations'] : [];
+        $degredations = empty($config['degredations']) ? [] : $config['degredations'];
         $changes = [];
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {

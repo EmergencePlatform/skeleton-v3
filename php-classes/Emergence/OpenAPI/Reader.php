@@ -45,12 +45,8 @@ class Reader
         // collapse and normalize paths
         $data['paths'] = static::findObjects(
             $data['paths'],
-            [__CLASS__, 'isPathObject'],
-            function (array $keys) {
-                return '/' . implode('/', array_map(function ($key) {
-                    return trim($key, '/');
-                }, $keys));
-            }
+            self::isPathObject(...),
+            fn(array $keys) => '/' . implode('/', array_map(fn($key) => trim((string) $key, '/'), $keys))
         );
 
         foreach ($data['paths'] as $pathKey => &$pathObject) {
@@ -73,23 +69,19 @@ class Reader
         // collapse and normalize definitions
         $data['components']['schemas'] = static::findObjects(
             $data['components']['schemas'],
-            [__CLASS__, 'isSchemaObject'],
-            function (array $keys) {
-                return implode('-', $keys);
-            }
+            self::isSchemaObject(...),
+            fn(array $keys) => implode('-', $keys)
         );
 
-        $data['components']['schemas'] = array_map([__CLASS__, 'normalizeSchemaObject'], $data['components']['schemas']);
+        $data['components']['schemas'] = array_map(self::normalizeSchemaObject(...), $data['components']['schemas']);
         ksort($data['components']['schemas']);
 
 
         // collapse and normalize parameters
         $data['components']['parameters'] = static::findObjects(
             $data['components']['parameters'],
-            [__CLASS__, 'isParameterObject'],
-            function (array $keys) {
-                return implode('-', $keys);
-            }
+            self::isParameterObject(...),
+            fn(array $keys) => implode('-', $keys)
         );
 
         ksort($data['components']['parameters']);
@@ -754,7 +746,7 @@ class Reader
                         unset($propertyDefaults['default']);
 
                         $description = 'Defaults to current timestamp.';
-                        $propertyDefaults['description'] = !empty($propertyDefaults['description']) ? $propertyDefaults['description'] . "\n\n" . $description : $description;
+                        $propertyDefaults['description'] = empty($propertyDefaults['description']) ? $description : $propertyDefaults['description'] . "\n\n" . $description;
                     }
                     break;
 
@@ -798,7 +790,7 @@ class Reader
 
             $propertyDefaults['description'] = rtrim($propertyDefaults['description'], ". \n");
 
-            if (!empty($propertyDefaults['description'])) {
+            if (isset($propertyDefaults['description']) && ($propertyDefaults['description'] !== '' && $propertyDefaults['description'] !== '0')) {
                 $propertyDefaults['description'] .= ', included';
             } else {
                 $propertyDefaults['description'] = 'Included';
@@ -830,7 +822,7 @@ class Reader
             throw new Exception('Resolving relative reference is not implemented');
         }
 
-        $pathStack = explode('/', substr($path, 2));
+        $pathStack = explode('/', substr((string) $path, 2));
         $pointer = &$document;
 
         while (isset($pathStack[0]) && isset($pointer)) {
@@ -858,9 +850,7 @@ class Reader
                 'required' => []
             ];
 
-            $definitions = array_map(function($definition) use ($document) {
-                return static::dereferenceNode($definition, $document);
-            }, $schema['allOf']);
+            $definitions = array_map(fn($definition) => static::dereferenceNode($definition, $document), $schema['allOf']);
 
             foreach ($definitions AS $definition) {
                 foreach ($definition['required'] AS $required) {
@@ -891,8 +881,8 @@ class Reader
             $prefix = '#/components/schemas/';
             $prefixLen = strlen($prefix);
 
-            if (substr($path, 0, $prefixLen) === $prefix) {
-                return substr($path, $prefixLen);
+            if (substr((string) $path, 0, $prefixLen) === $prefix) {
+                return substr((string) $path, $prefixLen);
             }
         }
 
@@ -902,10 +892,10 @@ class Reader
     public static function flattenAllRefs(array $document, array $scope = null)
     {
         // begin scope at entire document
-        $scope = $scope === null ? $document : $scope;
+        $scope ??= $document;
 
         // loop through each direct descendent
-        foreach ($scope as $key => &$value) {
+        foreach ($scope as &$value) {
             if (!is_array($value)) {
                 continue;
             }

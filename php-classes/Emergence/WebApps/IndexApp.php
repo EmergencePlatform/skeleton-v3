@@ -12,6 +12,7 @@ use Emergence\Site\Renderers\StaticContent;
 
 class IndexApp extends App
 {
+    public $indexNode;
     public static $responseId = 'webapp-index';
     public static $indexFilename = 'index.html';
 

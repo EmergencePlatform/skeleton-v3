@@ -6,7 +6,7 @@
  */
 class Router
 {
-    public static $classPaths = array(
+    public static $classPaths = [
         'Person' => 'users'
         ,'Media' => 'media'
         ,'Event' => 'events'
@@ -15,21 +15,21 @@ class Router
         ,'CMS_Page' => 'pages'
         ,'CMS_BlogPost' => 'blog'
         ,'CMS_Feature' => 'features'
-    );
+    ];
 
     public static function __classLoaded()
     {
-        Emergence\Logger::general_warning('Deprecated class loaded: '.__CLASS__);
+        Emergence\Logger::general_warning('Deprecated class loaded: '.self::class);
     }
 
     public static function getClassPath($className)
     {
         if (is_object($className)) {
-            $className = get_class($className);
+            $className = $className::class;
         }
 
         if ($className::$collectionRoute) {
-            return ltrim($className::$collectionRoute, '/');
+            return ltrim((string) $className::$collectionRoute, '/');
         }
 
         if (!empty(static::$classPaths[$className])) {
@@ -45,7 +45,7 @@ class Router
         return false;
     }
 
-    public static function redirectViewRecord(ActiveRecord $Record, $path = array(), $permanent = false)
+    public static function redirectViewRecord(ActiveRecord $Record, $path = [], $permanent = false)
     {
         if (is_array($path)) {
             $path = implode('/', $path);
@@ -60,7 +60,7 @@ class Router
         }
 
         if ($path) {
-            $url .= '/'.ltrim($path, '/');
+            $url .= '/'.ltrim((string) $path, '/');
         }
 
         if ($permanent) {

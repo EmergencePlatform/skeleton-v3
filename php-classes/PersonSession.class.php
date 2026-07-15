@@ -13,15 +13,15 @@ use Emergence\People\Person;
     protected $_authenticator;
      protected $_person;
 
-     public function __construct($options = array())
+     public function __construct($options = [])
      {
 
         // call parent and apply additional default options
-        parent::__construct(array_merge(array(
+        parent::__construct(array_merge([
             'Authenticator' => self::$DefaultAuthenticator
             ,'RequireAuthentication' => self::$DefaultRequireAuthentication
             ,'PersonClass' => Person::$StandardClass
-        ), $options));
+        ], $options));
 
         // initialize authenticator
         $this->_authenticator = new $this->_options['Authenticator']($this);
@@ -30,10 +30,8 @@ use Emergence\People\Person;
         $this->_authenticator->checkAuthentication();
 
         // require authentication ?
-        if ($this->_options['RequireAuthentication']) {
-            if (!$this->_authenticator->requireAuthentication($this->_options)) {
-                throw new AuthenticationFailedException();
-            }
+        if ($this->_options['RequireAuthentication'] && !$this->_authenticator->requireAuthentication($this->_options)) {
+            throw new AuthenticationFailedException();
         }
      }
 

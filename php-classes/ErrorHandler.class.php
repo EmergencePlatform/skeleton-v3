@@ -5,35 +5,26 @@ class ErrorHandler extends RequestHandler
     // error codes
     const ERROR_DB    = 1;
 
-    public static function handleException(Exception $e)
+    public static function handleException(\Throwable $e)
     {
-        switch (get_class($e)) {
+        switch ($e::class) {
             case 'RecordValidationException':
-            {
-                return static::handleValidationError($e);
-            }
+            return static::handleValidationError($e);
             default:
-            {
-                $report = sprintf("<h1 style='color:red'>%s caught</h1>\n", get_class($e));
+                $report = sprintf("<h1 style='color:red'>%s caught</h1>\n", $e::class);
                 $report .= sprintf("<h2>Details</h2>\n<pre>%s</pre>\n", print_r($e, true));
                 $report .= sprintf("<h2>URI</h2>\n<p>%s</p>\n", htmlspecialchars($_SERVER['REQUEST_URI']));
                 $report .= sprintf("<h2>_SERVER</h2>\n<pre>%s</pre>\n", print_r($_SERVER, true));
-
                 if ($GLOBALS['Session']->Person) {
                     $report .= sprintf("<h2>User</h2>\n<pre>%s</pre>\n", print_r($GLOBALS['Session']->Person->getData(), true));
                 }
-
                 $report .= ErrorHandler::formatBacktrace(debug_backtrace());
                 $report .= '<h2>Debug Log</h2><pre>'.print_r(DebugLog::getLog(), true).'</pre>';
-
                 if (Site::$debug) {
                     die($report);
-                } else {
-                    Email::send(Site::$webmasterEmail, 'Unhandeld '.get_class($e).' on '.$_SERVER['HTTP_HOST'], $report);
-                    ErrorHandler::handleFailure('There was a problem... our technical staff has been notified. Please retry later.');
                 }
-
-            }
+                Email::send(Site::$webmasterEmail, 'Unhandeld '.$e::class.' on '.$_SERVER['HTTP_HOST'], $report);
+                ErrorHandler::handleFailure('There was a problem... our technical staff has been notified. Please retry later.');
         }
     }
 
@@ -80,32 +71,27 @@ class ErrorHandler extends RequestHandler
             $backtrace = debug_backtrace();
         }
 
-        $report = sprintf("<h2>Backtrace</h2>\n");
-        $report .= sprintf("<table border='1'>\n");
-        $report .= sprintf("<tr><th>Function</th><th>Args</th><th>Object</th><th>File:Line</th></tr>\n");
+        $report = "<h2>Backtrace</h2>\n";
+        $report .= "<table border='1'>\n";
+        $report .= "<tr><th>Function</th><th>Args</th><th>Object</th><th>File:Line</th></tr>\n";
         foreach ($backtrace AS $track) {
             foreach ($track['args'] AS &$arg) {
-                if (is_object($arg)) {
-                    $arg = get_class($arg);
-                } else {
-                    $arg = substr(print_r($arg, true), 0, 100);
-                }
+                $arg = is_object($arg) ? $arg::class : substr(print_r($arg, true), 0, 100);
             }
 
             $report .= sprintf(
                 '<tr><td>%s<br/>%s%s</td><td>%s</td><td>%s</td><td>%s<br/>Line %s</td></tr>'
-                , isset($track['class']) ? $track['class'] : ''
-                , isset($track['type']) ? $track['type'] : ''
+                , $track['class'] ?? ''
+                , $track['type'] ?? ''
                 , $track['function']
-                , join('<hr />', $track['args'])
-                , isset($track['object']) ? get_class($track['object']) : ''
+                , implode('<hr />', $track['args'])
+                , isset($track['object']) ? $track['object']::class : ''
                 , $track['file']
                 , $track['line']
             );
         }
-        $report .= sprintf("</table>");
 
-        return $report;
+        return $report . "</table>";
     }
 
     public static function printBacktrace($backtrace = false, $exit = true)

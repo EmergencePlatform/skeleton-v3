@@ -31,14 +31,14 @@ class Email
         if ($from) {
             $headers .= "From: $from".PHP_EOL;
 
-            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', $from);
+            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', (string) $from);
             $sendmailParams .= sprintf(' -f%1$s -F%1$s', $fromAddress);
         }
 
         $headers .= 'MIME-Version: 1.0'.PHP_EOL;
         $headers .= 'Content-Type: text/html; charset=utf-8'.PHP_EOL;
 
-        return @mail($to, $subject, $body, $headers, $sendmailParams);
+        return @mail((string) $to, (string) $subject, (string) $body, $headers, $sendmailParams);
     }
 
     public static function sendWithAttachments($to, $subject, $body, $attachments, $from = false, $headers = '', $sendmailParams = '-t -i')
@@ -58,7 +58,7 @@ class Email
         if ($from) {
             $headers .= "From: $from".PHP_EOL;
 
-            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', $from);
+            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', (string) $from);
             $sendmailParams .= sprintf(' -f%1$s -F%1$s', $fromAddress);
         }
 
@@ -68,7 +68,7 @@ class Email
         $headers .= 'Content-Type: multipart/mixed; boundary="'.$mimeBoundary.'"'.PHP_EOL;
 
         // plain text version
-        $data = strip_tags($body).PHP_EOL.PHP_EOL;
+        $data = strip_tags((string) $body).PHP_EOL.PHP_EOL;
         $data .= '--'.$mimeBoundary.PHP_EOL;
 
         // html version
@@ -88,7 +88,7 @@ class Email
             $data .= '--'.$mimeBoundary.PHP_EOL;
         }
 
-        return @mail($to, $subject, $data, $headers, $sendmailParams);
+        return @mail((string) $to, (string) $subject, $data, $headers, $sendmailParams);
     }
 
     public static function removeReplyQuote($messageBody)
@@ -122,7 +122,7 @@ class Email
         $re12='( )';    # Any Single Character 7
         $re13='(at)';    # Word 2
         $re14='( )';    # Any Single Character 8
-        $re15='((?:(?:[0-1][0-9])|(?:[2][0-3])|(?:[0-9])):(?:[0-5][0-9])(?::[0-5][0-9])?(?:\\s?(?:am|AM|pm|PM))?)';    # HourMinuteSec 1
+        $re15='((?:(?:[0-1]\d)|(?:[2][0-3])|(?:\d)):(?:[0-5]\d)(?::[0-5]\d)?(?:\s?(?:am|AM|pm|PM))?)';    # HourMinuteSec 1
         $re16='(,)';    # Any Single Character 9
         $re17='( )';    # Any Single Character 10
         $re18='(YouGee)';    # Word 3
@@ -130,7 +130,7 @@ class Email
         $re20='(com)';    # Word 4
         $re21='( )';    # Any Single Character 12
         $re22='(<)';    # Any Single Character 13
-        $re23='([\\w-+]+(?:\\.[\\w-+]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})';    # Email Address 1
+        $re23='([\\w\-+]+(?:\\.[\\w\-+]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})';    # Email Address 1
         $re24='(>)';    # Any Single Character 14
         $re25='( )';    # Any Single Character 15
         $re26='(wrote)';    # Word 5
@@ -142,15 +142,15 @@ class Email
         $delimiter = '***THROW AWAY BELOW***';
 
         // clients' check
-        if ($messageBody != preg_replace($GmailRegex, $delimiter ,$messageBody)) {
+        if ($messageBody != preg_replace($GmailRegex, $delimiter ,(string) $messageBody)) {
             // Gmail check
-            $messageBody = preg_replace($GmailRegex, $delimiter ,$messageBody);
-            $endPos = strpos($messageBody, $delimiter);
-            $messageBody = substr($messageBody, 0, $endPos);
+            $messageBody = preg_replace($GmailRegex, $delimiter ,(string) $messageBody);
+            $endPos = strpos((string) $messageBody, $delimiter);
+            $messageBody = substr((string) $messageBody, 0, $endPos);
         } elseif (strpos($body, '-----Original Message-----')) {
             // AOL check
-            $startPos = strpos($messageBody, '-----Original Message-----');
-            $messageBody = substr($messageBody, 0, $startPos);
+            $startPos = strpos((string) $messageBody, '-----Original Message-----');
+            $messageBody = substr((string) $messageBody, 0, $startPos);
         }
 /*      elseif
         {

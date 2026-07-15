@@ -32,10 +32,6 @@ class Twitter_Autolink
     protected $hashtagUrlBase = "http://twitter.com/search?q=%23";
     protected $noFollow = true;
 
-    public function __construct()
-    {
-    }
-
     public function autolink($tweet)
     {
         return $this->autoLinkUsernamesAndLists($this->autoLinkURLs($this->autoLinkHashtags($tweet)));
@@ -46,7 +42,7 @@ class Twitter_Autolink
         // TODO Match latin chars with accents
         return preg_replace('$(^|[^0-9A-Z&/]+)([#?]+)([0-9A-Z_]*[A-Z_]+[a-z0-9_uA-OO-oo-y]*)$i',
             '${1}<a href="'.$this->hashtagUrlBase.'${3}" title="#${3}" class="'.$this->urlClass.' '.$this->hashtagClass.'">${2}${3}</a>',
-                            $tweet);
+                            (string) $tweet);
     }
 
     public function autoLinkURLs($tweet)
@@ -73,8 +69,8 @@ class Twitter_Autolink
           ')$i';
 
         return preg_replace_callback($VALID_URL_PATTERN_STRING,
-                                     array($this, 'replacementURLs'),
-                                     $tweet);
+                                     $this->replacementURLs(...),
+                                     (string) $tweet);
     }
 
     /**
@@ -83,7 +79,7 @@ class Twitter_Autolink
     private function replacementURLs($matches)
     {
         $replacement  = $matches[2];
-        if (substr($matches[3], 0, 7) == 'http://' || substr($matches[3], 0, 8) == 'https://') {
+        if (str_starts_with($matches[3], 'http://') || str_starts_with($matches[3], 'https://')) {
             $replacement .= '<a href="'.$matches[3].'">'.$matches[3].'</a>';
         } else {
             $replacement .= '<a href="http://'.$matches[3].'">'.$matches[3].'</a>';
@@ -94,8 +90,8 @@ class Twitter_Autolink
     public function autoLinkUsernamesAndLists($tweet)
     {
         return preg_replace_callback('$([^a-z0-9_]|^)([@|?])([a-z0-9_]{1,20})(/[a-z][a-z0-9\x80-\xFF-]{0,79})?$i',
-                                     array($this, 'replacementUsernameAndLists'),
-                                     $tweet);
+                                     $this->replacementUsernameAndLists(...),
+                                     (string) $tweet);
     }
 
     /**

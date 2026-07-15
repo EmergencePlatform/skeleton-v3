@@ -34,9 +34,7 @@ class File implements HashableInterface
     // factories
     public static function fromHash(Repository $repository, $hash)
     {
-        $file = new static($repository, $hash);
-
-        return $file;
+        return new static($repository, $hash);
     }
 
     public static function fromContent(Repository $repository, $content)
@@ -153,11 +151,11 @@ class File implements HashableInterface
         // first handle content modes that don't need piping content into hash-object
         switch ($this->contentMode) {
             case self::CONTENT_PATH_FS:
-                return trim($this->repository->run('hash-object', ['-w', $this->content]));
+                return trim((string) $this->repository->run('hash-object', ['-w', $this->content]));
             case self::CONTENT_PATH_REF:
                 try {
-                    return trim($this->repository->run('rev-parse', [$this->content]));
-                } catch (\Exception $e) {
+                    return trim((string) $this->repository->run('rev-parse', [$this->content]));
+                } catch (\Exception) {
                     return null;
                 }
             case self::CONTENT_HASHABLE:
@@ -180,7 +178,7 @@ class File implements HashableInterface
         // // write tree content to mktree's STDIN
         switch ($this->contentMode) {
             case self::CONTENT_STRING:
-                fwrite($pipes[0], $this->content);
+                fwrite($pipes[0], (string) $this->content);
 
                 break;
             case self::CONTENT_RESOURCE:

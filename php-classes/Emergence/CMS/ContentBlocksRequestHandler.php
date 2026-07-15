@@ -4,7 +4,7 @@ namespace Emergence\CMS;
 
 class ContentBlocksRequestHandler extends \RecordsRequestHandler
 {
-    public static $recordClass = 'Emergence\CMS\ContentBlock';
+    public static $recordClass = \Emergence\CMS\ContentBlock::class;
 
     public static $accountLevelRead = 'Staff';
     public static $accountLevelComment = 'Staff';

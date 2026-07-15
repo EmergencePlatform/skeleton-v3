@@ -7,19 +7,17 @@ return [
     'requireAccountLevel' => 'Developer',
     'handler' => function ($taskConfig) {
 
-        $getEntryData = function ($entry, $includeValue = false) {
-            return [
-                'hits' => $entry['num_hits'],
-                'size' => $entry['mem_size'],
-                'accessTime' => $entry['access_time'],
-                'createTime' => $entry['creation_time'],
-                'modifyTime' => $entry['mtime'],
-                'value' => $includeValue ? $entry['value'] : null
-            ];
-        };
+        $getEntryData = (fn($entry, $includeValue = false) => [
+            'hits' => $entry['num_hits'],
+            'size' => $entry['mem_size'],
+            'accessTime' => $entry['access_time'],
+            'createTime' => $entry['creation_time'],
+            'modifyTime' => $entry['mtime'],
+            'value' => $includeValue ? $entry['value'] : null
+        ]);
 
         if ($key = array_shift($taskConfig['pathStack'])) {
-            $key = urldecode($key);
+            $key = urldecode((string) $key);
             $entry = Cache::getIterator('/^'.preg_quote($key, '/').'$/')->current();
 
             if (!$entry) {
@@ -46,21 +44,15 @@ return [
         }
 
 
-        $prefixLength = strlen(Cache::getKeyPrefix());
+        $prefixLength = strlen((string) Cache::getKeyPrefix());
         $entries = [];
 
         foreach (Cache::getIterator('/.*/') AS $key => $entry) {
-            $key = substr($key, $prefixLength);
+            $key = substr((string) $key, $prefixLength);
             $entries[$key] = $getEntryData($entry);
         }
 
-        uasort($entries, function ($a, $b) {
-            if ($a['hits'] == $b['hits']) {
-                return 0;
-            }
-
-            return $a['hits'] > $b['hits'] ? -1 : 1;
-        });
+        uasort($entries, fn($a, $b) => $b['hits'] <=> $a['hits']);
 
         return static::respond('entries', [
             'entries' => $entries

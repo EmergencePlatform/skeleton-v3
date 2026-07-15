@@ -27,13 +27,11 @@ trait IdentityConsumerTrait
 
     public static function beforeAuthenticate(IPerson $Person)
     {
-        if (is_callable(static::$beforeAuthenticate)) {
-            if (false === call_user_func(static::$beforeAuthenticate, $Person)) {
-                return false;
-            }
+        if (!is_callable(static::$beforeAuthenticate)) {
+            return true;
         }
 
-        return true;
+        return false !== call_user_func(static::$beforeAuthenticate, $Person);
     }
 
     public static function getSAMLNameId(IPerson $Person)
@@ -60,7 +58,7 @@ trait IdentityConsumerTrait
 
     public static function getLaunchUrl(Mapping $Mapping = null)
     {
-        if ($Mapping) {
+        if ($Mapping instanceof \Emergence\Connectors\Mapping) {
             return null;
         }
         

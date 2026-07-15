@@ -24,7 +24,7 @@ class TablesManager
 
     public static function getActiveRecordClasses()
     {
-        $recordClasses = array();
+        $recordClasses = [];
 
         foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') AS $classNode) {
             if ($classNode->Type != 'application/php') {
@@ -34,10 +34,10 @@ class TablesManager
             $classPath = $classNode->getFullPath(null, false);
             array_shift($classPath);
 
-            $className = preg_replace('/(\.class)?\.php$/i', '', join('\\', $classPath));
+            $className = preg_replace('/(\.class)?\.php$/i', '', implode('\\', $classPath));
 
             foreach (static::$classFilters AS $pattern) {
-                if (preg_match($pattern, $className)) {
+                if (preg_match($pattern, (string) $className)) {
                     continue 2;
                 }
             }

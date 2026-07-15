@@ -3,9 +3,9 @@
 class Benchmark
 {
     public static $livePrint = false;
-    public static $startMark = null;
-    public static $lastMark = null;
-    public static $marks = array();
+    public static $startMark;
+    public static $lastMark;
+    public static $marks = [];
 
     public static function startLive()
     {

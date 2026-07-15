@@ -25,12 +25,12 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
 
     public static function getTitle()
     {
-        return static::$title ? static::$title : get_called_class();
+        return static::$title ? static::$title : static::class;
     }
 
     public static function getConnectorId()
     {
-        return static::$connectorId ? static::$connectorId : get_called_class();
+        return static::$connectorId ? static::$connectorId : static::class;
     }
 
     public static function getBaseUrl($external = false)
@@ -44,7 +44,7 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
     {
         switch ($action ? $action : $action = static::shiftPath()) {
             case 'synchronize':
-                if (!is_a(get_called_class(), 'Emergence\Connectors\ISynchronize', true)) {
+                if (!is_a(static::class, 'Emergence\Connectors\ISynchronize', true)) {
                     return static::throwError('Connector does not implement synchronize');
                 }
 
@@ -57,13 +57,13 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
         }
     }
 
-    public static function handleConnectorRequest(array $responseData = array())
+    public static function handleConnectorRequest(array $responseData = [])
     {
         if (static::$accountLevelBrowse) {
             $GLOBALS['Session']->requireAccountLevel(static::$accountLevelBrowse);
         }
 
-        $responseData['class'] = get_called_class();
+        $responseData['class'] = static::class;
         $responseData['title'] = static::getTitle();
 
         return static::respond('connector', $responseData);
@@ -96,30 +96,29 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
                     header(sprintf('Content-Disposition: attachment; filename="%s-%u.json"', $Job->Connector, $Job->ID));
                     passthru("bzcat $logPath");
                     exit();
-                } else {
-                    return static::throwNotFoundError('Log not available');
                 }
+                return static::throwNotFoundError('Log not available');
             }
 
-            return static::respond('jobStatus', array(
+            return static::respond('jobStatus', [
                 'data' => $Job
-            ));
+            ]);
         }
 
         // authenticate and create job or copy template
         if (!empty($_REQUEST['template'])) {
             $TemplateJob = Job::getByHandle($_REQUEST['template']);
 
-            if (!$TemplateJob || $TemplateJob->Status != 'Template' || $TemplateJob->Connector != get_called_class()) {
+            if (!$TemplateJob || $TemplateJob->Status != 'Template' || $TemplateJob->Connector != static::class) {
                 return static::throwNotFoundError('Template job not found');
             }
 
             $jobClass = $TemplateJob->Class;
-            $Job = $jobClass::create(array(
+            $Job = $jobClass::create([
                 'Connector' => $TemplateJob->Connector
                 ,'Template' => $TemplateJob
                 ,'Config' => $TemplateJob->Config
-            ));
+            ]);
         } else {
             if (static::$accountLevelSynchronize) {
                 $GLOBALS['Session']->requireAccountLevel(static::$accountLevelSynchronize);
@@ -135,21 +134,21 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
                 $Job->Status = 'Template';
                 $Job->save();
 
-                return static::respond('templateCreated', array(
+                return static::respond('templateCreated', [
                     'data' => $Job
-                ));
+                ]);
             }
         }
 
         // show template if not a post
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-            return static::respond('createJob', array(
+            return static::respond('createJob', [
                 'data' => $Job
-                ,'templates' => Job::getAllByWhere(array(
+                ,'templates' => Job::getAllByWhere([
                     'Status' => 'Template'
-                    ,'Connector' => get_called_class()
-                ))
-            ));
+                    ,'Connector' => static::class
+                ])
+            ]);
         }
 
 
@@ -162,7 +161,7 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
         // close connection to client
         if (!empty($_REQUEST['fork'])) {
             header('Location: '.static::_getConnectorBaseUrl(true).'/'.$Job->Handle, true, 201);
-            print(json_encode(array('data' => $Job->getData())));
+            print(json_encode(['data' => $Job->getData()]));
             fastcgi_finish_request();
         }
 
@@ -203,23 +202,23 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
 
             // email report
             if (!empty($Job->Config['reportTo'])) {
-                \Emergence\Mailer\Mailer::sendFromTemplate($Job->Config['reportTo'], 'syncronizeComplete', array(
+                \Emergence\Mailer\Mailer::sendFromTemplate($Job->Config['reportTo'], 'syncronizeComplete', [
                     'Job' => $Job
                     ,'connectorBaseUrl' => static::_getConnectorBaseUrl(true)
-                ));
+                ]);
             }
         }
 
 
         // all done, respond
-        return static::respond('syncronizeComplete', array(
+        return static::respond('syncronizeComplete', [
             'data' => $Job
             ,'success' => $success
             ,'pretend' => $pretend
-        ));
+        ]);
     }
 
-    public static function respond($responseID, $responseData = array(), $responseMode = false)
+    public static function respond($responseID, $responseData = [], $responseMode = false)
     {
         $responseData['connectorBaseUrl'] = static::_getConnectorBaseUrl();
 
@@ -234,16 +233,16 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
     protected static function _createJob(array $config = [])
     {
         return Job::create([
-            'Connector' => get_called_class(),
+            'Connector' => static::class,
             'Config' => $config
         ]);
     }
 
     protected static function _getJobConfig(array $requestData)
     {
-        return array(
-            'reportTo' => !empty($requestData['reportTo']) ? $requestData['reportTo'] : null
-        );
+        return [
+            'reportTo' => empty($requestData['reportTo']) ? null : $requestData['reportTo']
+        ];
     }
 
     protected static function _fireEvent($name, array $payload)

@@ -2,8 +2,8 @@
 
 function Dwoo_Plugin_format_timerange(Dwoo_Core $dwoo, $from, $to, $seperator = '&ndash;', $shortMonth = false, $html = false, $forceYear = false, $ordinalSuffix = true, $includeTooltips = true)
 {
-    $fromTime = is_numeric($from) ? $from : strtotime($from);
-    $toTime = is_numeric($to) ? $to : strtotime($to);
+    $fromTime = is_numeric($from) ? $from : strtotime((string) $from);
+    $toTime = is_numeric($to) ? $to : strtotime((string) $to);
 
     $from = getdate(min($fromTime, $toTime));
     $to = getdate(max($fromTime, $toTime));

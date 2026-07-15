@@ -11,7 +11,7 @@ class AudioMedia extends Media
     // magic methods
     public static function __classLoaded()
     {
-        $className = get_called_class();
+        $className = static::class;
 
         Media::$mimeHandlers['audio/mpeg'] = $className;
 
@@ -26,7 +26,6 @@ class AudioMedia extends Media
                 return 'image/png';
 
             case 'Width':
-                return 128;
 
             case 'Height':
                 return 128;
@@ -79,11 +78,11 @@ class AudioMedia extends Media
         }
 
         // create media instance
-        $PreviewMedia = Media::createFromFile($previewPath, array(
+        $PreviewMedia = Media::createFromFile($previewPath, [
             'ContextClass' => 'Media'
             ,'ContextID' => $this->ID
             ,'Caption' => sprintf('%u sec preview (%us-%us)', static::$previewDuration, $startTime, $startTime+static::$previewDuration)
-        ));
+        ]);
 
         return $PreviewMedia;
     }

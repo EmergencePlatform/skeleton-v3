@@ -18,7 +18,7 @@ class Obj extends AbstractField
     {
         switch ($options['type']) {
             case 'json':
-                return json_decode($packed, !empty($options['jsonToObjects']));
+                return json_decode((string) $packed, !empty($options['jsonToObjects']));
             case 'serialized':
             case 'php':
                 return unserialize($packed);

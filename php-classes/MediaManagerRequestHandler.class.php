@@ -10,12 +10,7 @@
              static::$responseMode = static::shiftPath();
          }
 
-         switch ($requestHandle = static::shiftPath()) {
-            default:
-            {
-                return static::handleCollectionsRequest();
-            }
-        }
+         return static::handleCollectionsRequest();
      }
 
 
@@ -23,37 +18,37 @@
      {
          $tags = DB::allRecords(
             'SELECT Tag.*, (SELECT COUNT(*) FROM `%2$s` AS TagItem WHERE Tag.`%3$s` = TagItem.`%4$s` AND TagItem.`%6$s` = "Media") AS itemsCount FROM `%1$s` AS Tag ORDER BY itemsCount'
-            ,array(
+            ,[
                 Tag::$tableName
                 ,TagItem::$tableName
                 ,Tag::getColumnName('ID')
                 ,TagItem::getColumnName('TagID')
                 ,Tag::getColumnName('Title')
                 ,TagItem::getColumnName('ContextClass')
-            )
+            ]
         );
 
 
-         $allMediaCollection = array(
+         $allMediaCollection = [
             'Title' => 'All Media'
             ,'itemsCount' => DB::oneValue('SELECT COUNT(*) FROM `%s`', Media::$tableName)
             ,'nodeType' => 'allMedia'
-        );
+        ];
 
-         $tagsCollection = array(
+         $tagsCollection = [
             'Title' => 'Tagged Media'
-            ,'itemsCount' => array_sum(array_map(function($tag) {return $tag['itemsCount'];}, $tags))
+            ,'itemsCount' => array_sum(array_map(fn($tag) => $tag['itemsCount'], $tags))
             ,'nodeType' => 'tags'
             ,'children'=> array_map(function($tag) {
                 $tag['nodeType'] = 'tag';
                 return $tag;
             }, $tags)
-        );
+        ];
 
 
-         return static::respond('collections', array(
+         return static::respond('collections', [
             $allMediaCollection
             ,$tagsCollection
-        ));
+        ]);
      }
  }

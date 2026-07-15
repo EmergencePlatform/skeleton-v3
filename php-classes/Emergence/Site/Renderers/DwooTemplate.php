@@ -13,6 +13,7 @@ use Emergence\Site\IResponse;
 
 class DwooTemplate implements IRenderer
 {
+    public $mode;
     protected $template;
     protected $contentType = 'text/html; charset=utf-8';
 

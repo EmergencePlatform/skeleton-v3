@@ -18,8 +18,8 @@ class SourcesRequestHandler extends \RequestHandler
         // git http backend handles its own authentication
 
         if ($sourceId = static::shiftPath()) {
-            if (substr($sourceId, -4) == '.git') {
-                if (!$source = Source::getById(substr($sourceId, 0, -4))) {
+            if (str_ends_with((string) $sourceId, '.git')) {
+                if (!$source = Source::getById(substr((string) $sourceId, 0, -4))) {
                     return static::throwNotFoundError('source not found');
                 }
 
@@ -255,7 +255,7 @@ class SourcesRequestHandler extends \RequestHandler
             return static::throwInvalidRequestError('only POST accepted');
         }
 
-        $message = !empty($_POST['subject']) ? $_POST['subject'] : '';
+        $message = empty($_POST['subject']) ? '' : $_POST['subject'];
 
         if (!empty($_POST['extended'])) {
             $message .= PHP_EOL . PHP_EOL . $_POST['extended'];
@@ -278,7 +278,7 @@ class SourcesRequestHandler extends \RequestHandler
             $author = null;
         }
 
-        $hash = $source->commit($message, $author);
+        $source->commit($message, $author);
 
         return static::respondStatusMessage($source, "Created commit");
     }
@@ -316,7 +316,7 @@ class SourcesRequestHandler extends \RequestHandler
             ]);
         }
 
-        $result = $source->clean();
+        $source->clean();
 
         return static::respondStatusMessage($source, 'Cleaned git working tree');
     }
@@ -334,7 +334,7 @@ class SourcesRequestHandler extends \RequestHandler
         $collectionsDeleted = 0;
         $filesDeleted = 0;
 
-        foreach ($results as $path => $result) {
+        foreach ($results as $result) {
             if (!empty($result['collectionsDeleted'])) {
                 $collectionsDeleted += count($result['collectionsDeleted']);
             }
