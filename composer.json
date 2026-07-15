@@ -1,0 +1,18 @@
+{
+    "name": "emergence/skeleton-v3",
+    "description": "Flat, minimal, PHP 8 Emergence site skeleton (hologit base holobranch for product repos)",
+    "type": "project",
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/EmergencePlatform/php-core.git"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "emergence/php-core": "dev-php8-compat"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
