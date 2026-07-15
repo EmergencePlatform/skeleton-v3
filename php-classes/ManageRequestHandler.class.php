@@ -2,31 +2,31 @@
 
 
 
- class ManageRequestHandler extends RequestHandler
- {
-     public static $viewportLoader = 'Manager.Viewport';
+class ManageRequestHandler extends RequestHandler
+{
+    public static $viewportLoader = 'Manager.Viewport';
 
-     public static $applicationPanels = [
-        //'dashboard' => 'Dashboard.DashboardPanel'
-        'browser' => 'Browser.BrowserPanel'
-        ,'people' => 'People.PeopleManager'
-        ,'media' => 'Media.MediaManager'
+    public static $applicationPanels = [
+       //'dashboard' => 'Dashboard.DashboardPanel'
+       'browser' => 'Browser.BrowserPanel'
+       ,'people' => 'People.PeopleManager'
+       ,'media' => 'Media.MediaManager'
     ];
 
-     public static $contextPanels = [
-        'Person' => [
-            'People.PersonDetailsPanel'
-            ,'People.PersonGroupsPanel'
-            ,'People.PersonJournalPanel'
-        ]
+    public static $contextPanels = [
+       'Person' => [
+           'People.PersonDetailsPanel'
+           ,'People.PersonGroupsPanel'
+           ,'People.PersonJournalPanel'
+       ]
     ];
 
-     public static $globalUse = [];
+    public static $globalUse = [];
 
 
-     public static function handleRequest()
-     {
-         $GLOBALS['Session']->requireAccountLevel('Staff');
+    public static function handleRequest()
+    {
+        $GLOBALS['Session']->requireAccountLevel('Staff');
 
         // handle JSON requests
         if (static::peekPath() == 'json') {
@@ -36,27 +36,27 @@
         // route request
         switch ($request = static::shiftPath()) {
             case 'sandbox':
-            return static::handleSandboxRequest();
+                return static::handleSandboxRequest();
 
             default:
-            return static::handleConsoleRequest();
+                return static::handleConsoleRequest();
         }
-     }
+    }
 
-     public static function handleConsoleRequest()
-     {
-         return static::respond('console', [
-            'success' => true
-            ,'viewportLoader' => static::$viewportLoader
-            ,'applicationPanels' => static::$applicationPanels
-            ,'contextPanels' => static::$contextPanels
+    public static function handleConsoleRequest()
+    {
+        return static::respond('console', [
+           'success' => true
+           ,'viewportLoader' => static::$viewportLoader
+           ,'applicationPanels' => static::$applicationPanels
+           ,'contextPanels' => static::$contextPanels
         ]);
-     }
+    }
 
-     public static function handleSandboxRequest()
-     {
-         return static::respond('sandbox', [
-            'success' => true
+    public static function handleSandboxRequest()
+    {
+        return static::respond('sandbox', [
+           'success' => true
         ]);
-     }
- }
+    }
+}

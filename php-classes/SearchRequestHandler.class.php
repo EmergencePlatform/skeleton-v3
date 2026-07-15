@@ -59,7 +59,7 @@ class SearchRequestHandler extends RequestHandler
 
         }
         */
-        foreach (static::$searchClasses AS $className => $options) {
+        foreach (static::$searchClasses as $className => $options) {
             if (is_string($options)) {
                 $className = $options;
                 $options = [];
@@ -82,7 +82,7 @@ class SearchRequestHandler extends RequestHandler
                 ,'exact' => []
                 ,'sql' => []
             ];
-            foreach ($options['fields'] AS $field) {
+            foreach ($options['fields'] as $field) {
                 // transform string-only
                 if (is_string($field)) {
                     $field = [
@@ -111,21 +111,21 @@ class SearchRequestHandler extends RequestHandler
             if ($columns['like']) {
                 $matchConditions[] =
                     '('
-                    .implode(') OR (', array_map(fn($column) => sprintf('`%s` LIKE "%%%s%%"', $column, $escapedQuery), $columns['like']))
+                    .implode(') OR (', array_map(fn ($column) => sprintf('`%s` LIKE "%%%s%%"', $column, $escapedQuery), $columns['like']))
                     .')';
             }
 
             if ($columns['exact']) {
                 $matchConditions[] =
                     '('
-                    .implode(') OR (', array_map(fn($column) => sprintf('`%s` = "%s"', $column, $escapedQuery), $columns['exact']))
+                    .implode(') OR (', array_map(fn ($column) => sprintf('`%s` = "%s"', $column, $escapedQuery), $columns['exact']))
                     .')';
             }
 
             if ($columns['sql']) {
                 $matchConditions[] =
                     '('
-                    .implode(') OR (', array_map(fn($sql) => is_callable($sql) ? call_user_func($sql, $query) : sprintf($sql, $escapedQuery), $columns['sql']))
+                    .implode(') OR (', array_map(fn ($sql) => is_callable($sql) ? call_user_func($sql, $query) : sprintf($sql, $escapedQuery), $columns['sql']))
                     .')';
             }
 
@@ -140,8 +140,8 @@ class SearchRequestHandler extends RequestHandler
                         .' FROM `tag_items` t'
                         .' INNER JOIN `%s` p ON (p.ID = t.`ContextID`)'
                         .' WHERE t.`TagID` = %u AND t.`ContextClass` = "%s"'
-                        .' AND (%s)'
-                        , [
+                        .' AND (%s)',
+                        [
                             $tableAlias,
                             $className::$tableName,
                             $tableAlias,
@@ -152,8 +152,8 @@ class SearchRequestHandler extends RequestHandler
                     );
                 } else {
                     $results = DB::allRecords(
-                        'SELECT * FROM `%s` %s WHERE (%s)'
-                        , [
+                        'SELECT * FROM `%s` %s WHERE (%s)',
+                        [
                             $className::$tableName,
                             $tableAlias,
                             implode(') AND (', $className::mapConditions($options['conditions']))

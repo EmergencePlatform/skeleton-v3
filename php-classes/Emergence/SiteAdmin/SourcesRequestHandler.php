@@ -4,8 +4,7 @@ namespace Emergence\SiteAdmin;
 
 use Emergence\Git\Source;
 use Emergence\SSH\KeyPair;
-use Emergence\Git\HttpBackend AS GitHttpBackend;
-
+use Emergence\Git\HttpBackend as GitHttpBackend;
 
 class SourcesRequestHandler extends \RequestHandler
 {

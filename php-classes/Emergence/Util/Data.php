@@ -7,7 +7,6 @@ use SiteFile;
 use Emergence_FS;
 use Symfony\Component\Yaml\Yaml;
 
-
 /**
  * TODO: use this in Sencha_App
  */
@@ -15,9 +14,9 @@ class Data
 {
     public static function expandDottedKeysToTree($input, &$output = [])
     {
-        foreach ($input AS $key => $value) {
+        foreach ($input as $key => $value) {
             $keys = explode('.', (string) $key);
-            $target =& $output;
+            $target = & $output;
 
             while (count($keys) > 0) {
                 $subKey = array_shift($keys);
@@ -27,7 +26,7 @@ class Data
                         $target[$subKey] = [];
                     }
 
-                    $target =& $target[$subKey];
+                    $target = & $target[$subKey];
                 } else {
                     $target[$subKey] = $value;
                 }
@@ -39,7 +38,7 @@ class Data
 
     public static function collapseTreeToDottedKeys($input, &$output = [], $prefix = null)
     {
-        foreach ($input AS $key => $value) {
+        foreach ($input as $key => $value) {
             $key = $prefix ? "$prefix.$key" : $key;
             if (is_array($value)) {
                 static::collapseTreeToDottedKeys($value, $output, $key);
@@ -64,7 +63,7 @@ class Data
      */
     public static function extractToFromDelta($delta, &$output = [])
     {
-        foreach ($delta AS $key => $value) {
+        foreach ($delta as $key => $value) {
             if (!is_array($value)) {
                 continue;
             }
@@ -115,7 +114,7 @@ class Data
         $docsTree = Emergence_FS::findFiles('\.(ya?ml|json)$', true, $root);
 
         $data = $base;
-        foreach ($docsTree AS $node) {
+        foreach ($docsTree as $node) {
             $pathStack = array_slice($node->getFullPath(null, false), 1);
             $dataRoot = &$data;
 

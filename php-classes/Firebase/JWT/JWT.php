@@ -1,10 +1,11 @@
 <?php
 
 namespace Firebase\JWT;
-use \DomainException;
-use \InvalidArgumentException;
-use \UnexpectedValueException;
-use \DateTime;
+
+use DomainException;
+use InvalidArgumentException;
+use UnexpectedValueException;
+use DateTime;
 
 /**
  * JSON Web Token implementation, based on this spec:
@@ -21,7 +22,6 @@ use \DateTime;
  */
 class JWT
 {
-
     /**
      * When checking nbf, iat or expiration times,
      * we want to provide some extra leeway time to
@@ -86,7 +86,7 @@ class JWT
             throw new UnexpectedValueException('Invalid claims encoding');
         }
         $sig = static::urlsafeB64Decode($cryptob64);
-        
+
         if (empty($header->alg)) {
             throw new UnexpectedValueException('Empty algorithm');
         }
@@ -156,7 +156,7 @@ class JWT
         if ($keyId !== null) {
             $header['kid'] = $keyId;
         }
-        if ( isset($head) && is_array($head) ) {
+        if (isset($head) && is_array($head)) {
             $header = array_merge($head, $header);
         }
         $segments = [];
@@ -188,7 +188,7 @@ class JWT
             throw new DomainException('Algorithm not supported');
         }
         [$function, $algorithm] = static::$supported_algs[$alg];
-        switch($function) {
+        switch ($function) {
             case 'hash_hmac':
                 return hash_hmac((string) $algorithm, $msg, $key, true);
             case 'openssl':
@@ -221,7 +221,7 @@ class JWT
         }
 
         [$function, $algorithm] = static::$supported_algs[$alg];
-        switch($function) {
+        switch ($function) {
             case 'openssl':
                 $success = openssl_verify($msg, $signature, $key, $algorithm);
                 if (!$success) {

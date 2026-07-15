@@ -3,14 +3,12 @@
 namespace Emergence\Exports;
 
 use Exception;
-
 use DB;
 use Site;
 use SiteFile;
 use Emergence_FS;
 use ActiveRecord;
 use SpreadsheetWriter;
-
 
 class ExportsRequestHandler extends \RequestHandler
 {
@@ -173,7 +171,7 @@ class ExportsRequestHandler extends \RequestHandler
                 $spreadsheetWriter->close();
             }
 
-             DB::resumeQueryLogging();
+            DB::resumeQueryLogging();
         }
 
         // finish output

@@ -319,13 +319,13 @@ class Person extends VersionedRecord implements IPerson
             ,$group->Right
         ]);
 
-        $containedGroups = array_map(fn($group) => $group['ID'],$containedGroups);
+        $containedGroups = array_map(fn ($group) => $group['ID'], $containedGroups);
 
-        return $matchedCondition['join']['aliasName'].'.GroupID'.' IN ('.implode(',',$containedGroups).')';
+        return $matchedCondition['join']['aliasName'].'.GroupID'.' IN ('.implode(',', $containedGroups).')';
     }
 
     public function getGroupIDs()
     {
-        return array_map(fn($Group) => $Group->ID, $this->Groups);
+        return array_map(fn ($Group) => $Group->ID, $this->Groups);
     }
 }

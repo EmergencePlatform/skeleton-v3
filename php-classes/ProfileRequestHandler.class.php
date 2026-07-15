@@ -111,7 +111,7 @@ class ProfileRequestHandler extends RequestHandler
         }
 
         return static::respond('profilePhotoUploaded', [
-            'success' => (boolean)$Photo
+            'success' => (bool)$Photo
             ,'data' => $Photo
         ]);
     }

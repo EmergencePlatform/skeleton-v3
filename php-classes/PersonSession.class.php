@@ -2,19 +2,19 @@
 
 use Emergence\People\Person;
 
- class PersonSession extends Session
- {
-     // configurable settings
+class PersonSession extends Session
+{
+    // configurable settings
     public static $DefaultAuthenticator = 'PasswordAuthenticator';
-     public static $DefaultRequireAuthentication = false;
-     public static $PersonIDColumn = 'person_id';
+    public static $DefaultRequireAuthentication = false;
+    public static $PersonIDColumn = 'person_id';
 
     // private variables
     protected $_authenticator;
-     protected $_person;
+    protected $_person;
 
-     public function __construct($options = [])
-     {
+    public function __construct($options = [])
+    {
 
         // call parent and apply additional default options
         parent::__construct(array_merge([
@@ -33,11 +33,11 @@ use Emergence\People\Person;
         if ($this->_options['RequireAuthentication'] && !$this->_authenticator->requireAuthentication($this->_options)) {
             throw new AuthenticationFailedException();
         }
-     }
+    }
 
-     public function __get($name)
-     {
-         switch ($name) {
+    public function __get($name)
+    {
+        switch ($name) {
             case 'PersonID':
                 return $this->_record['person_id'];
 
@@ -53,7 +53,7 @@ use Emergence\People\Person;
             default:
                 return parent::__get($name);
         }
-     }
+    }
 
 
 
@@ -62,19 +62,19 @@ use Emergence\People\Person;
      */
     public function afterLoadUser()
     {
-        //Update last login 
+        //Update last login
         db_n(sprintf(
-            'UPDATE %s SET last_login = CURRENT_TIMESTAMP WHERE %s = %u'
-            ,USER_TABLE
-            ,UID_COLUMN
-            ,$this->UserData[UID_COLUMN]
+            'UPDATE %s SET last_login = CURRENT_TIMESTAMP WHERE %s = %u',
+            USER_TABLE,
+            UID_COLUMN,
+            $this->UserData[UID_COLUMN]
         ));
     }
 
-     public function requireAuthentication()
-     {
-         return $this->_authenticator->requireAuthentication($this->_options);
-     }
+    public function requireAuthentication()
+    {
+        return $this->_authenticator->requireAuthentication($this->_options);
+    }
 
 
     /*
@@ -89,4 +89,4 @@ use Emergence\People\Person;
             exit();
         }
     }
- }
+}

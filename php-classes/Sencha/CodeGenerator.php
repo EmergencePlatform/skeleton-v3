@@ -5,10 +5,9 @@ namespace Sencha;
 use ActiveRecord;
 use VersionedRecord;
 
-
 class CodeGenerator
 {
-    const INDENT = '    ';
+    public const INDENT = '    ';
 
     public static $validatorTypes = [
         'presence' => 'Ext.data.validator.Presence',

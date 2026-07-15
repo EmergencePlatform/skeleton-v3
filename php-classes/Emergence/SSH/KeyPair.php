@@ -5,7 +5,6 @@ namespace Emergence\SSH;
 use Site;
 use Exception;
 
-
 class KeyPair
 {
     protected $privateKey;

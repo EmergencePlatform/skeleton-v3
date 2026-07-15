@@ -6,5 +6,4 @@ use Psr\Log\LoggerInterface;
 
 interface IJob extends LoggerInterface
 {
-
 }

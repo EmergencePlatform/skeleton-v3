@@ -36,7 +36,7 @@ class Router
             return static::$classPaths[$className];
         }
 
-        foreach (class_parents($className) AS $parentName) {
+        foreach (class_parents($className) as $parentName) {
             if (!empty(static::$classPaths[$parentName])) {
                 return static::$classPaths[$parentName];
             }

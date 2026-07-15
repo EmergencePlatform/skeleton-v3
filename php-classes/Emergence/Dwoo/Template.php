@@ -106,7 +106,7 @@ class Template extends \Dwoo_Template_String
         if (!$templateNode && $throwExceptionOnNotFound) {
             throw new Exception(
                 "Could not find template match for \"".implode('/', $path)."\", checked paths:\n\n"
-                .implode(PHP_EOL, array_map(fn($a) => implode('/', $a), $searchHistory))
+                .implode(PHP_EOL, array_map(fn ($a) => implode('/', $a), $searchHistory))
             );
         }
 

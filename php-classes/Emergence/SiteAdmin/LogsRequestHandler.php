@@ -3,9 +3,7 @@
 namespace Emergence\SiteAdmin;
 
 use Site;
-
 use Emergence\Site\Storage;
-
 
 class LogsRequestHandler extends \RequestHandler
 {
@@ -86,7 +84,7 @@ class LogsRequestHandler extends \RequestHandler
         if (!$files) {
             $files = static::$files;
 
-            foreach ($files AS $path => &$file) {
+            foreach ($files as $path => &$file) {
                 $file['path'] = $path;
 
                 if (empty($file['title'])) {
@@ -115,6 +113,6 @@ class LogsRequestHandler extends \RequestHandler
             }
         }
 
-        return array_filter($files, fn($file) => $file['size'] !== null);
+        return array_filter($files, fn ($file) => $file['size'] !== null);
     }
 }

@@ -63,7 +63,7 @@ class Tag extends ActiveRecord
     {
         $assignedTags = [];
 
-        foreach ($tags AS $tagTitle) {
+        foreach ($tags as $tagTitle) {
             if (!$tagTitle) {
                 continue;
             }
@@ -103,7 +103,7 @@ class Tag extends ActiveRecord
             $tags = $newTags;
         }
 
-        foreach ($tags AS $tag) {
+        foreach ($tags as $tag) {
             if ($tag && (is_string($tag) || is_int($tag))) {
                 $tag = static::getFromHandle($tag, $autoCreate, $prefix);
             }
@@ -131,8 +131,8 @@ class Tag extends ActiveRecord
         if (!$prefix || count($prefixTags)) { // if there are no existing tags with this prefix there are no items to delete
             try {
                 DB::query(
-                    'DELETE FROM `%s` WHERE ContextClass = "%s" AND ContextID = %u AND TagID NOT IN (%s) %s'
-                    ,[
+                    'DELETE FROM `%s` WHERE ContextClass = "%s" AND ContextID = %u AND TagID NOT IN (%s) %s',
+                    [
                         TagItem::$tableName
                         ,DB::escape($Context->getRootClass())
                         ,$Context->ID
@@ -308,8 +308,8 @@ class Tag extends ActiveRecord
         }
 
         return TagItem::instantiateRecords(DB::allRecords(
-            'SELECT * FROM `%s` WHERE (%s) ORDER BY rand() %s'
-            , [
+            'SELECT * FROM `%s` WHERE (%s) ORDER BY rand() %s',
+            [
                 TagItem::$tableName
                 , implode(') AND (', $where)
                 , $options['limit'] ? sprintf('LIMIT %u', $options['limit']) : ''
@@ -340,10 +340,10 @@ class Tag extends ActiveRecord
         $tagWhere[] = sprintf('`%s` = "%s"', TagItem::getColumnName('ContextClass'), DB::escape($class::getStaticRootClass()));
 
         $tagQuery = sprintf(
-            'SELECT ContextID FROM `%s` TagItem WHERE (%s)'
-            , TagItem::$tableName
-            , count($tagWhere) ? implode(') AND (', $tagWhere) : '1'
-            , ($options['limit'] ? sprintf('LIMIT %u', $options['limit']) : '')
+            'SELECT ContextID FROM `%s` TagItem WHERE (%s)',
+            TagItem::$tableName,
+            count($tagWhere) ? implode(') AND (', $tagWhere) : '1',
+            ($options['limit'] ? sprintf('LIMIT %u', $options['limit']) : '')
         );
 
         if (!empty($options['overlayTag'])) {
@@ -352,14 +352,14 @@ class Tag extends ActiveRecord
             }
 
             $tagQuery .= sprintf(
-                ' AND (TagItem.`%s`,TagItem.`%s`) IN (SELECT OverlayTagItem.`%s`, OverlayTagItem.`%s` FROM `%s` OverlayTagItem WHERE OverlayTagItem.`%s` = %u)'
-                ,TagItem::getColumnName('ContextClass')
-                ,TagItem::getColumnName('ContextID')
-                ,TagItem::getColumnName('ContextClass')
-                ,TagItem::getColumnName('ContextID')
-                ,TagItem::$tableName
-                ,TagItem::getColumnName('TagID')
-                ,$OverlayTag->ID
+                ' AND (TagItem.`%s`,TagItem.`%s`) IN (SELECT OverlayTagItem.`%s`, OverlayTagItem.`%s` FROM `%s` OverlayTagItem WHERE OverlayTagItem.`%s` = %u)',
+                TagItem::getColumnName('ContextClass'),
+                TagItem::getColumnName('ContextID'),
+                TagItem::getColumnName('ContextClass'),
+                TagItem::getColumnName('ContextID'),
+                TagItem::$tableName,
+                TagItem::getColumnName('TagID'),
+                $OverlayTag->ID
             );
         }
 
@@ -380,11 +380,13 @@ class Tag extends ActiveRecord
             .' Content.*'
             .' FROM (%s) TagItem'
             .' JOIN `%s` Content ON (Content.ID = TagItem.ContextID)'
-            .' WHERE (%s)'
-            , $options['calcFoundRows'] ? 'SQL_CALC_FOUND_ROWS' : ''
-            , $tagQuery                                                 // tag_items query
-            , $class::$tableName                                        // item's table name
-            , count($classWhere) > 0 ? implode(') AND (', $classWhere) : '1'   // optional where clause
+            .' WHERE (%s)',
+            $options['calcFoundRows'] ? 'SQL_CALC_FOUND_ROWS' : '',
+            $tagQuery                                                 // tag_items query
+            ,
+            $class::$tableName                                        // item's table name
+            ,
+            count($classWhere) > 0 ? implode(') AND (', $classWhere) : '1'   // optional where clause
         );
 
 
@@ -402,27 +404,27 @@ class Tag extends ActiveRecord
     public static function getTagsString($tags, $prefix = null)
     {
         if ($prefix) {
-            $tags = array_filter($tags, fn($Tag) => $Tag->HandlePrefix == $prefix);
+            $tags = array_filter($tags, fn ($Tag) => $Tag->HandlePrefix == $prefix);
         }
 
-        return implode(', ', array_map(fn($Tag) => $Tag->Title, $tags));
+        return implode(', ', array_map(fn ($Tag) => $Tag->Title, $tags));
     }
 
     public static function getAllTitles()
     {
-        return array_map(fn($Tag) => $Tag->Title, static::getAll());
+        return array_map(fn ($Tag) => $Tag->Title, static::getAll());
     }
 
     public static function filterTagsByPrefix(array $tags, $prefix)
     {
-        return array_filter($tags, fn($Tag) => $Tag->HandlePrefix == $prefix);
+        return array_filter($tags, fn ($Tag) => $Tag->HandlePrefix == $prefix);
     }
 
     public function getReadableItems()
     {
         $items = [];
 
-        foreach ($this->Items AS $item) {
+        foreach ($this->Items as $item) {
             try {
                 if (!$item->Context) {
                     continue;

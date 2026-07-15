@@ -30,12 +30,12 @@ class SpreadsheetWriter
     public function __construct($options = [])
     {
         $this->_options = array_merge($this->_options, $options);
-        $this->_fh = $this->_options['fileHandle'] ? $this->_options['fileHandle'] : fopen('php://output','w');
+        $this->_fh = $this->_options['fileHandle'] ? $this->_options['fileHandle'] : fopen('php://output', 'w');
     }
 
     public function writeRows($rows)
     {
-        foreach ($rows AS $row) {
+        foreach ($rows as $row) {
             $this->writeRow($row);
         }
     }

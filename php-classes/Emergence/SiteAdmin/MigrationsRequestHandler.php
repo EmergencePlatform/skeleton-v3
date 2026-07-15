@@ -11,15 +11,14 @@ use RangeException;
 use TableNotFoundException;
 use QueryException;
 
-
 class MigrationsRequestHandler extends \RequestHandler
 {
-    const STATUS_NEW = 'new';
-    const STATUS_SKIPPED = 'skipped';
-    const STATUS_STARTED = 'started';
-    const STATUS_FAILED = 'failed';
-    const STATUS_EXECUTED = 'executed';
-    const STATUS_DEBUG = 'debug';
+    public const STATUS_NEW = 'new';
+    public const STATUS_SKIPPED = 'skipped';
+    public const STATUS_STARTED = 'started';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_EXECUTED = 'executed';
+    public const STATUS_DEBUG = 'debug';
 
     public static $userResponseModes = [
         'application/json' => 'json',
@@ -45,7 +44,7 @@ class MigrationsRequestHandler extends \RequestHandler
 
     public static function handleBrowseRequest()
     {
-        return static::respond('migrations',[
+        return static::respond('migrations', [
             'migrations' => static::getMigrations()
         ]);
     }
@@ -81,7 +80,7 @@ class MigrationsRequestHandler extends \RequestHandler
                 continue;
             }
 
-            $migrations []= static::executeMigration($migration);
+            $migrations [] = static::executeMigration($migration);
         }
 
         return static::respond('allMigrationsExecuted', [
@@ -196,7 +195,7 @@ class MigrationsRequestHandler extends \RequestHandler
         $debugLogStartIndex = count(Debug::$log);
 
 
-        $resetMigrationStatus = function() use ($migration) {
+        $resetMigrationStatus = function () use ($migration) {
             static::resetMigrationStatus($migration['key']);
         };
 
@@ -244,7 +243,7 @@ class MigrationsRequestHandler extends \RequestHandler
 
         $migration['queryLog'] = array_filter(
             array_slice(Debug::$log, $debugLogStartIndex),
-            fn($entry) => !empty($entry['query'])
+            fn ($entry) => !empty($entry['query'])
         );
 
         return $migration;
@@ -269,14 +268,14 @@ class MigrationsRequestHandler extends \RequestHandler
 
         // append sequence to each node
         $migrations = [];
-        foreach (Emergence_FS::getTreeFiles('php-migrations') AS $migrationPath => $migrationNodeData) {
+        foreach (Emergence_FS::getTreeFiles('php-migrations') as $migrationPath => $migrationNodeData) {
             $migrationKey = preg_replace('#^php-migrations/(.*)\.php$#i', '$1', (string) $migrationPath);
             $migrationRecord = $migrationRecords[$migrationKey] ?? null;
             $migrations[$migrationKey] = static::getMigrationData($migrationKey, $migrationRecord);
         }
 
         // sort migrations by sequence
-        uasort($migrations, function($a, $b) {
+        uasort($migrations, function ($a, $b) {
             if ($a['sequence'] == $b['sequence']) {
                 if ($a['sequenceTime'] == $b['sequenceTime']) {
                     return 0;
@@ -323,12 +322,12 @@ class MigrationsRequestHandler extends \RequestHandler
 
     protected static function tableExists($tableName)
     {
-        return (boolean)DB::oneRecord('SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = SCHEMA() AND TABLE_NAME = "%s"', DB::escape($tableName));
+        return (bool)DB::oneRecord('SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = SCHEMA() AND TABLE_NAME = "%s"', DB::escape($tableName));
     }
 
     protected static function columnExists($tableName, $columnName)
     {
-        return (boolean)DB::oneRecord('SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = SCHEMA() AND TABLE_NAME = "%s" AND COLUMN_NAME = "%s"', DB::escape([$tableName, $columnName]));
+        return (bool)DB::oneRecord('SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = SCHEMA() AND TABLE_NAME = "%s" AND COLUMN_NAME = "%s"', DB::escape([$tableName, $columnName]));
     }
 
     protected static function getColumns($tableName)
@@ -359,7 +358,7 @@ class MigrationsRequestHandler extends \RequestHandler
             throw new RangeException("Column {$tableName}.{$columnName} is not enum");
         }
 
-        return array_map(fn($value) => str_replace(['\\\\', '\'\''], ['\\', '\''], $value), explode("','", substr((string) $columnType, 6, -2)));
+        return array_map(fn ($value) => str_replace(['\\\\', '\'\''], ['\\', '\''], $value), explode("','", substr((string) $columnType, 6, -2)));
     }
 
     protected static function hasColumnEnumValue($tableName, $columnName, $value)

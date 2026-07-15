@@ -116,7 +116,7 @@ class JSON
                         $include = explode(',', $include);
                     }
 
-                    foreach ($include AS $value) {
+                    foreach ($include as $value) {
                         if ($value == '*') {
                             $includeThisLevel = '*';
                             continue;
@@ -127,7 +127,7 @@ class JSON
 
                             if ($prefix === '*') {
                                 $includeThisLevel = '*';
-                            } elseif ($includeThisLevel != '*' &&!in_array($prefix, $includeThisLevel)) {
+                            } elseif ($includeThisLevel != '*' && !in_array($prefix, $includeThisLevel)) {
                                 $includeThisLevel[] = $prefix;
                             }
 
@@ -152,7 +152,7 @@ class JSON
         }
 
         if (is_array($input)) {
-            foreach ($input AS $key => &$item) {
+            foreach ($input as $key => &$item) {
                 if (isset($includeLater)) {
                     $includeNext = array_key_exists('*', $includeLater) ? $includeLater['*'] : [];
 
@@ -171,51 +171,51 @@ class JSON
         return $input;
     }
 
-#    public static function mapArrayToRecords($array)
-#    {
-#		return array_map(create_function('$value', 'return array($value);'), $array);
-#	}
-#
-#	static public function indent($json)
-#    {
-#
-#		$result	   = '';
-#		$pos	   = 0;
-#		$strLen	   = strlen($json);
-#		$indentStr = "\t";
-#		$newLine   = "\n";
-#
-#		for($i = 0; $i <= $strLen; $i++) {
-#
-#			// Grab the next character in the string
-#			$char = substr($json, $i, 1);
-#
-#			// If this character is the end of an element,
-#			// output a new line and indent the next line
-#			if($char == '}' || $char == ']') {
-#				$result .= $newLine;
-#				$pos --;
-#				for ($j=0; $j<$pos; $j++) {
-#					$result .= $indentStr;
-#				}
-#			}
-#
-#			// Add the character to the result string
-#			$result .= $char;
-#
-#			// If the last character was the beginning of an element,
-#			// output a new line and indent the next line
-#			if ($char == ',' || $char == '{' || $char == '[') {
-#				$result .= $newLine;
-#				if ($char == '{' || $char == '[') {
-#					$pos ++;
-#				}
-#				for ($j = 0; $j < $pos; $j++) {
-#					$result .= $indentStr;
-#				}
-#			}
-#		}
-#
-#		return $result;
-#	}
+    #    public static function mapArrayToRecords($array)
+    #    {
+    #		return array_map(create_function('$value', 'return array($value);'), $array);
+    #	}
+    #
+    #	static public function indent($json)
+    #    {
+    #
+    #		$result	   = '';
+    #		$pos	   = 0;
+    #		$strLen	   = strlen($json);
+    #		$indentStr = "\t";
+    #		$newLine   = "\n";
+    #
+    #		for($i = 0; $i <= $strLen; $i++) {
+    #
+    #			// Grab the next character in the string
+    #			$char = substr($json, $i, 1);
+    #
+    #			// If this character is the end of an element,
+    #			// output a new line and indent the next line
+    #			if($char == '}' || $char == ']') {
+    #				$result .= $newLine;
+    #				$pos --;
+    #				for ($j=0; $j<$pos; $j++) {
+    #					$result .= $indentStr;
+    #				}
+    #			}
+    #
+    #			// Add the character to the result string
+    #			$result .= $char;
+    #
+    #			// If the last character was the beginning of an element,
+    #			// output a new line and indent the next line
+    #			if ($char == ',' || $char == '{' || $char == '[') {
+    #				$result .= $newLine;
+    #				if ($char == '{' || $char == '[') {
+    #					$pos ++;
+    #				}
+    #				for ($j = 0; $j < $pos; $j++) {
+    #					$result .= $indentStr;
+    #				}
+    #			}
+    #		}
+    #
+    #		return $result;
+    #	}
 }

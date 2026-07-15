@@ -1,4 +1,5 @@
 <?php
+
 namespace Emergence\Http\Message;
 
 use Psr\Http\Message\StreamInterface;
@@ -177,6 +178,6 @@ trait MessageTrait
      */
     private function trimHeaderValues(array $values)
     {
-        return array_map(fn($value) => trim((string) $value, " \t"), $values);
+        return array_map(fn ($value) => trim((string) $value, " \t"), $values);
     }
 }

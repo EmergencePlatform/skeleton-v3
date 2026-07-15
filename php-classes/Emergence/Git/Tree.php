@@ -8,10 +8,10 @@ class Tree implements HashableInterface
 {
     use HashableTrait;
 
-    const REMOTES_MODE_FETCH = 'fetch';
-    const REMOTES_MODE_LINK = 'link';
-    const TREE_REGEX = '/^(?<mode>[^ ]+) (?<type>[^ ]+) (?<hash>[^\t]+)\t(?<path>.*)/';
-    const EMPTY_TREE_HASH = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+    public const REMOTES_MODE_FETCH = 'fetch';
+    public const REMOTES_MODE_LINK = 'link';
+    public const TREE_REGEX = '/^(?<mode>[^ ]+) (?<type>[^ ]+) (?<hash>[^\t]+)\t(?<path>.*)/';
+    public const EMPTY_TREE_HASH = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 
     protected $root = [];
     protected $remotesMode = self::REMOTES_MODE_FETCH;
@@ -191,8 +191,7 @@ class Tree implements HashableInterface
                 if ('tree' == $type) {
                     $content = $hash;
                 }
-            }
-            else {
+            } else {
                 throw new \Exception('unhandlable content for '.$name);
             }
 

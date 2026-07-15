@@ -27,7 +27,7 @@ function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = [])
     $reportStart = microtime(true);
 
     // analyze query stats
-    foreach (Debug::$log AS $l) {
+    foreach (Debug::$log as $l) {
         $totalQueries++;
         $totalQueryTime += $l['time_duration_ms'];
         $totalResults += $l['result_rows'];
@@ -35,7 +35,7 @@ function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = [])
 
         // try to group
         $group = false;
-        foreach ($groupers AS $grouper) {
+        foreach ($groupers as $grouper) {
             if (preg_match($grouper, $l['query'])) {
                 $group = $grouper;
                 break;
@@ -61,19 +61,18 @@ function Dwoo_Plugin_log_report(Dwoo_Core $dwoo, $groupers = [])
 
     $html .= '<tr><th>Count</th><th>Time</th><th>Results</th><th>Affected</th></tr>';
 
-    $html .= sprintf('<tr><td colspan="4">Total request time %0.3fms</td></tr>', $reportEnd-Site::$initializeTime);
+    $html .= sprintf('<tr><td colspan="4">Total request time %0.3fms</td></tr>', $reportEnd - Site::$initializeTime);
     $html .= sprintf('<tr><td align="center">%u</td><td align="center">%0.3fms</td><td align="center">%u</td><td align="center">%u</td></tr>', $totalQueries, $totalQueryTime, $totalResults, $totalAffected);
 
-    foreach ($groups AS $query => $g) {
+    foreach ($groups as $query => $g) {
         $html .= sprintf('<tr><td colspan="4">%s</td></tr>', htmlspecialchars((string) $query));
         $html .= sprintf('<tr><td align="center">%u</td><td align="center">%0.3fms</td><td align="center">%u</td><td align="center">%u</td></tr>', $g['count'], $g['queryTime'], $g['results'], $g['affected']);
 
-        foreach ($g['queries'] AS $query) {
+        foreach ($g['queries'] as $query) {
             $html .= '<tr><td colspan="4">'.htmlspecialchars((string) $query).'</td></tr>';
         }
     }
 
-    $html .= sprintf('<tr><th colspan="4">Report took %0.3fms to generate</th></tr>', $reportEnd-$reportStart);
+    $html .= sprintf('<tr><th colspan="4">Report took %0.3fms to generate</th></tr>', $reportEnd - $reportStart);
     return $html . '</table>';
 }
-

@@ -4,7 +4,8 @@ namespace Emergence\People\Groups;
 
 use DB;
 use ActiveRecord;
-use HandleBehavior, NestingBehavior;
+use HandleBehavior;
+use NestingBehavior;
 use Emergence\People\Person;
 use Emergence\People\IPerson;
 use PeopleRequestHandler;
@@ -142,8 +143,8 @@ class Group extends ActiveRecord
             .' FROM `%s` GroupMember'
             .' JOIN `%s` Person ON (Person.ID = GroupMember.PersonID)'
             .' WHERE GroupMember.GroupID IN (SELECT ID FROM `%s` WHERE `Left` BETWEEN %u AND %u)'
-            .' ORDER BY '.implode(',', $order)
-            ,[
+            .' ORDER BY '.implode(',', $order),
+            [
                 GroupMember::$tableName
                 ,Person::$tableName
                 ,Group::$tableName
@@ -156,8 +157,8 @@ class Group extends ActiveRecord
     public function getFullPath($separator = '/')
     {
         return DB::oneValue(
-            'SELECT GROUP_CONCAT(Name SEPARATOR "%s") FROM `%s` WHERE `Left` <= %u AND `Right` >= %u ORDER BY `Left`'
-            ,[
+            'SELECT GROUP_CONCAT(Name SEPARATOR "%s") FROM `%s` WHERE `Left` <= %u AND `Right` >= %u ORDER BY `Left`',
+            [
                 DB::escape($separator)
                 ,static::$tableName
                 ,$this->Left
@@ -169,9 +170,9 @@ class Group extends ActiveRecord
     public function getPopulation()
     {
         try {
-            return (integer)DB::oneValue(
-                'SELECT COUNT(*) FROM (SELECT ID FROM `%s` WHERE `Left` BETWEEN %u AND %u) `Group` JOIN `%s` GroupMember ON GroupID = `Group`.ID'
-                ,[
+            return (int)DB::oneValue(
+                'SELECT COUNT(*) FROM (SELECT ID FROM `%s` WHERE `Left` BETWEEN %u AND %u) `Group` JOIN `%s` GroupMember ON GroupID = `Group`.ID',
+                [
                     static::$tableName
                     ,$this->Left
                     ,$this->Right
@@ -191,7 +192,7 @@ class Group extends ActiveRecord
             $groupIDs = preg_split('/\s*[,]+\s*/', trim($groupIDs));
         }
 
-        foreach ($groupIDs AS $groupID) {
+        foreach ($groupIDs as $groupID) {
             if (!$groupID) {
                 continue;
             }
@@ -205,8 +206,8 @@ class Group extends ActiveRecord
         // delete tags
         try {
             DB::query(
-                'DELETE FROM `%s` WHERE PersonID = %u AND GroupID NOT IN (%s)'
-                ,[
+                'DELETE FROM `%s` WHERE PersonID = %u AND GroupID NOT IN (%s)',
+                [
                     GroupMember::$tableName
                     ,$Person->ID
                     ,count($assignedGroups) ? implode(',', $assignedGroups) : '0'

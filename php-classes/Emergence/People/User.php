@@ -75,7 +75,7 @@ class User extends Person implements IUser
         parent::__classLoaded();
     }
 
-    function getValue($name)
+    public function getValue($name)
     {
         switch ($name) {
             case 'AccountLevelNumeric':
@@ -222,7 +222,7 @@ class User extends Person implements IUser
                 if (is_callable($options['format'])) {
                     $username = call_user_func($options['format'], $firstName, $lastName, $options);
                 } else {
-                    throw new Exception ('Unknown format format.');
+                    throw new Exception('Unknown format format.');
                 }
         }
 
@@ -240,8 +240,8 @@ class User extends Person implements IUser
         $chars = ['2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's' ,'t', 'u', 'v', 'w', 'x', 'y', 'z'];
         $password = '';
 
-        for ($i=0; $i<$length; $i++) {
-           $password .= $chars[mt_rand(0, count($chars)-1)];
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[mt_rand(0, count($chars) - 1)];
         }
 
         return $password;

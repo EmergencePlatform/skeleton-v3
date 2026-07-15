@@ -13,7 +13,7 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
     $classPaths = explode(',', (string) $App->getBuildCfg('app.classpath'));
 
     $srcCollections = [];
-    foreach ($classPaths AS $classPath) {
+    foreach ($classPaths as $classPath) {
         if (str_starts_with($classPath, '${app.dir}/')) {
             $classPath = $appPath.substr($classPath, 10);
         } else {
@@ -39,9 +39,9 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
         $requiredPackages[] = $themeName;
     }
 
-    foreach ($requiredPackages AS $packageName) {
+    foreach ($requiredPackages as $packageName) {
         $packagePath = "sencha-workspace/packages/$packageName";
-        foreach (["$packagePath/src", "$packagePath/overrides"] AS $classPath) {
+        foreach (["$packagePath/src", "$packagePath/overrides"] as $classPath) {
             try {
                 $tree = Emergence_FS::getTree($classPath);
                 $srcCollections = array_merge($srcCollections, array_keys($tree));
@@ -51,9 +51,9 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
         }
     }
 
-#	Benchmark::startLive();
-#	Benchmark::mark("sencha_preload");
-#	Benchmark::mark("getting files from ".count($srcCollections)." collections");
+    #	Benchmark::startLive();
+    #	Benchmark::mark("sencha_preload");
+    #	Benchmark::mark("getting files from ".count($srcCollections)." collections");
 
     // get files
     if (count($srcCollections)) {
@@ -76,8 +76,8 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
                     .' GROUP BY f1.CollectionID, f1.Handle'
                 .') AS lastestFiles'
                 .' LEFT JOIN `%1$s` f2 USING (ID)'
-                .' WHERE f2.Status = "Normal" AND f2.Type = "application/javascript"'
-            ,[
+                .' WHERE f2.Status = "Normal" AND f2.Type = "application/javascript"',
+            [
                 SiteFile::$tableName
                 ,SiteCollection::$tableName
                 ,implode(',', $srcCollections)
@@ -89,7 +89,7 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
 
     // compile keyed manifest with localized paths
     $manifest = [];
-    foreach ($sources AS $source) {
+    foreach ($sources as $source) {
         if (str_starts_with($source['Path'], "$appPath/")) {
             $manifest[substr($source['Path'], strlen($appPath) + 1)] = $source['SHA1'];
         } elseif (str_starts_with($source['Path'], 'sencha-workspace/packages/')) {
@@ -97,25 +97,25 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
         }
     }
 
-#	$srcMasterHash = sha1(join(PHP_EOL, $srcHashes));
-#
-#	Benchmark::mark("found ".count($srcHashes)." files");
-#
-#	// try to get src from cache
-#	$cacheKey = "app-cache/$srcMasterHash";
-#
-#	if(!Cache::exists($cacheKey)) {
-#		$src = '';
-#
-#		foreach($srcHashes AS $fileId => $sha1) {
-#			$src .= JSMin::minify(file_get_contents(SiteFile::getRealPathByID($fileId)));
-#		}
-#
-#		Cache::store($cacheKey, $src);
-#	}
-#
-#	Benchmark::mark("compiled: ".strlen($src)." bytes");
-#
+    #	$srcMasterHash = sha1(join(PHP_EOL, $srcHashes));
+    #
+    #	Benchmark::mark("found ".count($srcHashes)." files");
+    #
+    #	// try to get src from cache
+    #	$cacheKey = "app-cache/$srcMasterHash";
+    #
+    #	if(!Cache::exists($cacheKey)) {
+    #		$src = '';
+    #
+    #		foreach($srcHashes AS $fileId => $sha1) {
+    #			$src .= JSMin::minify(file_get_contents(SiteFile::getRealPathByID($fileId)));
+    #		}
+    #
+    #		Cache::store($cacheKey, $src);
+    #	}
+    #
+    #	Benchmark::mark("compiled: ".strlen($src)." bytes");
+    #
     //getRealPathByID
     return
         '<script type="text/javascript">(function(){'
@@ -150,4 +150,3 @@ function Dwoo_Plugin_sencha_preloader(Dwoo_Core $dwoo, $classes = "app", $App = 
             .'};'
         .'})()</script>';
 }
-

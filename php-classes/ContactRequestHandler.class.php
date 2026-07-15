@@ -38,7 +38,7 @@ class ContactRequestHandler extends RequestHandler
             // validate
             $Validator = new RecordValidator($_REQUEST);
 
-            foreach (static::$validators AS $validatorConfig) {
+            foreach (static::$validators as $validatorConfig) {
                 // execute callable validator
                 if (is_callable($validatorConfig)) {
                     $validatorConfig($Validator, $subform);
@@ -91,7 +91,7 @@ class ContactRequestHandler extends RequestHandler
             ,'subform' => $subform
         ]);
     }
-    
+
     public static function handleSubmissionsRequest()
     {
         $GLOBALS['Session']->requireAccountLevel(static::$accountLevelBrowse);

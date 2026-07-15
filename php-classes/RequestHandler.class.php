@@ -1,8 +1,7 @@
 <?php
 
 use Symfony\Component\Yaml\Yaml;
-use Emergence\Dwoo\Engine AS DwooEngine;
-
+use Emergence\Dwoo\Engine as DwooEngine;
 
 abstract class RequestHandler
 {
@@ -133,7 +132,7 @@ abstract class RequestHandler
     public static function respondCsv($responseID, $responseData = [])
     {
         if (!empty($_REQUEST['downloadToken'])) {
-            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time()+300, 'path' => '/']);
+            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time() + 300, 'path' => '/']);
         }
         if (is_array($responseData['data'])) {
             return CSV::respond($responseData['data'], $responseID, empty($_GET['columns']) ? null : $_GET['columns']);
@@ -141,8 +140,7 @@ abstract class RequestHandler
 
         if ($responseID == 'error') {
             print($responseData['message']);
-        }
-        else {
+        } else {
             print 'Unable to render data to CSV: '.$responseID;
         }
         exit();
@@ -151,7 +149,7 @@ abstract class RequestHandler
     public static function respondPrint($responseID, $responseData = [], $format = 'html')
     {
         if (!empty($_REQUEST['downloadToken'])) {
-            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time()+300, 'path' => '/']);
+            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time() + 300, 'path' => '/']);
         }
 
         try {

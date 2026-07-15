@@ -1,4 +1,5 @@
 <?php
+
 namespace Emergence\Http\Message;
 
 use Psr\Http\Message\UriInterface;
@@ -18,7 +19,7 @@ class Uri implements UriInterface
      * we apply this default host when no host is given yet to form a
      * valid URI.
      */
-    const HTTP_DEFAULT_HOST = 'localhost';
+    public const HTTP_DEFAULT_HOST = 'localhost';
 
     private static $defaultPorts = [
         'http'  => 80,
@@ -120,7 +121,7 @@ class Uri implements UriInterface
             $uri .= $scheme . ':';
         }
 
-        if ($authority != ''|| $scheme === 'file') {
+        if ($authority != '' || $scheme === 'file') {
             $uri .= '//' . $authority;
         }
 
@@ -304,7 +305,7 @@ class Uri implements UriInterface
         }
 
         $decodedKey = rawurldecode($key);
-        $result = array_filter(explode('&', $current), fn($part) => rawurldecode(explode('=', (string) $part)[0]) !== $decodedKey);
+        $result = array_filter(explode('&', $current), fn ($part) => rawurldecode(explode('=', (string) $part)[0]) !== $decodedKey);
 
         return $uri->withQuery(implode('&', $result));
     }
@@ -332,7 +333,7 @@ class Uri implements UriInterface
             $result = [];
         } else {
             $decodedKey = rawurldecode($key);
-            $result = array_filter(explode('&', $current), fn($part) => rawurldecode(explode('=', (string) $part)[0]) !== $decodedKey);
+            $result = array_filter(explode('&', $current), fn ($part) => rawurldecode(explode('=', (string) $part)[0]) !== $decodedKey);
         }
 
         // Query string separators ("=", "&") within the key or value need to be encoded

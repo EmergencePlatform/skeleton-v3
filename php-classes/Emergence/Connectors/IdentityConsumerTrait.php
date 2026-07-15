@@ -4,7 +4,6 @@ namespace Emergence\Connectors;
 
 use Emergence\People\IPerson;
 
-
 trait IdentityConsumerTrait
 {
     public static $issuer;
@@ -61,7 +60,7 @@ trait IdentityConsumerTrait
         if ($Mapping instanceof \Emergence\Connectors\Mapping) {
             return null;
         }
-        
+
         return static::getBaseUrl() . '/launch';
     }
 

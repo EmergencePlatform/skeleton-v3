@@ -31,7 +31,7 @@ class SQL
 
         // compile fields
         $recordClass::getStaticRootClass();
-        foreach (static::getAggregateFieldOptions($recordClass) AS $fieldId => $field) {
+        foreach (static::getAggregateFieldOptions($recordClass) as $fieldId => $field) {
             if ($field['columnName'] == 'RevisionID') {
                 continue;
             }
@@ -65,7 +65,7 @@ class SQL
         }
 
         // compile indexes
-        foreach ($indexes AS $indexName => $index) {
+        foreach ($indexes as $indexName => $index) {
             if (is_array($index['fields'])) {
                 $indexFields = $index['fields'];
             } elseif ($index['fields']) {
@@ -75,7 +75,7 @@ class SQL
             }
 
             // translate field names
-            foreach ($index['fields'] AS &$indexField) {
+            foreach ($index['fields'] as &$indexField) {
                 $indexField = $recordClass::getColumnName($indexField);
             }
 
@@ -85,10 +85,10 @@ class SQL
             }
 
             $queryFields[] = sprintf(
-                '%s KEY `%s` (`%s`)'
-                , empty($index['unique']) ? '' : 'UNIQUE'
-                , $indexName
-                , implode('`,`', $index['fields'])
+                '%s KEY `%s` (`%s`)',
+                empty($index['unique']) ? '' : 'UNIQUE',
+                $indexName,
+                implode('`,`', $index['fields'])
             );
         }
 
@@ -98,10 +98,10 @@ class SQL
 
 
         $createSQL = sprintf(
-            "CREATE TABLE IF NOT EXISTS `%s` (\n\t%s\n) ENGINE=%s DEFAULT CHARSET=utf8;"
-            , $historyVariant ? $recordClass::getHistoryTableName() : $recordClass::$tableName
-            , implode("\n\t,", $queryFields)
-            , static::$mysqlStorageEngine
+            "CREATE TABLE IF NOT EXISTS `%s` (\n\t%s\n) ENGINE=%s DEFAULT CHARSET=utf8;",
+            $historyVariant ? $recordClass::getHistoryTableName() : $recordClass::$tableName,
+            implode("\n\t,", $queryFields),
+            static::$mysqlStorageEngine
         );
 
         // append history table SQL
@@ -124,11 +124,13 @@ class SQL
                 return $field['type'].($field['unsigned'] ? ' unsigned' : '').($field['zerofill'] ? ' zerofill' : '');
             case 'uint':
                 $field['unsigned'] = true;
+                // no break
             case 'int':
             case 'integer':
                 return 'int'.($field['unsigned'] ? ' unsigned' : '').(empty($field['zerofill']) ? '' : ' zerofill');
             case 'decimal':
-                return sprintf('decimal(%s)', $field['length']).(empty($field['unsigned']) ? '' : ' unsigned').(empty($field['zerofill']) ? '' : ' zerofill');;
+                return sprintf('decimal(%s)', $field['length']).(empty($field['unsigned']) ? '' : ' unsigned').(empty($field['zerofill']) ? '' : ' zerofill');
+                ;
             case 'float':
                 return 'float';
             case 'double':

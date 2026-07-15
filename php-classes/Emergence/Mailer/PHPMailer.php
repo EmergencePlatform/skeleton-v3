@@ -15,7 +15,7 @@ class PHPMailer extends AbstractMailer
             $headers = '';
         } elseif (is_array($options['Headers'])) {
             $headers = '';
-            foreach ($options['Headers'] AS $key => $value) {
+            foreach ($options['Headers'] as $key => $value) {
                 if (is_string($key)) {
                     $headers .= $key.': '.$value.PHP_EOL;
                 } else {

@@ -5,7 +5,6 @@ namespace Emergence\Comments;
 use ActiveRecord;
 use HandleBehavior;
 
-
 class Comment extends \VersionedRecord
 {
     // support subclassing

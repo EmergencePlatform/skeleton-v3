@@ -6,7 +6,6 @@ use Emergence\People\IUser;
 use Emergence\People\Person;
 use Emergence\People\User;
 
-
 class PeopleRequestHandler extends RecordsRequestHandler
 {
     public static $personClass = Person::class;
@@ -40,14 +39,14 @@ class PeopleRequestHandler extends RecordsRequestHandler
         $interface = empty($_GET['interface']) || $_GET['interface'] != 'user' ? IPerson::class : IUser::class;
         $baseClass = $interface == IPerson::class ? $personClass : $userClass;
 
-        $classes = array_values(array_filter(Person::getSubClasses(), fn($class) => is_a($class, $interface, true)));
+        $classes = array_values(array_filter(Person::getSubClasses(), fn ($class) => is_a($class, $interface, true)));
 
         $defaultClass = $baseClass::getDefaultClass();
         $defaultPersonClass = $personClass::getDefaultClass();
         $defaultUserClass = $userClass::getDefaultClass();
 
         return static::respond('classes', [
-            'data' => array_map(fn($class) => [
+            'data' => array_map(fn ($class) => [
                 'name' => $class,
                 'label' => $class::$classLabel,
                 'interfaces' => array_values(class_implements($class)),

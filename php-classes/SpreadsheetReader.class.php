@@ -23,13 +23,13 @@ class SpreadsheetReader
         switch ($mimeType) {
             case 'text/plain':
             case 'text/csv':
-            return new static($stream, $options);
+                return new static($stream, $options);
 
             case 'application/vnd.ms-office':
-            throw new Exception('Excel import not yet supported');
+                throw new Exception('Excel import not yet supported');
 
             default:
-            throw new Exception('Unsupported spreadsheet mime-type: '.$mimeType);
+                throw new Exception('Unsupported spreadsheet mime-type: '.$mimeType);
         }
     }
 
@@ -116,7 +116,7 @@ class SpreadsheetReader
 
     public function writeToTable($tableName, $type = 'MyISAM', $temporary = false)
     {
-        $fieldDefs = array_map(fn($cn) => sprintf('`%s` varchar(255) default NULL', $cn), $this->_columnNames);
+        $fieldDefs = array_map(fn ($cn) => sprintf('`%s` varchar(255) default NULL', $cn), $this->_columnNames);
 
         // trim blank last column
         $trimLast = false;
@@ -127,8 +127,8 @@ class SpreadsheetReader
 
         // create table
         DB::nonQuery(
-            'CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8;'
-            ,[
+            'CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8;',
+            [
                 $tableName
                 ,implode(',', $fieldDefs)
                 ,$type
@@ -143,8 +143,8 @@ class SpreadsheetReader
             }
 
             DB::nonQuery(
-                'INSERT INTO `%s` VALUES ("%s")'
-                ,[
+                'INSERT INTO `%s` VALUES ("%s")',
+                [
                     $tableName
                     ,implode('","', array_map(['DB', 'escape'], $row))
                 ]

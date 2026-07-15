@@ -3,7 +3,6 @@
 namespace Emergence\WebApps;
 
 use Exception;
-
 use Site;
 use SiteFile;
 use JSON;
@@ -40,6 +39,6 @@ class IndexApp extends App
     {
         return new Response(static::$responseId, [
             'node' => $this->indexNode
-        ], new StaticContent);
+        ], new StaticContent());
     }
 }

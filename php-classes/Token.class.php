@@ -65,7 +65,7 @@ abstract class Token extends ActiveRecord
         }
 
         if (!$this->Expires) {
-            $this->Expires = time() + (3600*static::$expirationHours);
+            $this->Expires = time() + (3600 * static::$expirationHours);
         }
 
         // call parent

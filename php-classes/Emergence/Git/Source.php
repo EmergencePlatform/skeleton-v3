@@ -666,11 +666,11 @@ class Source
             try {
                 if ($srcFileNode = Site::resolvePath($treeOptions['vfsPath'])) {
                     if ($srcFileNode instanceof SiteFile) {
-//                        \Debug::dumpVar($srcFileNode, false, "Found file at path: $treeOptions[vfsPath]");
+                        //                        \Debug::dumpVar($srcFileNode, false, "Found file at path: $treeOptions[vfsPath]");
                         $srcFileNode->delete();
                         $result = ['filesDeleted' => 1];
                     } else {
-//                        \Debug::dumpVar($treeOptions, false, "Found tree at path: $treeOptions[vfsPath]");
+                        //                        \Debug::dumpVar($treeOptions, false, "Found tree at path: $treeOptions[vfsPath]");
                         $result = static::eraseTree($treeOptions['vfsPath'], $treeOptions);
                     }
 

@@ -4,7 +4,6 @@ namespace Jarvus\Sencha;
 
 use Site;
 use Emergence_FS;
-
 use Emergence\Site\Storage;
 
 class Framework
@@ -273,7 +272,7 @@ class Framework
         // extract minimum files
         $extractPaths = $this->getExtractPaths();
 
-        foreach ($extractPaths AS $extractPath => $extractConfig) {
+        foreach ($extractPaths as $extractPath => $extractConfig) {
             if (is_string($extractConfig)) {
                 $extractPath = $extractConfig;
             }
@@ -291,7 +290,7 @@ class Framework
                     implode(
                         ' ',
                         array_map(
-                            fn($excludePath) => '-x '.escapeshellarg($archiveRootDirectory.'/'.$excludePath),
+                            fn ($excludePath) => '-x '.escapeshellarg($archiveRootDirectory.'/'.$excludePath),
                             is_string($extractConfig['exclude']) ? [$extractConfig['exclude']] : $extractConfig['exclude']
                         )
                     );

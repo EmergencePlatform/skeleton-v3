@@ -3,13 +3,13 @@
 class ErrorHandler extends RequestHandler
 {
     // error codes
-    const ERROR_DB    = 1;
+    public const ERROR_DB    = 1;
 
     public static function handleException(\Throwable $e)
     {
         switch ($e::class) {
             case 'RecordValidationException':
-            return static::handleValidationError($e);
+                return static::handleValidationError($e);
             default:
                 $report = sprintf("<h1 style='color:red'>%s caught</h1>\n", $e::class);
                 $report .= sprintf("<h2>Details</h2>\n<pre>%s</pre>\n", print_r($e, true));
@@ -74,20 +74,20 @@ class ErrorHandler extends RequestHandler
         $report = "<h2>Backtrace</h2>\n";
         $report .= "<table border='1'>\n";
         $report .= "<tr><th>Function</th><th>Args</th><th>Object</th><th>File:Line</th></tr>\n";
-        foreach ($backtrace AS $track) {
-            foreach ($track['args'] AS &$arg) {
+        foreach ($backtrace as $track) {
+            foreach ($track['args'] as &$arg) {
                 $arg = is_object($arg) ? $arg::class : substr(print_r($arg, true), 0, 100);
             }
 
             $report .= sprintf(
-                '<tr><td>%s<br/>%s%s</td><td>%s</td><td>%s</td><td>%s<br/>Line %s</td></tr>'
-                , $track['class'] ?? ''
-                , $track['type'] ?? ''
-                , $track['function']
-                , implode('<hr />', $track['args'])
-                , isset($track['object']) ? $track['object']::class : ''
-                , $track['file']
-                , $track['line']
+                '<tr><td>%s<br/>%s%s</td><td>%s</td><td>%s</td><td>%s<br/>Line %s</td></tr>',
+                $track['class'] ?? '',
+                $track['type'] ?? '',
+                $track['function'],
+                implode('<hr />', $track['args']),
+                isset($track['object']) ? $track['object']::class : '',
+                $track['file'],
+                $track['line']
             );
         }
 
@@ -102,5 +102,3 @@ class ErrorHandler extends RequestHandler
         }
     }
 }
-
-

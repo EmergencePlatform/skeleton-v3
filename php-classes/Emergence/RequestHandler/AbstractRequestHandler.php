@@ -112,7 +112,7 @@ abstract class AbstractRequestHandler
     public static function respondCsv($responseId, array $responseData = [])
     {
         if (!empty($_REQUEST['downloadToken'])) {
-            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time()+300, 'path' => '/']);
+            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time() + 300, 'path' => '/']);
         }
         if (is_array($responseData['data'])) {
             return CSV::respond($responseData['data'], $responseId, empty($_GET['columns']) ? null : $_GET['columns']);
@@ -120,8 +120,7 @@ abstract class AbstractRequestHandler
 
         if ($responseId == 'error') {
             print($responseData['message']);
-        }
-        else {
+        } else {
             print 'Unable to render data to CSV: '.$responseId;
         }
         exit();
@@ -130,7 +129,7 @@ abstract class AbstractRequestHandler
     public static function respondPdf($responseId, array $responseData = [])
     {
         if (!empty($_REQUEST['downloadToken'])) {
-            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time()+300, 'path' => '/']);
+            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time() + 300, 'path' => '/']);
         }
 
         $tmpPath = tempnam('/tmp', 'e_pdf_');

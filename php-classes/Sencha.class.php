@@ -43,7 +43,7 @@ class Sencha
 
         $cmd = sprintf('SENCHA_CMD_3_0_0="%1$s" PATH="%2$s" %1$s/sencha', static::$cmdPath.'/'.$cmdVersion, implode(':', static::$binPaths));
 
-        foreach ($args AS $arg) {
+        foreach ($args as $arg) {
             if (is_string($arg)) {
                 $cmd .= ' '.$arg;
             } elseif (is_array($arg)) {
@@ -80,8 +80,8 @@ class Sencha
         $newVersion = explode('.', (string) $newVersion);
 
         while (count($oldVersion) || count($newVersion)) {
-            $oldVersion[0] = (integer)$oldVersion[0];
-            $newVersion[0] = (integer)$newVersion[0];
+            $oldVersion[0] = (int)$oldVersion[0];
+            $newVersion[0] = (int)$newVersion[0];
             if ($newVersion[0] == $oldVersion[0]) {
                 array_shift($oldVersion);
                 array_shift($newVersion);
@@ -131,7 +131,7 @@ class Sencha
             return [];
         }
 
-        foreach ($packages AS $package) {
+        foreach ($packages as $package) {
             $cacheKey = "$package@$framework-$frameworkVersion";
 
             // check cache
@@ -179,11 +179,11 @@ class Sencha
 
         $classPaths = [];
 
-        foreach ($packages AS $packageName) {
+        foreach ($packages as $packageName) {
             $packageBuildConfigNode = Site::resolvePath("sencha-workspace/packages/$packageName/.sencha/package/sencha.cfg");
             if ($packageBuildConfigNode) {
                 $packageBuildConfig = Sencha::loadProperties($packageBuildConfigNode->RealPath);
-                foreach (explode(',', $packageBuildConfig['package.classpath']) AS $classPath) {
+                foreach (explode(',', $packageBuildConfig['package.classpath']) as $classPath) {
                     if (!$skipPackageRelative || !str_starts_with($classPath, '${package.dir}')) {
                         $classPaths[] = $classPath;
                     }

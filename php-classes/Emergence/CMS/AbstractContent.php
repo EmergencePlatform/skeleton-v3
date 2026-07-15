@@ -212,6 +212,6 @@ abstract class AbstractContent extends \VersionedRecord
 
     public function renderBody()
     {
-        return implode('', array_map(fn($Item) => $Item->renderBody(), $this->Items));
+        return implode('', array_map(fn ($Item) => $Item->renderBody(), $this->Items));
     }
 }

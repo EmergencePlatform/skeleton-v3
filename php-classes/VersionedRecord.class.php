@@ -154,8 +154,8 @@ abstract class VersionedRecord extends ActiveRecord
             $set = static::_mapValuesToSet($recordValues);
 
             DB::nonQuery(
-                'INSERT INTO `%s` SET %s'
-                , [
+                'INSERT INTO `%s` SET %s',
+                [
                     static::getHistoryTableName()
                     , implode(',', $set)
                 ]

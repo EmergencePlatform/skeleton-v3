@@ -17,12 +17,12 @@ class EventBus
             'RESULTS' => []
         ]);
 
-        foreach ($_EVENT['HANDLERS'] AS $handlerPath => $handlerNodeID) {
+        foreach ($_EVENT['HANDLERS'] as $handlerPath => $handlerNodeID) {
             $_EVENT['CURRENT_HANDLER_PATH'] = $handlerPath;
             $_EVENT['CURRENT_HANDLER_ID'] = $handlerNodeID;
 
             // create a closure for executing hanlder so that $_EMAIL is the only variable pre-defined in its scope
-            $handler = function() use (&$_EVENT) {
+            $handler = function () use (&$_EVENT) {
                 return include(SiteFile::getRealPathByID($_EVENT['CURRENT_HANDLER_ID']));
             };
 
@@ -66,7 +66,7 @@ class EventBus
             $eventPath = $contextPath.'/'.$key;
             $handlerNodes = Emergence_FS::getAggregateChildren($eventPath);
             ksort($handlerNodes);
-            foreach ($handlerNodes AS $filename => $node) {
+            foreach ($handlerNodes as $filename => $node) {
                 if ($node->Type == 'application/php') {
                     $handlers[$eventPath.'/'.$filename] = $node->ID;
                 }
@@ -75,7 +75,7 @@ class EventBus
             $eventPath = $contextPath.'/~';
             $handlerNodes = Emergence_FS::getAggregateChildren($eventPath);
             ksort($handlerNodes);
-            foreach ($handlerNodes AS $filename => $node) {
+            foreach ($handlerNodes as $filename => $node) {
                 if ($node->Type == 'application/php') {
                     $handlers[$eventPath.'/'.$filename] = $node->ID;
                 }

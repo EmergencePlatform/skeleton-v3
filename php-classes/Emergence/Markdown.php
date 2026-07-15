@@ -14,21 +14,21 @@ class Markdown extends \Michelf\MarkdownExtra
 
     protected function _doFencedCodeBlocks_callback($matches)
     {
-        $hashes    =& $this->html_hashes;
-        $classname =& $matches[2];
-        $attrs     =& $matches[3];
+        $hashes    = & $this->html_hashes;
+        $classname = & $matches[2];
+        $attrs     = & $matches[3];
 
 
         $html = parent::_doFencedCodeBlocks_callback($matches);
 
-        preg_replace_callback('/B\x1A\d+B/', function($blockHashMatches) use (&$hashes) {
+        preg_replace_callback('/B\x1A\d+B/', function ($blockHashMatches) use (&$hashes) {
             $hashId = $blockHashMatches[0];
 
             if (array_key_exists($hashId, $hashes)) {
-                $hashes[$hashId] = preg_replace_callback('|<pre class="shell">(.*?)</pre>|s', function($codeBlockMatches) {
+                $hashes[$hashId] = preg_replace_callback('|<pre class="shell">(.*?)</pre>|s', function ($codeBlockMatches) {
                     $shellCode = $codeBlockMatches[1];
 
-                    $shellCode = preg_replace_callback('/^([^\s]+\s+)([^\s]+\s+)([#$])\s+(.*)/m', function($commandMatches) {
+                    $shellCode = preg_replace_callback('/^([^\s]+\s+)([^\s]+\s+)([#$])\s+(.*)/m', function ($commandMatches) {
                         $shellUser = trim($commandMatches[1]);
                         $shellPromptPath = trim($commandMatches[2]);
                         $shellPromptSymbol = $commandMatches[3];

@@ -11,7 +11,7 @@ return [
         'FirstName' => 'First Name',
         'LastName' => 'Last Name'
     ],
-    'readQuery' => fn(array $input) => [],
+    'readQuery' => fn (array $input) => [],
     'buildRows' => function (array $query = [], array $config = []) {
 
         // build rows

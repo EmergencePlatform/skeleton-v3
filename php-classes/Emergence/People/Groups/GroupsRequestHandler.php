@@ -17,7 +17,7 @@ class GroupsRequestHandler extends RecordsRequestHandler
         if (!empty($_REQUEST['parentGroup']) && $_REQUEST['parentGroup'] != 'any') {
             $conditions['ParentID'] = $_REQUEST['parentGroup'];
         } elseif ($_REQUEST['parentGroup'] != 'any') {
-            $conditions['ParentID'] = NULL;
+            $conditions['ParentID'] = null;
         }
 
         if ($_REQUEST['query']) {

@@ -9,29 +9,29 @@ use Tag;
 abstract class AbstractRequestHandler extends \RecordsRequestHandler
 {
     #    public static $contentTypes = array(
-#        'Emergence\CMS\Page' => array(
-#            'handler' => '/pages'
-#            ,'editor' => 'CMS.PageEditor'
-#        )
-#        ,'Emergence\CMS\BlogPost' => array(
-#            'handler' => '/blog'
-#            ,'editor' => 'CMS.BlogPostEditor'
-#        )
-#    );
-#
-#    public static $contentItemTypes = array(
-#        'Emergence\CMS\Item\RichText' => array(
-#            'composer' => 'CMS.Composer.RichTextComposer'
-#            //'composer' => 'CMS.Composer.WYMTextComposer'
-#        )
-#        ,'Emergence\CMS\Item\Media' => array(
-#            'composer' => 'CMS.Composer.MediaComposer'
-#        )
-#    );
-#
-#    public static $defaultItems = array(
-#        'Emergence\CMS\RichTextContent'
-#    );
+    #        'Emergence\CMS\Page' => array(
+    #            'handler' => '/pages'
+    #            ,'editor' => 'CMS.PageEditor'
+    #        )
+    #        ,'Emergence\CMS\BlogPost' => array(
+    #            'handler' => '/blog'
+    #            ,'editor' => 'CMS.BlogPostEditor'
+    #        )
+    #    );
+    #
+    #    public static $contentItemTypes = array(
+    #        'Emergence\CMS\Item\RichText' => array(
+    #            'composer' => 'CMS.Composer.RichTextComposer'
+    #            //'composer' => 'CMS.Composer.WYMTextComposer'
+    #        )
+    #        ,'Emergence\CMS\Item\Media' => array(
+    #            'composer' => 'CMS.Composer.MediaComposer'
+    #        )
+    #    );
+    #
+    #    public static $defaultItems = array(
+    #        'Emergence\CMS\RichTextContent'
+    #    );
 
     // RecordsRequestHandler config
     public static $recordClass = \Emergence\CMS\AbstractContent::class;
@@ -97,7 +97,7 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
             $responseData['phantomsMap'] = [];
 
             // sort and save items
-            foreach ($requestData['items'] AS $itemData) {
+            foreach ($requestData['items'] as $itemData) {
                 if (!empty($itemData['ID']) && is_numeric($itemData['ID'])) {
                     // modify an existing item
                     $Item = Item\AbstractItem::getByID($itemData['ID']);
@@ -136,25 +136,25 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
             // remove deleted items
             $currentItemIDs = array_merge(array_keys($responseData['changedItems']), array_keys($responseData['newItems']));
 
-            $responseData['deletedItems'] = array_filter($Content->Items, fn($Item) => !in_array($Item->ID, $currentItemIDs));
+            $responseData['deletedItems'] = array_filter($Content->Items, fn ($Item) => !in_array($Item->ID, $currentItemIDs));
 
             if ($responseData['deletedItems']) {
-                foreach ($responseData['deletedItems'] AS $Item) {
+                foreach ($responseData['deletedItems'] as $Item) {
                     $Item->Status = 'Deleted';
                     $Item->save();
                 }
 
-                $Content->Items = array_filter($Content->Items, fn($Item) => $Item->Status != 'Deleted');
+                $Content->Items = array_filter($Content->Items, fn ($Item) => $Item->Status != 'Deleted');
             }
 
             // update layout if there were phantoms
             if (is_array($requestData['LayoutConfig']['itemOrder'])) {
-                foreach ($requestData['LayoutConfig']['itemOrder'] AS &$column) {
+                foreach ($requestData['LayoutConfig']['itemOrder'] as &$column) {
                     if (!is_array($column)) {
                         continue;
                     }
 
-                    foreach ($column AS &$itemID) {
+                    foreach ($column as &$itemID) {
                         if (array_key_exists($itemID, $responseData['phantomsMap'])) {
                             $itemID = $responseData['phantomsMap'][$itemID];
                         } else {
@@ -169,7 +169,7 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
 
         // assign context to media
         if (is_array($requestData['contextMedia'])) {
-            foreach ($requestData['contextMedia'] AS $mediaID) {
+            foreach ($requestData['contextMedia'] as $mediaID) {
                 if (!is_numeric($mediaID)) {
                     continue;
                 }
@@ -197,43 +197,43 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
     }
 
 
-#    protected static function getEditResponse($responseID, $responseData)
-#    {
-#        $responseData['contentTypes'] = static::$contentTypes;
-#        foreach ($responseData['contentTypes'] AS $contentClass => &$cfg) {
-#            if (empty($cfg['singularNoun'])) {
-#                $cfg['singularNoun'] = $contentClass::$singularNoun;
-#            }
-#
-#            if (empty($cfg['pluralNoun'])) {
-#                $cfg['pluralNoun'] = $contentClass::$pluralNoun;
-#            }
-#        }
-#
-#
-#        $responseData['contentItemTypes'] = static::$contentItemTypes;
-#        foreach ($responseData['contentItemTypes'] AS $contentItemClass => &$cfg) {
-#            if (empty($cfg['singularNoun'])) {
-#                $cfg['singularNoun'] = $contentItemClass::$singularNoun;
-#            }
-#
-#            if (empty($cfg['pluralNoun'])) {
-#                $cfg['pluralNoun'] = $contentItemClass::$pluralNoun;
-#            }
-#        }
-#
-#
-#        $responseData['defaultItems'] = array();
-#        foreach (static::$defaultItems AS $value) {
-#            if (is_string($value)) {
-#                $value = array(
-#                    'Class' => $value
-#                );
-#            }
-#
-#            $responseData['defaultItems'][] = $value;
-#        }
-#
-#        return $responseData;
-#    }
+    #    protected static function getEditResponse($responseID, $responseData)
+    #    {
+    #        $responseData['contentTypes'] = static::$contentTypes;
+    #        foreach ($responseData['contentTypes'] AS $contentClass => &$cfg) {
+    #            if (empty($cfg['singularNoun'])) {
+    #                $cfg['singularNoun'] = $contentClass::$singularNoun;
+    #            }
+    #
+    #            if (empty($cfg['pluralNoun'])) {
+    #                $cfg['pluralNoun'] = $contentClass::$pluralNoun;
+    #            }
+    #        }
+    #
+    #
+    #        $responseData['contentItemTypes'] = static::$contentItemTypes;
+    #        foreach ($responseData['contentItemTypes'] AS $contentItemClass => &$cfg) {
+    #            if (empty($cfg['singularNoun'])) {
+    #                $cfg['singularNoun'] = $contentItemClass::$singularNoun;
+    #            }
+    #
+    #            if (empty($cfg['pluralNoun'])) {
+    #                $cfg['pluralNoun'] = $contentItemClass::$pluralNoun;
+    #            }
+    #        }
+    #
+    #
+    #        $responseData['defaultItems'] = array();
+    #        foreach (static::$defaultItems AS $value) {
+    #            if (is_string($value)) {
+    #                $value = array(
+    #                    'Class' => $value
+    #                );
+    #            }
+    #
+    #            $responseData['defaultItems'][] = $value;
+    #        }
+    #
+    #        return $responseData;
+    #    }
 }

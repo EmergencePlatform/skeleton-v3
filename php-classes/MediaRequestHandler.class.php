@@ -52,13 +52,13 @@ class MediaRequestHandler extends RecordsRequestHandler
         // handle action
         switch ($action = static::shiftPath()) {
 
-#    		case 'media':
-#			{
-#				return static::handleMediaRequest();
-#			}
+            #    		case 'media':
+            #			{
+            #				return static::handleMediaRequest();
+            #			}
 
             case 'upload':
-            return static::handleUploadRequest();
+                return static::handleUploadRequest();
 
             case 'open':
                 $mediaID = static::shiftPath();
@@ -78,13 +78,13 @@ class MediaRequestHandler extends RecordsRequestHandler
                 return static::handleCaptionRequest($mediaID);
 
             case 'delete':
-            return static::handleDeleteRequest();
+                return static::handleDeleteRequest();
 
             case 'thumbnail':
-            return static::handleThumbnailRequest();
+                return static::handleThumbnailRequest();
 
             case 'manage':
-            return MediaManagerRequestHandler::handleRequest();
+                return MediaManagerRequestHandler::handleRequest();
 
             case false:
             case '':
@@ -201,7 +201,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         }
 
         return static::respond('uploadComplete', [
-            'success' => (boolean)$Media
+            'success' => (bool)$Media
             ,'data' => $Media
             ,'TagID' => isset($Tag) ? $Tag->ID : null
         ]);
@@ -246,9 +246,9 @@ class MediaRequestHandler extends RecordsRequestHandler
             }
 
             // send caching headers
-            $expires = 60*60*24*365;
+            $expires = 60 * 60 * 24 * 365;
             header("Cache-Control: public, max-age=$expires");
-            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time()+$expires));
+            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + $expires));
             header('Pragma: public');
 
             // media are immutable for a given URL, so no need to actually check anything if the browser wants to revalidate its cache
@@ -440,7 +440,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         }
 
         $deleted = [];
-        foreach ($mediaIDs AS $mediaID) {
+        foreach ($mediaIDs as $mediaID) {
             if (!is_numeric($mediaID)) {
                 static::throwError('Invalid mediaID');
             }
@@ -471,9 +471,9 @@ class MediaRequestHandler extends RecordsRequestHandler
     public static function handleThumbnailRequest(Media $Media = null)
     {
         // send caching headers
-        $expires = 60*60*24*365;
+        $expires = 60 * 60 * 24 * 365;
         header("Cache-Control: public, max-age=$expires");
-        header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time()+$expires));
+        header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + $expires));
         header('Pragma: public');
 
 
@@ -566,34 +566,34 @@ class MediaRequestHandler extends RecordsRequestHandler
 
 
 
-#	public static function handleMediaRequest()
-#	{
-#		if(static::peekPath() == 'delete')
-#		{
-#			return static::handleMediaDeleteRequest();
-#		}
-#
-#
-#		// get media
-#		$media = JSON::translateRecords(Media::getAll(), true);
-#
-#		// get tag media assignments
-#		$media_tags = Tag::getAllItems('media');
-#
-#		// inject album assignments to photo records
-#		foreach($media_tags AS $media_id => $tags)
-#		{
-#			foreach($tags AS $tag)
-#			{
-#				$media[$media_id]['tags'][] = $tag['tag_id'];
-#			}
-#		}
-#
-#		return static::respond('media', array(
-#			'success' => true
-#			,'data' => array_values($media)
-#		));
-#	}
+    #	public static function handleMediaRequest()
+    #	{
+    #		if(static::peekPath() == 'delete')
+    #		{
+    #			return static::handleMediaDeleteRequest();
+    #		}
+    #
+    #
+    #		// get media
+    #		$media = JSON::translateRecords(Media::getAll(), true);
+    #
+    #		// get tag media assignments
+    #		$media_tags = Tag::getAllItems('media');
+    #
+    #		// inject album assignments to photo records
+    #		foreach($media_tags AS $media_id => $tags)
+    #		{
+    #			foreach($tags AS $tag)
+    #			{
+    #				$media[$media_id]['tags'][] = $tag['tag_id'];
+    #			}
+    #		}
+    #
+    #		return static::respond('media', array(
+    #			'success' => true
+    #			,'data' => array_values($media)
+    #		));
+    #	}
 
 
     public static function handleMediaDeleteRequest()
@@ -605,7 +605,7 @@ class MediaRequestHandler extends RecordsRequestHandler
 
         // retrieve photos
         $media_array = [];
-        foreach ($_REQUEST['media'] AS $media_id) {
+        foreach ($_REQUEST['media'] as $media_id) {
             if (!is_numeric($media_id)) {
                 static::throwError('Invalid request');
             }
@@ -621,7 +621,7 @@ class MediaRequestHandler extends RecordsRequestHandler
 
         // delete
         $deleted = [];
-        foreach ($media_array AS $media_id => $Media) {
+        foreach ($media_array as $media_id => $Media) {
             if ($Media->delete()) {
                 $deleted[] = $media_id;
             }

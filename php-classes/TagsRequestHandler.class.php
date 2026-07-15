@@ -11,18 +11,18 @@ class TagsRequestHandler extends RecordsRequestHandler
     {
         switch ($action ? $action : $action = static::shiftPath()) {
             case 'assign':
-            return static::handleMultiAssignRequest();
+                return static::handleMultiAssignRequest();
 
             default:
-            return parent::handleRecordsRequest($action);
+                return parent::handleRecordsRequest($action);
         }
     }
 
-    public static function handleBrowseRequest($options = [], $conditions = [], $responseID = NULL, $responseData = [])
+    public static function handleBrowseRequest($options = [], $conditions = [], $responseID = null, $responseData = [])
     {
         if (!empty($_REQUEST['q']) && $_REQUEST['valuesqry'] == 'true') {
             $handles = explode('|', $_REQUEST['q']);
-            $conditions = 'Handle IN ("'.implode('","',DB::escape($handles)).'")';
+            $conditions = 'Handle IN ("'.implode('","', DB::escape($handles)).'")';
 
             return static::respond('tags', [
                 'success' => true
@@ -41,10 +41,10 @@ class TagsRequestHandler extends RecordsRequestHandler
     {
         switch ($action ? $action : $action = static::shiftPath()) {
             case 'items':
-            return static::handleTagItemsRequest($Tag);
+                return static::handleTagItemsRequest($Tag);
 
             default:
-            return parent::handleRecordRequest($Tag, $action);
+                return parent::handleRecordRequest($Tag, $action);
         }
     }
 
@@ -81,7 +81,7 @@ class TagsRequestHandler extends RecordsRequestHandler
         $className = static::$recordClass;
         $results = [];
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             if (!$Tag = $className::getByID($datum['TagID'])) {
                 return static::throwNotFoundError();
             }

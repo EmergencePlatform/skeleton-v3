@@ -4,11 +4,11 @@ namespace Emergence\Connectors;
 
 class SyncResult
 {
-    const STATUS_CREATED = 'created';
-    const STATUS_UPDATED = 'updated';
-    const STATUS_SKIPPED = 'skipped';
-    const STATUS_VERIFIED = 'verified';
-    const STATUS_DELETED = 'deleted';
+    public const STATUS_CREATED = 'created';
+    public const STATUS_UPDATED = 'updated';
+    public const STATUS_SKIPPED = 'skipped';
+    public const STATUS_VERIFIED = 'verified';
+    public const STATUS_DELETED = 'deleted';
 
     protected $status;
     protected $message = '';

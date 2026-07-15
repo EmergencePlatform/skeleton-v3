@@ -5,13 +5,10 @@ namespace Emergence\Connectors;
 use Site;
 use DB;
 use ActiveRecord;
-
 use Emergence\EventBus;
 use Emergence\Logger;
 use Emergence\Util\Url;
-
 use Psr\Log\LoggerInterface;
-
 
 abstract class AbstractConnector extends \RequestHandler implements IConnector
 {
@@ -37,7 +34,8 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
     {
         $path = '/connectors/' . static::getConnectorId();
 
-        return $external ? Url::buildAbsolute($path) : $path;;
+        return $external ? Url::buildAbsolute($path) : $path;
+        ;
     }
 
     public static function handleRequest($action = null)

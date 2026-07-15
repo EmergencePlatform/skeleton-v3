@@ -1,4 +1,5 @@
 <?php
+
 namespace Emergence\Http\Message;
 
 use Psr\Http\Message\StreamInterface;

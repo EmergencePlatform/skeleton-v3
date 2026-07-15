@@ -49,21 +49,20 @@ class Logger extends \Psr\Log\AbstractLogger
 
         if (in_array($level, static::$logLevelsWrite)) {
             file_put_contents(
-                static::$logPath
-                ,
-                    date('Y-m-d H:i:s')." [$level] $message\n\t"
+                static::$logPath,
+                date('Y-m-d H:i:s')." [$level] $message\n\t"
                     ."context: ".trim(str_replace(PHP_EOL, "\n\t", print_r($context, true)))."\n"
                     ."\tbacktrace:\n\t\t".implode("\n\t\t", static::buildBacktraceLines())
-                    ."\n\n"
-                ,FILE_APPEND
+                    ."\n\n",
+                FILE_APPEND
             );
         }
 
         if (in_array($level, static::$logLevelsEmail)) {
             \Emergence\Mailer\Mailer::send(
-                \Site::$webmasterEmail
-                ,"$level logged on $_SERVER[HTTP_HOST]"
-                ,'<dl>'
+                \Site::$webmasterEmail,
+                "$level logged on $_SERVER[HTTP_HOST]",
+                '<dl>'
                     .'<dt>Timestamp</dt><dd>'.date('Y-m-d H:i:s').'</dd>'
                     .'<dt>Level</dt><dd>'.$level.'</dd>'
                     .'<dt>Message</dt><dd>'.htmlspecialchars($message).'</dd>'
@@ -118,7 +117,7 @@ class Logger extends \Psr\Log\AbstractLogger
                  (empty($frame['class']) ? '' : $frame['class'])
                 .(empty($frame['type']) ? '' : $frame['type'])
                 .(empty($frame['function']) ? '' : $frame['function'])
-                .(empty($frame['args']) ? '' : '('.implode(',', array_map(fn($arg) => is_string($arg) || is_numeric($arg) ? var_export($arg, true) : gettype($arg), $frame['args'])).')')
+                .(empty($frame['args']) ? '' : '('.implode(',', array_map(fn ($arg) => is_string($arg) || is_numeric($arg) ? var_export($arg, true) : gettype($arg), $frame['args'])).')')
                 .(empty($frame['file']) ? '' : " called at $frame[file]:$frame[line]");
         }
 

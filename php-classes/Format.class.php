@@ -2,7 +2,7 @@
 
 class Format
 {
-    public static function emailLink($email, $subject=false)
+    public static function emailLink($email, $subject = false)
     {
         $mailto = 'mailto:'.$email;
 
@@ -11,16 +11,16 @@ class Format
         }
 
         return sprintf(
-            '<a href="%s">%s</a>'
-            ,$mailto
-            ,$email
+            '<a href="%s">%s</a>',
+            $mailto,
+            $email
         );
     }
 
     public static function usPhone($input, $format = '(%s) %s-%s')
     {
         // strip non-digits
-        $numbers = preg_replace('/\D/','',(string) $input);
+        $numbers = preg_replace('/\D/', '', (string) $input);
 
         // strip prefixed 1
         if ((strlen((string) $numbers) === 11) && ($numbers[0] == '1')) {
@@ -34,14 +34,14 @@ class Format
 
         // return formatted string
         return sprintf(
-            $format
-            , substr((string) $numbers,0,3)
-            , substr((string) $numbers,3,3)
-            , substr((string) $numbers,6,4)
+            $format,
+            substr((string) $numbers, 0, 3),
+            substr((string) $numbers, 3, 3),
+            substr((string) $numbers, 6, 4)
         );
     }
 
-    public static function truncate($string, $limit=300, $break = '.', $pad = '...')
+    public static function truncate($string, $limit = 300, $break = '.', $pad = '...')
     {
         // return with no change if string is shorter than $limit
         if (strlen((string) $string) <= $limit) {
@@ -69,14 +69,14 @@ class Format
       define( 'ONE_WEEK',   ONE_DAY*7 );
       define( 'ONE_MONTH',  ONE_WEEK*4 );
       define( 'ONE_YEAR',   ONE_MONTH*12 );
-     
+
       // sod = start of day :)
       $sod = mktime( 0, 0, 0, date( 'm', $time ), date( 'd', $time ), date( 'Y', $time ) );
       $sod_now = mktime( 0, 0, 0, date( 'm', NOW ), date( 'd', NOW ), date( 'Y', NOW ) );
-     
+
       // used to convert numbers to strings
       $convert = array( 1 => 'one', 2 => 'two', 3 => 'three', 4 => 'four', 5 => 'five', 6 => 'six', 7 => 'seven', 8 => 'eight', 9 => 'nine', 10 => 'ten', 11 => 'eleven' );
-     
+
       // today
       if ( $sod_now == $sod ) {
         if ( $time > NOW-(ONE_MINUTE*3) ) {
@@ -88,7 +88,7 @@ class Format
         }
         return 'today at ' . date( 'g:ia', $time );
       }
-     
+
       // yesterday
       if ( ($sod_now-$sod) <= ONE_DAY ) {
         if ( date( 'i', $time ) > (ONE_MINUTE+30) ) {
@@ -96,7 +96,7 @@ class Format
         }
         return 'yesterday around ' . date( 'ga', $time );
       }
-     
+
       // within the last 5 days
       if ( ($sod_now-$sod) <= (ONE_DAY*5) ) {
         $str = date( 'l', $time );
@@ -112,7 +112,7 @@ class Format
         }
         return $str;
       }
-     
+
       // number of weeks (between 1 and 3)...
       if ( ($sod_now-$sod) < (ONE_WEEK*3.5) ) {
         if ( ($sod_now-$sod) < (ONE_WEEK*1.5) ) {
@@ -123,7 +123,7 @@ class Format
           return 'about three weeks ago';
         }
       }
-     
+
       // number of months (between 1 and 11)...
       if ( ($sod_now-$sod) < (ONE_MONTH*11.5) ) {
         for ( $i = (ONE_WEEK*3.5), $m=0; $i < ONE_YEAR; $i += ONE_MONTH, $m++ ) {
@@ -132,21 +132,21 @@ class Format
           }
         }
       }
-     
+
       // number of years...
       for ( $i = (ONE_MONTH*11.5), $y=0; $i < (ONE_YEAR*10); $i += ONE_YEAR, $y++ ) {
         if ( ($sod_now-$sod) <= $i ) {
           return 'about ' . $convert[$y] . ' year' . (($y>1)?'s':'') . ' ago';
         }
       }
-     
+
       // more than ten years...
       return 'more than ten years ago';
       */
 
         if (!ctype_digit((string) $timestamp) && ($timestamp = strtotime((string) $timestamp)) == false) {
             echo $timestamp;
-            return FALSE;
+            return false;
         }
         $diff = time() - $timestamp;
 
@@ -172,12 +172,11 @@ class Format
         } elseif ($diff < 77760000) { //Months (30 Days)
             $val = round(($diff / 2592000));
             $unit = 'month';
-        }
-        else {
+        } else {
             $val = round(($diff / 31104000));
             $unit = 'year';
         }
-        if ($val>1) {
+        if ($val > 1) {
             return $val.' '.$unit.'s ago';
         }
         return $pre.' '.$unit.' ago';
@@ -189,36 +188,36 @@ class Format
         if (!isset($GLOBALS['bbcodeEngine'])) {
             function bbcode_clean_list($text)
             {
-                return preg_replace("/[\r\n]/",'',(string) $text);
+                return preg_replace("/[\r\n]/", '', (string) $text);
             }
 
             $GLOBALS['bbcodeEngine'] = bbcode_create([
-                '' => ['type'=>BBCODE_TYPE_ROOT,  'childs'=>'!*']
-                ,'h2' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h2>', 'close_tag'=>'</h2>']
-                ,'h3' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h3>', 'close_tag'=>'</h3>']
-                ,'h4' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h4>', 'close_tag'=>'</h4>']
-                ,'h5' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h5>', 'close_tag'=>'</h5>']
-                ,'h6' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<h6>', 'close_tag'=>'</h6>']
-                ,'i' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<i>', 'close_tag'=>'</i>']
-                ,'cite' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<cite>', 'close_tag'=>'</cite>']
-                ,'b' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<b>', 'close_tag'=>'</b>']
-                ,'u' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<u>', 'close_tag'=>'</u>']
-                ,'s' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<s>', 'close_tag'=>'</s>']
-                ,'small' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<small>', 'close_tag'=>'</small>']
-                ,'quote' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<blockquote>', 'close_tag'=>'</blockquote>']
-                ,'sig' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<div class="sig">', 'close_tag'=>'</div>']
-                ,'url' => ['type'=>BBCODE_TYPE_OPTARG, 'open_tag'=>'<a href="{PARAM}" target="_blank">', 'close_tag'=>'</a>', 'default_arg'=>'{CONTENT}', 'childs'=>'b,i']
-                ,'img' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<img src="', 'close_tag'=>'" />', 'childs'=>'']
-                ,'list'=> [
+                '' => ['type' => BBCODE_TYPE_ROOT,  'childs' => '!*']
+                ,'h2' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<h2>', 'close_tag' => '</h2>']
+                ,'h3' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<h3>', 'close_tag' => '</h3>']
+                ,'h4' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<h4>', 'close_tag' => '</h4>']
+                ,'h5' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<h5>', 'close_tag' => '</h5>']
+                ,'h6' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<h6>', 'close_tag' => '</h6>']
+                ,'i' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<i>', 'close_tag' => '</i>']
+                ,'cite' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<cite>', 'close_tag' => '</cite>']
+                ,'b' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<b>', 'close_tag' => '</b>']
+                ,'u' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<u>', 'close_tag' => '</u>']
+                ,'s' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<s>', 'close_tag' => '</s>']
+                ,'small' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<small>', 'close_tag' => '</small>']
+                ,'quote' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<blockquote>', 'close_tag' => '</blockquote>']
+                ,'sig' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<div class="sig">', 'close_tag' => '</div>']
+                ,'url' => ['type' => BBCODE_TYPE_OPTARG, 'open_tag' => '<a href="{PARAM}" target="_blank">', 'close_tag' => '</a>', 'default_arg' => '{CONTENT}', 'childs' => 'b,i']
+                ,'img' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<img src="', 'close_tag' => '" />', 'childs' => '']
+                ,'list' => [
                     'type' => BBCODE_TYPE_NOARG
                     ,'open_tag' => '<ul>'
                     ,'close_tag' => '</ul>'
                     ,'childs' => '*'
                     ,'content_handling' => 'bbcode_clean_list'
                 ]
-                ,'*' => ['type'=>BBCODE_TYPE_NOARG, 'open_tag'=>'<li>', 'close_tag'=>'</li>', 'parent'=>'list', 'flags'=>BBCODE_FLAGS_ONE_OPEN_PER_LEVEL]
-                ,'l' => ['type'=>BBCODE_TYPE_SINGLE, 'open_tag' => '[']
-                ,'r' => ['type'=>BBCODE_TYPE_SINGLE, 'open_tag' => ']']
+                ,'*' => ['type' => BBCODE_TYPE_NOARG, 'open_tag' => '<li>', 'close_tag' => '</li>', 'parent' => 'list', 'flags' => BBCODE_FLAGS_ONE_OPEN_PER_LEVEL]
+                ,'l' => ['type' => BBCODE_TYPE_SINGLE, 'open_tag' => '[']
+                ,'r' => ['type' => BBCODE_TYPE_SINGLE, 'open_tag' => ']']
             ]);
         }
 
@@ -242,7 +241,7 @@ class Format
         // simple character replacements
         $text = str_replace(['--','(r)','(tm)','(c)'], ['&mdash;','&reg;','&trade;','&copy;'], $text);
         // ordinals
-        $text = preg_replace('/(\d+)(st|nd|rd|th|st)\b/i', '$1<sup>$2</sup>',(string) $text);
+        $text = preg_replace('/(\d+)(st|nd|rd|th|st)\b/i', '$1<sup>$2</sup>', (string) $text);
         // turn remaining single newlines into brs
         $text = nl2br((string) $text);
         return $text;

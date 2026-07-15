@@ -11,7 +11,7 @@ function Dwoo_Plugin_cssmin(Dwoo_Core $dwoo, $files, $root = ['site-root','css']
 
     if ($debug || !empty($_GET['css-debug']) || !empty($_GET['cssdebug'])) {
         $html = '';
-        foreach ($sourceReport['files'] AS $filename => $fileData) {
+        foreach ($sourceReport['files'] as $filename => $fileData) {
             $html .= "<link rel='stylesheet' type='text/css' href='".preg_replace('/^site-root/', '', (string) $filename)."?_sha1=$fileData[SHA1]'>\n";
         }
 

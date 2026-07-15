@@ -7,7 +7,7 @@ return [
     'handler' => function () {
         if (empty($_GET['class'])) {
             return static::respond('classes', [
-                'classes' => array_filter(Emergence\ActiveRecord\TablesManager::getActiveRecordClasses(), fn($className) => $className::fieldExists('Left') && $className::fieldExists('Right') && $className::fieldExists('ParentID'))
+                'classes' => array_filter(Emergence\ActiveRecord\TablesManager::getActiveRecordClasses(), fn ($className) => $className::fieldExists('Left') && $className::fieldExists('Right') && $className::fieldExists('ParentID'))
             ]);
         }
 

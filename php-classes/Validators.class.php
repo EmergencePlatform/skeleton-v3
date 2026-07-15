@@ -206,7 +206,7 @@ class Validators
         $sum = 0;
 
         foreach (array_reverse(str_split((string) $cc)) as $num) {
-            $sum += array_sum(str_split(($odd = !$odd) ? $num*2 : $num));
+            $sum += array_sum(str_split(($odd = !$odd) ? $num * 2 : $num));
         }
 
         return (($sum % 10 === 0) && ($sum != 0));
@@ -272,16 +272,16 @@ class Validators
 
         switch ($options['country']) {
             case 'US':
-            return in_array($state_province, array_keys(Address::$usStates));
+                return in_array($state_province, array_keys(Address::$usStates));
 
             case 'AU':
-            return in_array($state_province, array_keys(Address::$auStates));
+                return in_array($state_province, array_keys(Address::$auStates));
 
             case 'CA':
-            return in_array($state_province, array_keys(Address::$caProvinces));
+                return in_array($state_province, array_keys(Address::$caProvinces));
 
             default:
-            return true;
+                return true;
         }
     }
 
@@ -364,11 +364,11 @@ class Validators
                 );
 
             default:
-            return
-            (
-                (strlen((string) $phone) >= 8)
-                && (strlen((string) $phone) <= 15)
-            );
+                return
+                (
+                    (strlen((string) $phone) >= 8)
+                    && (strlen((string) $phone) <= 15)
+                );
         }
         return null;
     }
@@ -558,7 +558,7 @@ class Validators
             return true;
         }
 
-        foreach ($value AS $item) {
+        foreach ($value as $item) {
             if (!call_user_func([self::class,$options['itemValidator']], $item, $options['itemValidatorOptions'])) {
                 return false;
             }

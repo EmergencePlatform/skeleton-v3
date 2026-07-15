@@ -102,7 +102,7 @@ class RecordValidator
         // parse 'field' for multiple values and array paths
         if (is_array($options['field'])) {
             $value = [];
-            foreach ($options['field'] AS $field_single) {
+            foreach ($options['field'] as $field_single) {
                 $value[] = $this->resolveValue($field_single);
             }
 
@@ -128,7 +128,7 @@ class RecordValidator
                 $this->_errors[$options['id']] = gettext($options['errorMessage']);
             } else {
                 // default 'errorMessage' built from 'id'
-                $this->_errors[$options['id']] = sprintf($options['required'] && empty($value) ? _('%s is missing.') :  _('%s is invalid.'), Inflector::spacifyCaps($options['id']));
+                $this->_errors[$options['id']] = sprintf($options['required'] && empty($value) ? _('%s is missing.') : _('%s is invalid.'), Inflector::spacifyCaps($options['id']));
             }
             return false;
         }
@@ -162,7 +162,7 @@ class RecordValidator
     // protected static methods
     protected static function trimArray(&$array)
     {
-        foreach ($array AS &$var) {
+        foreach ($array as &$var) {
             if (is_string($var)) {
                 $var = trim($var);
             } elseif (is_array($var)) {

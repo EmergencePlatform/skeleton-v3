@@ -7,7 +7,7 @@ return [
     'requireAccountLevel' => 'Developer',
     'handler' => function ($taskConfig) {
 
-        $getEntryData = (fn($entry, $includeValue = false) => [
+        $getEntryData = (fn ($entry, $includeValue = false) => [
             'hits' => $entry['num_hits'],
             'size' => $entry['mem_size'],
             'accessTime' => $entry['access_time'],
@@ -47,12 +47,12 @@ return [
         $prefixLength = strlen((string) Cache::getKeyPrefix());
         $entries = [];
 
-        foreach (Cache::getIterator('/.*/') AS $key => $entry) {
+        foreach (Cache::getIterator('/.*/') as $key => $entry) {
             $key = substr((string) $key, $prefixLength);
             $entries[$key] = $getEntryData($entry);
         }
 
-        uasort($entries, fn($a, $b) => $b['hits'] <=> $a['hits']);
+        uasort($entries, fn ($a, $b) => $b['hits'] <=> $a['hits']);
 
         return static::respond('entries', [
             'entries' => $entries

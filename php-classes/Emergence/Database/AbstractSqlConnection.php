@@ -42,7 +42,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
      */
     public static function hasDefaultInstance()
     {
-        return (boolean)static::$defaultInstance;
+        return (bool)static::$defaultInstance;
     }
 
     /**
@@ -167,7 +167,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['with']) && is_array($options['with'])) {
             $with = [];
 
-            foreach ($options['with'] AS $withAlias => $withBody) {
+            foreach ($options['with'] as $withAlias => $withBody) {
                 if (is_array($withBody)) {
                     if (isset($withBody['params'])) {
                         throw new \Exception('CTE query spec may not include params');
@@ -186,14 +186,14 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['columns'])) {
             if (is_array($options['columns'])) {
                 $select = [];
-                foreach ($options['columns'] AS $columnAlias => $columnValue) {
-                    $select[] = $columnValue . ( is_string($columnAlias) ? ' AS ' . $this->quoteIdentifier($columnAlias) : '' );
+                foreach ($options['columns'] as $columnAlias => $columnValue) {
+                    $select[] = $columnValue . (is_string($columnAlias) ? ' AS ' . $this->quoteIdentifier($columnAlias) : '');
                 }
                 $select = implode(', ', $select);
             } else {
                 $select = $options['columns'];
             }
-        } elseif(!empty($options['from']) || !empty($options['table'])) {
+        } elseif (!empty($options['from']) || !empty($options['table'])) {
             $select = '*';
         } else {
             throw new \Exception('SELECT query must have columns, from, or table configured');
@@ -206,8 +206,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['from'])) {
             if (is_array($options['from'])) {
                 $from = [];
-                foreach ($options['from'] AS $fromAlias => $fromValue) {
-                    $from[] = $fromValue . ( is_string($fromAlias) ? ' AS ' . $fromAlias : '' );
+                foreach ($options['from'] as $fromAlias => $fromValue) {
+                    $from[] = $fromValue . (is_string($fromAlias) ? ' AS ' . $fromAlias : '');
                 }
                 $from = implode(', ', $from);
             } else {
@@ -232,7 +232,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['where'])) {
             if (is_array($options['where'])) {
                 $where = [];
-                foreach ($options['where'] AS $whereKey => $whereValue) {
+                foreach ($options['where'] as $whereKey => $whereValue) {
                     if (is_string($whereKey)) {
                         $where[] = $this->quoteIdentifier($whereKey) . ' = ' . $this->quoteValue($whereValue);
                     } else {
@@ -260,7 +260,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['order'])) {
             if (is_array($options['order'])) {
                 $order = [];
-                foreach ($options['order'] AS $orderKey => $orderValue) {
+                foreach ($options['order'] as $orderKey => $orderValue) {
                     $order[] = is_string($orderKey) ? $orderKey . ' ' . $orderValue : $orderValue;
                 }
                 $order = implode(', ', $order);
@@ -350,7 +350,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         $query = 'UPDATE ' . $this->quoteIdentifier($table);
 
         $set = [];
-        foreach ($values AS $key => $value) {
+        foreach ($values as $key => $value) {
             $set[] = $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value);
         }
 
@@ -360,7 +360,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
             if (is_array($where)) {
                 $conditions = [];
 
-                foreach ($where AS $key => $value) {
+                foreach ($where as $key => $value) {
                     $conditions[] = is_string($key) ? $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value) : $value;
                 }
 
@@ -385,7 +385,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
             if (is_array($where)) {
                 $conditions = [];
 
-                foreach ($where AS $key => $value) {
+                foreach ($where as $key => $value) {
                     $conditions[] = is_string($key) ? $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value) : $value;
                 }
 

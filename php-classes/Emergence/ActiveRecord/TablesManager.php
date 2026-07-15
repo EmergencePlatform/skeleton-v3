@@ -4,7 +4,6 @@ namespace Emergence\ActiveRecord;
 
 use Emergence_FS;
 
-
 class TablesManager
 {
     public static $classFilters = [
@@ -26,7 +25,7 @@ class TablesManager
     {
         $recordClasses = [];
 
-        foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') AS $classNode) {
+        foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') as $classNode) {
             if ($classNode->Type != 'application/php') {
                 continue;
             }
@@ -36,7 +35,7 @@ class TablesManager
 
             $className = preg_replace('/(\.class)?\.php$/i', '', implode('\\', $classPath));
 
-            foreach (static::$classFilters AS $pattern) {
+            foreach (static::$classFilters as $pattern) {
                 if (preg_match($pattern, (string) $className)) {
                     continue 2;
                 }

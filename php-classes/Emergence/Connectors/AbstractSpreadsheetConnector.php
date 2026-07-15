@@ -22,7 +22,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
     {
         $requiredColumns = [];
 
-        foreach ($config AS $key => $value) {
+        foreach ($config as $key => $value) {
             if (!$value) {
                 if (is_string($key) && array_key_exists($key, $requiredColumns)) {
                     unset($requiredColumns[$key]);
@@ -48,7 +48,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
 
         if ($columnsMap) {
             $mappedColumns = [];
-            foreach ($columns AS $columnName) {
+            foreach ($columns as $columnName) {
                 $mappedColumns[] = array_key_exists($columnName, $columnsMap) ? $columnsMap[$columnName] : $columnName;
             }
             $columns = $mappedColumns;
@@ -191,7 +191,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
             $results['created']++;
         } elseif ($logEntry['action'] == 'update') {
             $results['updated']++;
-            foreach (array_keys($logEntry['changes']->getNewValues()) AS $changedField) {
+            foreach (array_keys($logEntry['changes']->getNewValues()) as $changedField) {
                 $results['updated-fields'][$changedField]++;
             }
         }

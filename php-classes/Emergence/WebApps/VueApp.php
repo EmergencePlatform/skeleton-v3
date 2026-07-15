@@ -4,7 +4,6 @@ namespace Emergence\WebApps;
 
 use DOMDocument;
 use Exception;
-
 use Site;
 use Cache;
 use JSON;

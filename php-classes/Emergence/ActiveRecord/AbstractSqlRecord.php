@@ -75,7 +75,7 @@ abstract class AbstractSqlRecord extends AbstractActiveRecord
 
         $rows = $connection->selectAll($options);
 
-        foreach ($rows AS $row) {
+        foreach ($rows as $row) {
             if ($instanceOptions) {
                 $className = $row['Class'] ?: $defaultClass;
                 $row = new $className($row, $instanceOptions);

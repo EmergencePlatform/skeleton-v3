@@ -40,7 +40,7 @@ class PostmarkMailer extends AbstractMailer
 
         $result = curl_exec($ch);
         $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-#		die("<hr>result: $result, status: $httpStatus<hr>");
+        #		die("<hr>result: $result, status: $httpStatus<hr>");
 
         if ($httpStatus == 200) {
             return json_decode($result, true);

@@ -4,7 +4,6 @@ namespace Emergence\CMS;
 
 use ActiveRecord;
 
-
 class Page extends AbstractContent
 {
     // ActiveRecord configuration

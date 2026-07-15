@@ -6,6 +6,6 @@ function Dwoo_Plugin_money(Dwoo_Core $dwoo, $value, $format = '%n', $avoidDecima
         return '$'.($value + 0);
     }
     // strip non-digits
-    $value = preg_replace('/[^\d.]/','',(string) $value);
+    $value = preg_replace('/[^\d.]/', '', (string) $value);
     return money_format($format, $value ? $value : 0);
 }

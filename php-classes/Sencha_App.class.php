@@ -43,12 +43,12 @@ class Sencha_App
         }
 
         // try to get from shared cache - this seems annoying and unecessary
-#		$cacheKey = "app/$this->_name/config";
-#
-#		if($this->_buildCfg = Cache::fetch($cacheKey))
-#		{
-#			return $key ? $this->_buildCfg[$key] : $this->_buildCfg;
-#		}
+        #		$cacheKey = "app/$this->_name/config";
+        #
+        #		if($this->_buildCfg = Cache::fetch($cacheKey))
+        #		{
+        #			return $key ? $this->_buildCfg[$key] : $this->_buildCfg;
+        #		}
 
         // get from filesystem
         $configPath = ['sencha-workspace', $this->_name, '.sencha', 'app', 'sencha.cfg'];
@@ -64,7 +64,7 @@ class Sencha_App
         }
 
         // store in cache
-#		Cache::store($cacheKey, $this->_buildCfg);
+        #		Cache::store($cacheKey, $this->_buildCfg);
 
         return $key ? $this->_buildCfg[$key] : $this->_buildCfg;
     }

@@ -33,6 +33,7 @@ class PhotoMedia extends Media
                         return $this->MIMEType;
                 }
 
+                // no break
             case 'Extension':
 
                 switch ($this->MIMEType) {
@@ -55,6 +56,7 @@ class PhotoMedia extends Media
                         throw new Exception('Unable to find photo extension for mime-type: '.$this->MIMEType);
                 }
 
+                // no break
             default:
                 return parent::getValue($name);
         }

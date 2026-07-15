@@ -34,16 +34,16 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
     {
         switch ($action ?: $action = static::shiftPath()) {
             case 'save':
-            return static::handleMultiSaveRequest();
+                return static::handleMultiSaveRequest();
 
             case 'destroy':
-            return static::handleMultiDestroyRequest();
+                return static::handleMultiDestroyRequest();
 
             case 'create':
-            return static::handleCreateRequest();
+                return static::handleCreateRequest();
 
             case '*fields':
-            return static::handleFieldsRequest();
+                return static::handleFieldsRequest();
 
             case '':
             case false:
@@ -99,7 +99,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         $having = [];
         $matchers = [];
 
-        foreach ($terms AS $term) {
+        foreach ($terms as $term) {
             $n = 0;
             $qualifier = 'any';
             $split = explode(':', $term, 2);
@@ -113,7 +113,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 $term = $split[1];
             }
 
-            if ($qualifier === 'mode' && $term=='or') {
+            if ($qualifier === 'mode' && $term == 'or') {
                 $mode = 'OR';
                 continue;
             }
@@ -139,7 +139,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         if ($mode == 'OR') {
             // OR mode, object can match any term and results are sorted by score
 
-            $select[] = implode('+', array_map(fn($c) => sprintf('IF(%s, %u, 0)', $c['condition'], $c['points']), $matchers)).' AS searchScore';
+            $select[] = implode('+', array_map(fn ($c) => sprintf('IF(%s, %u, 0)', $c['condition'], $c['points']), $matchers)).' AS searchScore';
 
             $having[] = 'searchScore > 1';
 
@@ -147,17 +147,17 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 $options['order'] = ['searchScore DESC'];
             }
         } else {
-            // AND mode, all terms must match 
+            // AND mode, all terms must match
 
             // group by qualifier
             $qualifierConditions = [];
-            foreach ($matchers AS $matcher) {
+            foreach ($matchers as $matcher) {
                 $qualifierConditions[$matcher['qualifier']][] = $matcher['condition'];
                 //$conditions[] = $matcher['condition'];
             }
 
             // compile conditions
-            foreach ($qualifierConditions AS $newConditions) {
+            foreach ($qualifierConditions as $newConditions) {
                 $conditions[] = '( ('.implode(') OR (', $newConditions).') )';
             }
 
@@ -167,21 +167,21 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         }
 
         return static::respond(
-            $responseId ?? static::getTemplateName($className::$pluralNoun)
-            ,array_merge($responseData, [
+            $responseId ?? static::getTemplateName($className::$pluralNoun),
+            array_merge($responseData, [
                 'success' => true
                 ,'data' => $className::getAllByQuery(
-                    'SELECT DISTINCT %s %s FROM `%s` %s %s WHERE (%s) %s %s %s'
-                    ,[
+                    'SELECT DISTINCT %s %s FROM `%s` %s %s WHERE (%s) %s %s %s',
+                    [
                         static::$browseCalcFoundRows ? 'SQL_CALC_FOUND_ROWS' : ''
-                        ,implode(',',$select)
+                        ,implode(',', $select)
                         ,$className::$tableName
                         ,$tableAlias
                         ,implode(' ', $joins)
-                        ,$conditions !== [] ? implode(') AND (',$className::mapConditions($conditions)) : '1'
+                        ,$conditions !== [] ? implode(') AND (', $className::mapConditions($conditions)) : '1'
                         ,count($having) ? 'HAVING ('.implode(') AND (', $having).')' : ''
                         ,count($options['order']) > 0 ? 'ORDER BY '.implode(',', $options['order']) : ''
-                        ,$options['limit'] ? sprintf('LIMIT %u,%u',$options['offset'],$options['limit']) : ''
+                        ,$options['limit'] ? sprintf('LIMIT %u,%u', $options['offset'], $options['limit']) : ''
                     ]
                 )
                 ,'query' => $query
@@ -209,8 +209,8 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
             $conditions = array_merge(static::$browseConditions, $conditions);
         }
 
-        $limit = isset($_REQUEST['limit']) && ctype_digit($_REQUEST['limit']) ? (integer)$_REQUEST['limit'] : static::$browseLimitDefault;
-        $offset = isset($_REQUEST['offset']) && ctype_digit($_REQUEST['offset']) ? (integer)$_REQUEST['offset'] : false;
+        $limit = isset($_REQUEST['limit']) && ctype_digit($_REQUEST['limit']) ? (int)$_REQUEST['limit'] : static::$browseLimitDefault;
+        $offset = isset($_REQUEST['offset']) && ctype_digit($_REQUEST['offset']) ? (int)$_REQUEST['offset'] : false;
 
         if (!empty($_REQUEST['sort'])) {
             $dir = (empty($_REQUEST['dir']) || $_REQUEST['dir'] == 'ASC') ? 'ASC' : 'DESC';
@@ -251,8 +251,8 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
             $relatedTables = is_array($_GET['relatedTable']) ? $_GET['relatedTable'] : explode(',', $_GET['relatedTable']);
 
             $related = [];
-            foreach ($results AS $result) {
-                foreach ($relatedTables AS $relName) {
+            foreach ($results as $result) {
+                foreach ($relatedTables as $relName) {
                     if (!$result::relationshipExists($relName)) {
                         continue;
                     }
@@ -282,8 +282,8 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
         // generate response
         return static::respond(
-            $responseId ?? static::getTemplateName($className::$pluralNoun)
-            ,array_merge($responseData, [
+            $responseId ?? static::getTemplateName($className::$pluralNoun),
+            array_merge($responseData, [
                 'success' => true
                 ,'data' => $results
                 ,'conditions' => $conditions
@@ -307,16 +307,16 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 ]);
 
             case 'comment':
-            return static::handleCommentRequest($Record);
+                return static::handleCommentRequest($Record);
 
             case 'edit':
-            return static::handleEditRequest($Record);
+                return static::handleEditRequest($Record);
 
             case 'delete':
-            return static::handleDeleteRequest($Record);
+                return static::handleDeleteRequest($Record);
 
             default:
-            return static::onRecordRequestNotHandled($Record, $action);
+                return static::onRecordRequestNotHandled($Record, $action);
         }
     }
 
@@ -342,7 +342,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         $failed = [];
         $message = null;
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             // get record
             if (empty($datum['ID']) || !is_numeric($datum['ID']) || $datum['ID'] <= 0) {
                 $subClasses = $className::getStaticSubClasses();
@@ -417,7 +417,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         $results = [];
         $failed = [];
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             // get record
             if (is_numeric($datum)) {
                 $recordID = $datum;
@@ -591,7 +591,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
     protected static function getTemplateName($noun)
     {
-        return preg_replace_callback('/\s+([a-zA-Z])/', fn($matches) => strtoupper($matches[1]), (string) $noun);
+        return preg_replace_callback('/\s+([a-zA-Z])/', fn ($matches) => strtoupper($matches[1]), (string) $noun);
     }
 
     public static function respondJson($responseId, array $responseData = [])

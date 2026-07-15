@@ -3,9 +3,7 @@
 namespace Emergence\WebApps;
 
 use Exception;
-
 use Site;
-
 
 abstract class App implements IApp
 {

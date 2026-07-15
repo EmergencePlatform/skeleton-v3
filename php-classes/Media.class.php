@@ -119,7 +119,7 @@ class Media extends ActiveRecord
         parent::__classLoaded();
 
         // load subclasses
-        foreach (static::$subClasses AS $subClass) {
+        foreach (static::$subClasses as $subClass) {
             Site::loadClass($subClass);
         }
     }
@@ -156,8 +156,8 @@ class Media extends ActiveRecord
 
                 if (!isset($this->_webPath)) {
                     $this->_webPath = sprintf(
-                        static::$webPathFormat
-                        , $this->ID
+                        static::$webPathFormat,
+                        $this->ID
                     );
                 }
 
@@ -183,11 +183,11 @@ class Media extends ActiveRecord
     public static function getBlankThumbnailRequest($class, $width, $height, $fillColor = null)
     {
         return sprintf(
-            static::$blankThumbnailRequestFormat
-            , $class
-            , $width
-            , $height
-            , (isset($fillColor) ? 'x'.$fillColor : '')
+            static::$blankThumbnailRequestFormat,
+            $class,
+            $width,
+            $height,
+            (isset($fillColor) ? 'x'.$fillColor : '')
         );
     }
 
@@ -197,11 +197,11 @@ class Media extends ActiveRecord
     public function getThumbnailRequest($width, $height = null, $fillColor = null, $cropped = false)
     {
         return sprintf(
-            static::$thumbnailRequestFormat
-            , $this->ID
-            , $width
-            , $height ?: $width
-            , (is_string($fillColor) ? 'x'.$fillColor : '')
+            static::$thumbnailRequestFormat,
+            $this->ID,
+            $width,
+            $height ?: $width,
+            (is_string($fillColor) ? 'x'.$fillColor : '')
         ).($cropped ? '/cropped' : '');
     }
 
@@ -232,7 +232,7 @@ class Media extends ActiveRecord
 
             case 'application/pdf':
 
-               return PDFMedia::getImage();
+                return PDFMedia::getImage();
 
             case 'application/postscript':
 
@@ -418,31 +418,39 @@ class Media extends ActiveRecord
                     imagesavealpha($image, true);
                 }
 
-    /*
-                $trans_index = imagecolorallocate($image, 218, 0, 245);
-                ImageColorTransparent($image, $background); // make the new temp image all transparent
-                imagealphablending($image, false); // turn off the alpha blending to keep the alpha channel
-    */
+                /*
+                            $trans_index = imagecolorallocate($image, 218, 0, 245);
+                            ImageColorTransparent($image, $background); // make the new temp image all transparent
+                            imagealphablending($image, false); // turn off the alpha blending to keep the alpha channel
+                */
             }
 
             // resize photo to thumbnail
             if ($cropped) {
                 imagecopyresampled(
-                      $image
-                    , $srcImage
-                    , ($thumbWidth - $scaledWidth) / 2, ($thumbHeight - $scaledHeight) / 2
-                    , 0, 0
-                    , $scaledWidth, $scaledHeight
-                    , $srcWidth, $srcHeight
+                    $image,
+                    $srcImage,
+                    ($thumbWidth - $scaledWidth) / 2,
+                    ($thumbHeight - $scaledHeight) / 2,
+                    0,
+                    0,
+                    $scaledWidth,
+                    $scaledHeight,
+                    $srcWidth,
+                    $srcHeight
                 );
             } else {
                 imagecopyresampled(
-                      $image
-                    , $srcImage
-                    , round(($thumbWidth - $scaledWidth) / 2), round(($thumbHeight - $scaledHeight) / 2)
-                    , 0, 0
-                    , $scaledWidth, $scaledHeight
-                    , $srcWidth, $srcHeight
+                    $image,
+                    $srcImage,
+                    round(($thumbWidth - $scaledWidth) / 2),
+                    round(($thumbHeight - $scaledHeight) / 2),
+                    0,
+                    0,
+                    $scaledWidth,
+                    $scaledHeight,
+                    $srcWidth,
+                    $srcHeight
                 );
             }
 
@@ -606,7 +614,7 @@ class Media extends ActiveRecord
 
         if (!isset(static::$mimeHandlers[$mediaInfo['mimeType']]) || $staticClass != 'Media') {
             // MICS::dump(static::$mimeHandlers, 'MIME Handlers');
-           // throw new MediaTypeException('No class registered for mime type "' . $mediaInfo['mimeType'] . '"');
+            // throw new MediaTypeException('No class registered for mime type "' . $mediaInfo['mimeType'] . '"');
 
             $mediaInfo['className'] = $staticClass;
         } else {

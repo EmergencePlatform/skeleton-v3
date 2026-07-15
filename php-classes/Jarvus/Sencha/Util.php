@@ -44,7 +44,7 @@ class Util
 
         // transfer existing properties, replacing matching ones with new value
         while ($line = fgetss($inputFile)) {
-            foreach ($properties AS $key => $value) {
+            foreach ($properties as $key => $value) {
                 if (str_starts_with(ltrim($line), (string) $key)) {
                     fwrite($outputFile, "#$line$key=$value\n");
                     unset($properties[$key]);
@@ -60,7 +60,7 @@ class Util
         // append remaining properties to end of file
         if (count($properties) > 0) {
             fwrite($outputFile, "\n\n");
-            foreach ($properties AS $key => $value) {
+            foreach ($properties as $key => $value) {
                 fwrite($outputFile, "$key=$value\n");
             }
         }

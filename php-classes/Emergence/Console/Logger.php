@@ -23,7 +23,7 @@ class Logger extends \Psr\Log\AbstractLogger
         static $c = null;
 
         if ($c === null) {
-            $c = new Color;
+            $c = new Color();
             $c->setTheme(static::$theme);
             $c->setForceStyle(true);
         }

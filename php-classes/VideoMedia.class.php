@@ -77,6 +77,7 @@ class VideoMedia extends Media
                         throw new Exception('Unable to find video extension for mime-type: '.$this->MIMEType);
                 }
 
+                // no break
             default:
                 return parent::getValue($name);
         }
@@ -112,7 +113,7 @@ class VideoMedia extends Media
         }
 
         // extract video streams
-        $videoStreams = array_filter($output['streams'], fn($streamInfo) => $streamInfo['codec_type'] == 'video');
+        $videoStreams = array_filter($output['streams'], fn ($streamInfo) => $streamInfo['codec_type'] == 'video');
 
         if (!count($videoStreams)) {
             throw new MediaTypeException('avprobe did not detect any video streams');
@@ -124,7 +125,7 @@ class VideoMedia extends Media
 
         $mediaInfo['width'] = (int)$mediaInfo['videoStream']['width'];
         $mediaInfo['height'] = (int)$mediaInfo['videoStream']['height'];
-        $mediaInfo['duration'] = (double)$mediaInfo['videoStream']['duration'];
+        $mediaInfo['duration'] = (float)$mediaInfo['videoStream']['duration'];
 
         return $mediaInfo;
     }
@@ -145,7 +146,7 @@ class VideoMedia extends Media
 
 
         // fork encoding job with each configured profile
-        foreach (static::$encodingProfiles AS $profileName => $profile) {
+        foreach (static::$encodingProfiles as $profileName => $profile) {
             if (empty($profile['enabled'])) {
                 continue;
             }
@@ -219,7 +220,7 @@ class VideoMedia extends Media
 
     protected static function _appendAvconvOptions(array &$cmd, array $options)
     {
-        foreach ($options AS $key => $value) {
+        foreach ($options as $key => $value) {
             if (!is_int($key)) {
                 $cmd[] = '-'.$key;
             }

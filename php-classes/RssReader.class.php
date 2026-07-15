@@ -1,9 +1,10 @@
 <?php
+
 /*
     RSS_PHP - the PHP DOM based RSS Parser
     Author: <rssphp.net>
     Published: 200801 :: blacknet :: via rssphp.net
-    
+
     RSS_PHP is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY.
 
     Usage:
@@ -18,75 +19,75 @@ class RssReader
     public $channel;
     public $items;
 
-/****************************
-    public load methods
-***/
+    /****************************
+        public load methods
+    ***/
     # load RSS by URL
-        public function load($url=false, $unblock=true)
-        {
-            if ($url) {
-                if ($unblock) {
-                    $this->loadParser(file_get_contents($url, false, $this->randomContext()));
-                } else {
-                    $this->loadParser(file_get_contents($url));
-                }
+    public function load($url = false, $unblock = true)
+    {
+        if ($url) {
+            if ($unblock) {
+                $this->loadParser(file_get_contents($url, false, $this->randomContext()));
+            } else {
+                $this->loadParser(file_get_contents($url));
             }
         }
+    }
     # load raw RSS data
-        public function loadRSS($rawxml=false)
-        {
-            if ($rawxml) {
-                $this->loadParser($rawxml);
-            }
+    public function loadRSS($rawxml = false)
+    {
+        if ($rawxml) {
+            $this->loadParser($rawxml);
         }
+    }
 
-/****************************
-    public load methods
-        @param $includeAttributes BOOLEAN
-        return array;
-***/
+    /****************************
+        public load methods
+            @param $includeAttributes BOOLEAN
+            return array;
+    ***/
     # return full rss array
-        public function getRSS($includeAttributes=false)
-        {
-            if ($includeAttributes) {
-                return $this->document;
-            }
-            return $this->valueReturner();
+    public function getRSS($includeAttributes = false)
+    {
+        if ($includeAttributes) {
+            return $this->document;
         }
+        return $this->valueReturner();
+    }
     # return channel data
-        public function getChannel($includeAttributes=false)
-        {
-            if ($includeAttributes) {
-                return $this->channel;
-            }
-            return $this->valueReturner($this->channel);
+    public function getChannel($includeAttributes = false)
+    {
+        if ($includeAttributes) {
+            return $this->channel;
         }
+        return $this->valueReturner($this->channel);
+    }
     # return rss items
-        public function getItems($includeAttributes=false)
-        {
-            if ($includeAttributes) {
-                return $this->items;
-            }
-            return $this->valueReturner($this->items);
+    public function getItems($includeAttributes = false)
+    {
+        if ($includeAttributes) {
+            return $this->items;
         }
+        return $this->valueReturner($this->items);
+    }
 
-/****************************
-    internal methods
-***/
-    private function loadParser($rss=false)
+    /****************************
+        internal methods
+    ***/
+    private function loadParser($rss = false)
     {
         if ($rss) {
             $this->document = [];
             $this->channel = [];
             $this->items = [];
-            $DOMDocument = new DOMDocument;
+            $DOMDocument = new DOMDocument();
             $DOMDocument->strictErrorChecking = false;
             $DOMDocument->loadXML($rss);
             $this->document = $this->extractDOM($DOMDocument->childNodes);
         }
     }
 
-    private function valueReturner($valueBlock=false)
+    private function valueReturner($valueBlock = false)
     {
         if (!$valueBlock) {
             $valueBlock = $this->document;
@@ -100,7 +101,7 @@ class RssReader
         return $valueBlock;
     }
 
-    private function extractDOM($nodeList,$parentNodeName=false)
+    private function extractDOM($nodeList, $parentNodeName = false)
     {
         $itemCounter = 0;
         foreach ($nodeList as $values) {
@@ -113,7 +114,7 @@ class RssReader
                 }
                 $tempNode[$nodeName] = [];
                 if ($values->attributes) {
-                    for ($i=0;$values->attributes->item($i);$i++) {
+                    for ($i = 0;$values->attributes->item($i);$i++) {
                         $tempNode[$nodeName]['properties'][$values->attributes->item($i)->nodeName] = $values->attributes->item($i)->nodeValue;
                     }
                 }
@@ -129,12 +130,12 @@ class RssReader
                         $this->channel[$values->nodeName] = $tempNode[$nodeName];
                     }
                 }
-            } elseif (substr((string) $values->nodeName,1) === 'text') {
-                $tempValue = trim(preg_replace('/\s\s+/',' ',str_replace("\n",' ', $values->textContent)));
+            } elseif (substr((string) $values->nodeName, 1) === 'text') {
+                $tempValue = trim(preg_replace('/\s\s+/', ' ', str_replace("\n", ' ', $values->textContent)));
                 if ($tempValue !== '' && $tempValue !== '0') {
                     $tempNode = $tempValue;
                 }
-            } elseif (substr((string) $values->nodeName,1) === 'cdata-section') {
+            } elseif (substr((string) $values->nodeName, 1) === 'cdata-section') {
                 $tempNode = $values->textContent;
             }
         }
@@ -144,21 +145,19 @@ class RssReader
     private function randomContext()
     {
         $headerstrings = [];
-        $headerstrings['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.'.random_int(0,2).'; en-US; rv:1.'.random_int(2,9).'.'.random_int(0,4).'.'.random_int(1,9).') Gecko/2007'.random_int(10,12).random_int(10,30).' Firefox/2.0.'.random_int(0,1).'.'.random_int(1,9);
-        $headerstrings['Accept-Charset'] = random_int(0,1) !== 0 ? 'en-gb,en;q=0.'.random_int(3,8) : 'en-us,en;q=0.'.random_int(3,8);
-        $headerstrings['Accept-Language'] = 'en-us,en;q=0.'.random_int(4,6);
+        $headerstrings['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.'.random_int(0, 2).'; en-US; rv:1.'.random_int(2, 9).'.'.random_int(0, 4).'.'.random_int(1, 9).') Gecko/2007'.random_int(10, 12).random_int(10, 30).' Firefox/2.0.'.random_int(0, 1).'.'.random_int(1, 9);
+        $headerstrings['Accept-Charset'] = random_int(0, 1) !== 0 ? 'en-gb,en;q=0.'.random_int(3, 8) : 'en-us,en;q=0.'.random_int(3, 8);
+        $headerstrings['Accept-Language'] = 'en-us,en;q=0.'.random_int(4, 6);
         $setHeaders =    'Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5'."\r\n".
                         'Accept-Charset: '.$headerstrings['Accept-Charset']."\r\n".
                         'Accept-Language: '.$headerstrings['Accept-Language']."\r\n".
                         'User-Agent: '.$headerstrings['User-Agent']."\r\n";
         $contextOptions = [
-            'http'=>[
-                'method'=>"GET",
-                'header'=>$setHeaders
+            'http' => [
+                'method' => "GET",
+                'header' => $setHeaders
             ]
         ];
         return stream_context_create($contextOptions);
     }
 }
-
-?>

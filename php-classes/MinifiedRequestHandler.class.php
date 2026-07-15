@@ -2,8 +2,8 @@
 
 class MinifiedRequestHandler extends RequestHandler
 {
-    const ERROR_NOT_FOUND = -1;
-    const ERROR_TYPE_MISMATCH = -2;
+    public const ERROR_NOT_FOUND = -1;
+    public const ERROR_TYPE_MISMATCH = -2;
 
     public static function handleRequest()
     {
@@ -53,10 +53,10 @@ class MinifiedRequestHandler extends RequestHandler
 
 
         // if URL includes correct hash, response can be cached permenantly by the client
-        if (!empty($_GET['_sha1']) && (empty($sourceReport) ||$_GET['_sha1'] == $sourceReport['hash'])) {
-            $expires = 60*60*24*365;
+        if (!empty($_GET['_sha1']) && (empty($sourceReport) || $_GET['_sha1'] == $sourceReport['hash'])) {
+            $expires = 60 * 60 * 24 * 365;
             header('Cache-Control: public, max-age='.$expires);
-            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time()+$expires));
+            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + $expires));
             header('Pragma: public');
         }
 
@@ -86,7 +86,7 @@ class MinifiedRequestHandler extends RequestHandler
 
         if (is_array($cacheHashOrSourceReport) && is_array($cacheHashOrSourceReport['files'])) {
             $code = '';
-            foreach ($cacheHashOrSourceReport['files'] AS $fileData) {
+            foreach ($cacheHashOrSourceReport['files'] as $fileData) {
                 $code .= $minifier::minify(file_get_contents(SiteFile::getRealPathByID($fileData['ID'])));
             }
 
@@ -117,7 +117,7 @@ class MinifiedRequestHandler extends RequestHandler
 
         $sourceFiles = [];
 
-        foreach ($paths AS $path) {
+        foreach ($paths as $path) {
             $path = array_merge($root, $path);
             [$filename] = array_slice($path, -1);
 
@@ -125,7 +125,7 @@ class MinifiedRequestHandler extends RequestHandler
                 array_pop($path);
 
                 Emergence_FS::cacheTree($path);
-                foreach (Emergence_FS::getTreeFiles($path, false, $contentType ? ['Type' => $contentType] : null) AS $path => $fileData) {
+                foreach (Emergence_FS::getTreeFiles($path, false, $contentType ? ['Type' => $contentType] : null) as $path => $fileData) {
                     $sourceFiles[$path] = $fileData;
                 }
             } else {
@@ -171,14 +171,14 @@ class MinifiedRequestHandler extends RequestHandler
             $paths = implode('/', $paths);
         }
 
-        return array_map(fn($path) => array_filter(explode('/', (string) $path)), preg_split('/(\+|%2B|%20|\s+)/', (string) $paths));
+        return array_map(fn ($path) => array_filter(explode('/', (string) $path)), preg_split('/(\+|%2B|%20|\s+)/', (string) $paths));
     }
 
     public static function getFilesHash($files)
     {
         $hashStr = '';
 
-        foreach ($files AS $path => $fileData) {
+        foreach ($files as $path => $fileData) {
             $hashStr .= "$path\t$fileData[SHA1]\n";
         }
 

@@ -123,7 +123,7 @@ abstract class CRUDRequestHandler extends RequestHandler
 
         // process sorter
         if (!empty($_REQUEST['sort'])) {
-            $sort = json_decode($_REQUEST['sort'],true);
+            $sort = json_decode($_REQUEST['sort'], true);
             if (!$sort || !is_array($sort)) {
                 throw new Exception('Invalid sorter');
             }
@@ -141,7 +141,7 @@ abstract class CRUDRequestHandler extends RequestHandler
                 throw new Exception('Invalid filter');
             }
 
-            foreach ($filter AS $field) {
+            foreach ($filter as $field) {
                 if ($_GET['anyMatch']) {
                     $conditions[$field['property']] = [
                         'value'    =>    '%'.$field['value'].'%'
@@ -160,7 +160,7 @@ abstract class CRUDRequestHandler extends RequestHandler
 
         // process page
         if (!empty($_REQUEST['page']) && is_numeric($_REQUEST['page']) && $queryOptions['limit']) {
-            $queryOptions['offset'] = ($_REQUEST['page']-1) * $queryOptions['limit'];
+            $queryOptions['offset'] = ($_REQUEST['page'] - 1) * $queryOptions['limit'];
         }
 
         return $class::getAllByWhere($conditions, $queryOptions);
@@ -190,7 +190,7 @@ abstract class CRUDRequestHandler extends RequestHandler
 
     public static function throwRecordInvalidError(ActiveRecord $Record, $data = null)
     {
-        return static::respond(static::getResponseID('singular','invalid'), [
+        return static::respond(static::getResponseID('singular', 'invalid'), [
             'success' => false
             ,'data' => $Record
             ,'errors' => $Record->validationErrors
@@ -202,7 +202,7 @@ abstract class CRUDRequestHandler extends RequestHandler
     {
         $class = static::$recordClass;
         $noun = $count == 'singular' ? $class::$singularNoun : $class::$pluralNoun;
-        return preg_replace_callback('/\s+([a-zA-Z])/', fn($matches) => strtoupper($matches[1]), (string) $noun).ucfirst((string) $verb);
+        return preg_replace_callback('/\s+([a-zA-Z])/', fn ($matches) => strtoupper($matches[1]), (string) $noun).ucfirst((string) $verb);
     }
 
 

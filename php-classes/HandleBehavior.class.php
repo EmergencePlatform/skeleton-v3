@@ -43,18 +43,19 @@ class HandleBehavior extends RecordBehavior
 
         // strip bad characters
         $text = preg_replace(
-             [
+            [
                  '/\s+/'                                // 1- Find spaces
                  ,'/^[^\\pL]+/u'                        // 2- Find anything not a letter at the beginning
                  ,'/[-_]*[^\\pL\d_:\-\.]+[-_]*/u'       // 3- Find non-allowed charecters segment and any placeholders next to it
                  ,'/[-_]*:[-_]*/']                      // 4- Find any : and any placeholders next to it
-            ,[
+            ,
+            [
                 '_'                                     // 1- Replace spaces with _
                 , ''                                    // 2- Erase anything not a letter at the beginning
                 ,'-'                                    // 3- Replace non-allowed characters with -
                 ,'--'                                   // 4- Replace any : with --
-            ]
-            ,(string) $text
+            ],
+            (string) $text
         );
 
         // transliterate

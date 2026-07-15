@@ -8,7 +8,7 @@ function Dwoo_Plugin_html_attributes_encode(Dwoo_Core $dwoo, $array, $prefix = '
         $exclude = explode(',', $exclude);
     }
 
-    foreach ($array AS $key => $value) {
+    foreach ($array as $key => $value) {
         if ($value === false) {
             continue;
         }

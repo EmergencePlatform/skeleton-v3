@@ -26,4 +26,3 @@ function Dwoo_Plugin_twitter(Dwoo_Core $dwoo, $username = false, $query = false,
 
     return '';
 }
-

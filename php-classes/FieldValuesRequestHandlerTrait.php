@@ -19,7 +19,7 @@ trait FieldValuesRequestHandlerTrait
             case 'enum':
                 $values = $field['values'];
                 if ($query) {
-                    $values = array_filter($values, fn($value) => stripos((string) $value, (string) $query) !== false);
+                    $values = array_filter($values, fn ($value) => stripos((string) $value, (string) $query) !== false);
                 }
 
                 break;

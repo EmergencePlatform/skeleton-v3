@@ -38,6 +38,7 @@ class PDFMedia extends Media
                         throw new Exception('Unable to find document extension for mime-type: '.$this->MIMEType);
                 }
 
+                // no break
             default:
                 return parent::getValue($name);
         }

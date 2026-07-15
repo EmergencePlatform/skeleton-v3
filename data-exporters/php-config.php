@@ -10,7 +10,7 @@ return [
         'property',
         'value'
     ],
-    'readQuery' => fn(array $input) => [],
+    'readQuery' => fn (array $input) => [],
     'buildRows' => function (array $query = [], array $config = []) {
 
         $classNodes = Emergence_FS::findFiles('\.php$', true, 'php-classes');

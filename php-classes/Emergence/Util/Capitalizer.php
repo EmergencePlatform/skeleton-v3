@@ -16,7 +16,7 @@ class Capitalizer
     public static function capitalizePronoun($word, $familyName = false)
     {
         $me = static::class;
-        $_recurse = (fn($word) => $me::capitalizePronoun($word, $familyName));
+        $_recurse = (fn ($word) => $me::capitalizePronoun($word, $familyName));
         if (preg_match('/^[ea]l-\pL/u', (string) $word)) {
             // el- / al- prefixes stay lowercase
             return strtolower(substr((string) $word, 0, 2)).'-'.static::capitalizePronoun(substr((string) $word, 3));
@@ -55,7 +55,7 @@ class Capitalizer
 
         // handly family name prefixes
         if ($familyName) {
-            foreach (static::$familyNamePrefixes AS $prefix) {
+            foreach (static::$familyNamePrefixes as $prefix) {
                 if (str_starts_with($word, (string) $prefix)) {
                     $prefixLen = strlen((string) $prefix);
 

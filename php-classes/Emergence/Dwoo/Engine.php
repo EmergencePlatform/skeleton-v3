@@ -37,7 +37,7 @@ class Engine extends \Dwoo_Core
         parent::__construct(static::$pathCompile, static::$pathCache);
 
         // register template resources
-        foreach (static::$templateResources AS $handle => $class) {
+        foreach (static::$templateResources as $handle => $class) {
             $this->addResource($handle, $class, self::compilerFactory(...));
         }
     }
@@ -118,7 +118,7 @@ class Engine extends \Dwoo_Core
         ];
 
         // add magic globals
-        foreach (self::$magicGlobals AS $name => $value) {
+        foreach (self::$magicGlobals as $name => $value) {
             if (is_int($name)) {
                 $name = $value;
             }

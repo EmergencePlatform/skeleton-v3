@@ -44,16 +44,16 @@ abstract class RecordsRequestHandler extends RequestHandler
     {
         switch ($action ? $action : $action = static::shiftPath()) {
             case 'save':
-            return static::handleMultiSaveRequest();
+                return static::handleMultiSaveRequest();
 
             case 'destroy':
-            return static::handleMultiDestroyRequest();
+                return static::handleMultiDestroyRequest();
 
             case 'create':
-            return static::handleCreateRequest();
+                return static::handleCreateRequest();
 
             case '*fields':
-            return static::handleFieldsRequest();
+                return static::handleFieldsRequest();
 
             case '':
             case false:
@@ -110,7 +110,7 @@ abstract class RecordsRequestHandler extends RequestHandler
         $termsConditions = [];
 
         $parsedQuery = \Emergence\SearchStringParser::parseString($query);
-        foreach ($parsedQuery AS $queryPart) {
+        foreach ($parsedQuery as $queryPart) {
             if ($queryPart === null) {
                 continue;
             }
@@ -120,7 +120,7 @@ abstract class RecordsRequestHandler extends RequestHandler
             $term = $queryPart['term'];
             $qualifier = strtolower($queryPart['qualifier']) ?: 'any';
 
-            if ($qualifier === 'mode' && $term=='or') {
+            if ($qualifier === 'mode' && $term == 'or') {
                 $mode = 'OR';
                 continue;
             }
@@ -144,7 +144,7 @@ abstract class RecordsRequestHandler extends RequestHandler
             return static::throwError('Query was empty');
         }
 
-        $select[] = implode('+', array_map(fn($c) => sprintf('IF(%s, %u, 0)', $c['condition'], $c['points']), $matchers)).' AS searchScore';
+        $select[] = implode('+', array_map(fn ($c) => sprintf('IF(%s, %u, 0)', $c['condition'], $c['points']), $matchers)).' AS searchScore';
 
         if ($mode == 'OR') {
             // OR mode, object can match any term and results are sorted by score
@@ -152,7 +152,7 @@ abstract class RecordsRequestHandler extends RequestHandler
         } else {
             // AND mode, all terms must match
             foreach ($termsConditions as $termConditions) {
-                $conditions[] = '( ('.implode(') OR (', array_map(fn($termCondition) => $termCondition['condition'], $termConditions)).') )';
+                $conditions[] = '( ('.implode(') OR (', array_map(fn ($termCondition) => $termCondition['condition'], $termConditions)).') )';
             }
         }
 
@@ -161,21 +161,21 @@ abstract class RecordsRequestHandler extends RequestHandler
         }
 
         return static::respond(
-            $responseID ?? static::getTemplateName($className::$pluralNoun)
-            ,array_merge($responseData, [
+            $responseID ?? static::getTemplateName($className::$pluralNoun),
+            array_merge($responseData, [
                 'success' => true
                 ,'data' => $className::getAllByQuery(
-                    'SELECT DISTINCT %s %s FROM `%s` %s %s WHERE (%s) %s ORDER BY %s %s'
-                    ,[
+                    'SELECT DISTINCT %s %s FROM `%s` %s %s WHERE (%s) %s ORDER BY %s %s',
+                    [
                         empty($options['calcFoundRows']) ? '' : 'SQL_CALC_FOUND_ROWS'
-                        ,implode(',',$select)
+                        ,implode(',', $select)
                         ,$className::$tableName
                         ,$tableAlias
                         ,implode(' ', $joins)
-                        ,$conditions ? implode(') AND (',$className::mapConditions($conditions)) : '1'
+                        ,$conditions ? implode(') AND (', $className::mapConditions($conditions)) : '1'
                         ,count($having) ? 'HAVING ('.implode(') AND (', $having).')' : ''
                         ,empty($options['order']) ? 'searchScore DESC' : 'searchScore DESC, '.implode(',', $className::mapFieldOrder($options['order']))
-                        ,$options['limit'] ? sprintf('LIMIT %u,%u',$options['offset'],$options['limit']) : ''
+                        ,$options['limit'] ? sprintf('LIMIT %u,%u', $options['offset'], $options['limit']) : ''
                     ]
                 )
                 ,'query' => $query
@@ -204,8 +204,8 @@ abstract class RecordsRequestHandler extends RequestHandler
             return static::throwUnauthorizedError($e->getMessage());
         }
 
-        $limit = isset($_REQUEST['limit']) && ctype_digit($_REQUEST['limit']) ? (integer)$_REQUEST['limit'] : static::$browseLimitDefault;
-        $offset = isset($_REQUEST['offset']) && ctype_digit($_REQUEST['offset']) ? (integer)$_REQUEST['offset'] : false;
+        $limit = isset($_REQUEST['limit']) && ctype_digit($_REQUEST['limit']) ? (int)$_REQUEST['limit'] : static::$browseLimitDefault;
+        $offset = isset($_REQUEST['offset']) && ctype_digit($_REQUEST['offset']) ? (int)$_REQUEST['offset'] : false;
 
         if (!empty($_REQUEST['sort'])) {
             $dir = (empty($_REQUEST['dir']) || $_REQUEST['dir'] == 'ASC') ? 'ASC' : 'DESC';
@@ -246,8 +246,8 @@ abstract class RecordsRequestHandler extends RequestHandler
             $relatedTables = is_array($_GET['relatedTable']) ? $_GET['relatedTable'] : explode(',', $_GET['relatedTable']);
 
             $related = [];
-            foreach ($results AS $result) {
-                foreach ($relatedTables AS $relName) {
+            foreach ($results as $result) {
+                foreach ($relatedTables as $relName) {
                     if (!$result::relationshipExists($relName)) {
                         continue;
                     }
@@ -277,8 +277,8 @@ abstract class RecordsRequestHandler extends RequestHandler
 
         // generate response
         return static::respond(
-            $responseID ?? static::getTemplateName($className::$pluralNoun)
-            ,array_merge($responseData, [
+            $responseID ?? static::getTemplateName($className::$pluralNoun),
+            array_merge($responseData, [
                 'success' => true
                 ,'data' => $results
                 ,'conditions' => $conditions
@@ -302,16 +302,16 @@ abstract class RecordsRequestHandler extends RequestHandler
                 ]);
 
             case 'comment':
-            return static::handleCommentRequest($Record);
+                return static::handleCommentRequest($Record);
 
             case 'edit':
-            return static::handleEditRequest($Record);
+                return static::handleEditRequest($Record);
 
             case 'delete':
-            return static::handleDeleteRequest($Record);
+                return static::handleDeleteRequest($Record);
 
             default:
-            return static::onRecordRequestNotHandled($Record, $action);
+                return static::onRecordRequestNotHandled($Record, $action);
         }
     }
 
@@ -339,7 +339,7 @@ abstract class RecordsRequestHandler extends RequestHandler
         $failed = [];
         $message = null;
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             // get record
             if (empty($datum['ID']) || !is_numeric($datum['ID']) || $datum['ID'] <= 0) {
                 $subClasses = $className::getStaticSubClasses();
@@ -463,7 +463,7 @@ abstract class RecordsRequestHandler extends RequestHandler
         $results = [];
         $failed = [];
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             // get record
             if (is_numeric($datum)) {
                 $recordID = $datum;
@@ -666,7 +666,7 @@ abstract class RecordsRequestHandler extends RequestHandler
 
     protected static function getTemplateName($noun)
     {
-        return preg_replace_callback('/\s+([a-zA-Z])/', fn($matches) => strtoupper($matches[1]), (string) $noun);
+        return preg_replace_callback('/\s+([a-zA-Z])/', fn ($matches) => strtoupper($matches[1]), (string) $noun);
     }
 
     public static function respondJson($responseID, $responseData = [])

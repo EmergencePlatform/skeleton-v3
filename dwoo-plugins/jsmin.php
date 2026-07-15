@@ -11,7 +11,7 @@ function Dwoo_Plugin_jsmin(Dwoo_Core $dwoo, $files, $root = ['site-root','js'], 
 
     if ($debug || !empty($_GET['js-debug']) || !empty($_GET['jsdebug'])) {
         $html = '';
-        foreach ($sourceReport['files'] AS $filename => $fileData) {
+        foreach ($sourceReport['files'] as $filename => $fileData) {
             $html .= "<script src='".preg_replace('/^site-root/', '', (string) $filename)."?_sha1=$fileData[SHA1]'></script>\n";
         }
 

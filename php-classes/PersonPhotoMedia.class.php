@@ -2,9 +2,9 @@
 
 use Emergence\People\Person;
 
- class PersonPhotoMedia extends PhotoMedia
- {
-     // configurables
+class PersonPhotoMedia extends PhotoMedia
+{
+    // configurables
 
 
     // protected properties
@@ -53,4 +53,4 @@ use Emergence\People\Person;
         return parent::prepareRecord($data, $recordFields);
     }
     */
- }
+}

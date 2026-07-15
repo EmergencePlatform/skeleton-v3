@@ -8,13 +8,13 @@ class File implements HashableInterface
         __construct as hashableTraitConstruct;
     }
 
-    const CONTENT_HASH = 'hash';
-    const CONTENT_PATH_FS = 'path-fs';
-    const CONTENT_PATH_REF = 'path-ref';
-    const CONTENT_STRING = 'string';
-    const CONTENT_RESOURCE = 'resource';
-    const CONTENT_CALLABLE = 'callable';
-    const CONTENT_HASHABLE = 'hashable';
+    public const CONTENT_HASH = 'hash';
+    public const CONTENT_PATH_FS = 'path-fs';
+    public const CONTENT_PATH_REF = 'path-ref';
+    public const CONTENT_STRING = 'string';
+    public const CONTENT_RESOURCE = 'resource';
+    public const CONTENT_CALLABLE = 'callable';
+    public const CONTENT_HASHABLE = 'hashable';
 
     protected $content;
     protected $contentMode;

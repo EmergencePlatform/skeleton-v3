@@ -10,7 +10,7 @@ $GLOBALS['Session']->requireAccountLevel('Developer');
         <ul>
         <?php
         Emergence_FS::cacheTree('phpunit-tests');
-        foreach (Emergence_FS::getAggregateChildren('phpunit-tests') AS $testsSubNode) {
+        foreach (Emergence_FS::getAggregateChildren('phpunit-tests') as $testsSubNode) {
             if (!is_a($testsSubNode, 'SiteCollection')) {
                 continue;
             }
@@ -29,7 +29,7 @@ $GLOBALS['Session']->requireAccountLevel('Developer');
         </form>
         <ul>
         <?php
-        foreach ($testNodes AS $testNode) {
+        foreach ($testNodes as $testNode) {
             if (is_a($testNode, 'SiteCollection')) {
                 if ($testNode->Handle == 'src') {
                     continue;
@@ -55,6 +55,6 @@ $GLOBALS['Session']->requireAccountLevel('Developer');
     } else {
         echo "Suite not found";
     }
-    ?>
+?>
     </body>
 </html>

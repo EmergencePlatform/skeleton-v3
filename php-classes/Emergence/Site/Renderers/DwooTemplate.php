@@ -3,7 +3,6 @@
 namespace Emergence\Site\Renderers;
 
 use Exception;
-
 use Site;
 use SiteFile;
 use Emergence\Dwoo\Engine;

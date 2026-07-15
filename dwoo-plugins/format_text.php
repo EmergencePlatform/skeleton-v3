@@ -18,10 +18,7 @@ function Dwoo_Plugin_format_text(Dwoo_Core $dwoo, $text, $format = 'plain', $mod
 
         default:
         case 'plain':
-        return nl2br(htmlspecialchars((string) $text));
+            return nl2br(htmlspecialchars((string) $text));
 
     }
 }
-
-
-?>

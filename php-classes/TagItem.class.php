@@ -136,14 +136,14 @@ class TagItem extends ActiveRecord
             }
 
             $itemsCountQuery .= sprintf(
-                ' AND (TagItem.`%s`,TagItem.`%s`) IN (SELECT OverlayTagItem.`%s`, OverlayTagItem.`%s` FROM `%s` OverlayTagItem WHERE OverlayTagItem.`%s` = %u)'
-                ,TagItem::getColumnName('ContextClass')
-                ,TagItem::getColumnName('ContextID')
-                ,TagItem::getColumnName('ContextClass')
-                ,TagItem::getColumnName('ContextID')
-                ,TagItem::$tableName
-                ,TagItem::getColumnName('TagID')
-                ,$OverlayTag->ID
+                ' AND (TagItem.`%s`,TagItem.`%s`) IN (SELECT OverlayTagItem.`%s`, OverlayTagItem.`%s` FROM `%s` OverlayTagItem WHERE OverlayTagItem.`%s` = %u)',
+                TagItem::getColumnName('ContextClass'),
+                TagItem::getColumnName('ContextID'),
+                TagItem::getColumnName('ContextClass'),
+                TagItem::getColumnName('ContextID'),
+                TagItem::$tableName,
+                TagItem::getColumnName('TagID'),
+                $OverlayTag->ID
             );
         }
 
@@ -151,11 +151,11 @@ class TagItem extends ActiveRecord
             $classIDs = DB::allValues('ID', $classSubquery, $classParams);
 
             $itemsCountQuery .= sprintf(
-                ' AND TagItem.`%s` = "%s" AND TagItem.`%s` IN (%s)'
-                ,TagItem::getColumnName('ContextClass')
-                ,DB::escape($options['Class']::getStaticRootClass())
-                ,TagItem::getColumnName('ContextID')
-                ,count($classIDs) > 0 ? implode(",", $classIDs) : '0'
+                ' AND TagItem.`%s` = "%s" AND TagItem.`%s` IN (%s)',
+                TagItem::getColumnName('ContextClass'),
+                DB::escape($options['Class']::getStaticRootClass()),
+                TagItem::getColumnName('ContextID'),
+                count($classIDs) > 0 ? implode(",", $classIDs) : '0'
             );
         }
 

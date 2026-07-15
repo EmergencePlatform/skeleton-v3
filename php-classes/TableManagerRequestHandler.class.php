@@ -20,25 +20,25 @@ class TableManagerRequestHandler extends RequestHandler
             case '':
             case false:
             case 'classes':
-            return static::handleClassesRequest();
+                return static::handleClassesRequest();
 
             case 'sql':
-            return static::handleSQLRequest();
+                return static::handleSQLRequest();
 
             case 'ext-model':
-            return static::handleExtModelRequest();
+                return static::handleExtModelRequest();
 
             case 'ext-columns':
-            return static::handleExtColumnsRequest();
+                return static::handleExtColumnsRequest();
 
             case 'index':
-            return static::handleManagerRequest();
+                return static::handleManagerRequest();
 
             case 'renest':
-            return static::handleRenestRequest();
+                return static::handleRenestRequest();
 
             default:
-            return static::throwNotFoundError();
+                return static::throwNotFoundError();
         }
     }
 
@@ -54,7 +54,7 @@ class TableManagerRequestHandler extends RequestHandler
         // discover activerecord classes
         $recordClasses = [];
 
-        foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') AS $classNode) {
+        foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') as $classNode) {
             if ($classNode->Type != 'application/php') {
                 continue;
             }
@@ -64,7 +64,7 @@ class TableManagerRequestHandler extends RequestHandler
 
             $className = preg_replace('/(\.class)?\.php$/i', '', implode('\\', $classPath));
 
-            foreach (static::$classFilters AS $pattern) {
+            foreach (static::$classFilters as $pattern) {
                 if (preg_match($pattern, (string) $className)) {
                     continue 2;
                 }

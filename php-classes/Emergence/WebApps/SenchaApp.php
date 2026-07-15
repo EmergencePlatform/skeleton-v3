@@ -3,7 +3,6 @@
 namespace Emergence\WebApps;
 
 use Exception;
-
 use Site;
 use Cache;
 use JSON;
@@ -24,14 +23,14 @@ class SenchaApp extends App
     public static function load($name)
     {
         // if (!$manifest = Cache::fetch($cacheKey)) {
-            // TODO: create cache clear event
-            $manifestNode = Site::resolvePath([static::$buildsRoot, $name, 'app.json']);
+        // TODO: create cache clear event
+        $manifestNode = Site::resolvePath([static::$buildsRoot, $name, 'app.json']);
 
-            if (!$manifestNode) {
-                return null;
-            }
+        if (!$manifestNode) {
+            return null;
+        }
 
-            $manifest = json_decode(file_get_contents($manifestNode->RealPath), true);
+        $manifest = json_decode(file_get_contents($manifestNode->RealPath), true);
 
         //     Cache::store($cacheKey, $manifest);
         // }

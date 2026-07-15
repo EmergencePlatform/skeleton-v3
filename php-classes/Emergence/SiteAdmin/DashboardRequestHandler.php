@@ -24,7 +24,7 @@ class DashboardRequestHandler extends \RequestHandler
         $memoryOutput = explode(PHP_EOL, trim(shell_exec('free -b')));
         array_shift($memoryOutput);
 
-        foreach ($memoryOutput AS $line) {
+        foreach ($memoryOutput as $line) {
             $line = preg_split('/\s+/', $line);
 
             if ($line[0] == 'Mem:') {
@@ -104,7 +104,7 @@ class DashboardRequestHandler extends \RequestHandler
                 ],
                 [
                     'label' => 'Host Load Average',
-                    'value' => implode(' ', array_map(fn($n) => number_format($n, 2), sys_getloadavg()))
+                    'value' => implode(' ', array_map(fn ($n) => number_format($n, 2), sys_getloadavg()))
                 ],
                 [
                     'label' => 'Database tables',

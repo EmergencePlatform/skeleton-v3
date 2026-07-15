@@ -127,7 +127,7 @@ class Job extends ActiveRecord implements IJob
             ,'record' => &$Record
         ];
 
-        foreach ($Record->originalValues AS $field => $from) {
+        foreach ($Record->originalValues as $field => $from) {
             if (in_array($field, $ignoreFields)) {
                 continue;
             }

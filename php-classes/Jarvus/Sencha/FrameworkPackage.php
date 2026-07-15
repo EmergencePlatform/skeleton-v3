@@ -125,11 +125,11 @@ class FrameworkPackage extends Package
     {
         $packages = [];
 
-        foreach (['packages', 'modern', 'classic'] AS $packagesCollection) {
+        foreach (['packages', 'modern', 'classic'] as $packagesCollection) {
             $packagesSubpath = "$packagesPath/$packagesCollection";
             $packageNodes = Emergence_FS::getAggregateChildren($packagesSubpath);
 
-            foreach ($packageNodes AS $packageDir => $packageNode) {
+            foreach ($packageNodes as $packageDir => $packageNode) {
                 $packagePath = "$packagesSubpath/$packageDir";
                 $packageJsonNode = Site::resolvePath("$packagePath/package.json");
 
@@ -159,10 +159,10 @@ class FrameworkPackage extends Package
     {
         $packages = [];
 
-        foreach (['packages', 'modern', 'classic'] AS $packagesCollection) {
+        foreach (['packages', 'modern', 'classic'] as $packagesCollection) {
             $packagesSubpath = "$packagesPath/$packagesCollection";
 
-            foreach (glob("$packagesSubpath/*") AS $packagePath) {
+            foreach (glob("$packagesSubpath/*") as $packagePath) {
                 $packageDir = basename($packagePath);
                 $packageJsonPath = "$packagePath/package.json";
 
