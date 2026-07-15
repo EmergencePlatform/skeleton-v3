@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "emergence/php-core": "dev-php8-compat"
+        "emergence/php-core": "dev-develop"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
