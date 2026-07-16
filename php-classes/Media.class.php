@@ -226,7 +226,7 @@ class Media extends ActiveRecord
 
                 //Converts PSD to PNG temporarily on the real file system.
                 $tempFile = tempnam('/tmp', 'media_convert');
-                exec("convert -density 100 ".$this->FilesystemPath."[0] -flatten $tempFile.png");
+                exec("convert -density 100 ".escapeshellarg((string) $this->getLocalPath())."[0] -flatten $tempFile.png");
 
                 return imagecreatefrompng("$tempFile.png");
 
@@ -236,18 +236,32 @@ class Media extends ActiveRecord
 
             case 'application/postscript':
 
-                return imagecreatefromstring(shell_exec("gs -r150 -dEPSCrop -dNOPAUSE -dBATCH -sDEVICE=png48 -sOutputFile=- -q $this->FilesystemPath"));
+                return imagecreatefromstring(shell_exec("gs -r150 -dEPSCrop -dNOPAUSE -dBATCH -sDEVICE=png48 -sOutputFile=- -q ".escapeshellarg((string) $this->getLocalPath())));
 
             default:
-                $sourceFile = $this->FilesystemPath ? $this->FilesystemPath : $this->BlankPath;
+                if ($this->isPhantom) {
+                    $sourceFile = $this->BlankPath;
 
-                if (!$fileData = @file_get_contents($sourceFile)) {
-                    throw new Exception('Could not load media source: '.$sourceFile);
+                    if (!$fileData = @file_get_contents($sourceFile)) {
+                        throw new Exception('Could not load media source: '.$sourceFile);
+                    }
+                } else {
+                    $sourceFile = $this->getStoragePath();
+
+                    try {
+                        $fileData = static::getFilesystem()->read($sourceFile);
+                    } catch (\League\Flysystem\FileNotFoundException) {
+                        $fileData = false;
+                    }
+
+                    if ($fileData === false) {
+                        throw new Exception('Could not load media source: '.$sourceFile);
+                    }
                 }
 
                 $image = imagecreatefromstring($fileData);
 
-                if ($this->MIMEType == 'image/jpeg' && ($exifData = @exif_read_data($sourceFile)) && !empty($exifData['Orientation'])) {
+                if ($this->MIMEType == 'image/jpeg' && ($exifData = static::readExifData($fileData)) && !empty($exifData['Orientation'])) {
                     switch ($exifData['Orientation']) {
                         case 1: // nothing
                             break;
@@ -281,7 +295,11 @@ class Media extends ActiveRecord
         }
     }
 
-    public function getThumbnail($maxWidth, $maxHeight, $fillColor = false, $cropped = false)
+    /**
+     * Ensure a thumbnail exists in the media storage bucket, generating and
+     * storing it if needed, and return its bucket-relative storage path
+     */
+    public function ensureThumbnail($maxWidth, $maxHeight, $fillColor = false, $cropped = false)
     {
         // init thumbnail path
         $thumbFormat = sprintf('%ux%u', $maxWidth, $maxHeight);
@@ -294,23 +312,47 @@ class Media extends ActiveRecord
             $thumbFormat .= '.cropped';
         }
 
-        $thumbPath = Storage::getLocalStorageRoot().'/media/'.$thumbFormat.'/'.$this->Filename;
+        $storagePath = $thumbFormat.'/'.$this->Filename;
+        $fs = static::getFilesystem();
 
         // look for cached thumbnail
-        if (!file_exists($thumbPath)) {
-            // ensure directory exists
-            $thumbDir = dirname($thumbPath);
-            if (!is_dir($thumbDir)) {
-                mkdir($thumbDir, static::$newDirectoryPermissions, true);
-            }
+        if (!$fs->has($storagePath)) {
+            // render to a local temporary file, then write into the bucket
+            $tempPath = tempnam(sys_get_temp_dir(), 'media-thumb-');
 
-            // create new thumbnail
-            $this->createThumbnailImage($thumbPath, $maxWidth, $maxHeight, $fillColor, $cropped);
+            try {
+                $this->createThumbnailImage($tempPath, $maxWidth, $maxHeight, $fillColor, $cropped);
+
+                $tempStream = fopen($tempPath, 'rb');
+                $fs->putStream($storagePath, $tempStream);
+
+                if (is_resource($tempStream)) {
+                    fclose($tempStream);
+                }
+            } finally {
+                @unlink($tempPath);
+            }
         }
 
+        return $storagePath;
+    }
 
-        // return path
-        return $thumbPath;
+    /**
+     * Ensure a thumbnail exists and return a local filesystem path to it,
+     * materializing a temporary copy when the media bucket is remote.
+     *
+     * Kept for backwards compatibility; prefer ensureThumbnail() plus
+     * Media::getFilesystem() streaming for new code.
+     */
+    public function getThumbnail($maxWidth, $maxHeight, $fillColor = false, $cropped = false)
+    {
+        $storagePath = $this->ensureThumbnail($maxWidth, $maxHeight, $fillColor, $cropped);
+
+        if (!Storage::isRemote('media')) {
+            return Storage::getLocalStorageRoot().'/media/'.$storagePath;
+        }
+
+        return static::downloadToTemp($storagePath);
     }
 
     public function createThumbnailImage($thumbPath, $maxWidth, $maxHeight, $fillColor = false, $cropped = false)
@@ -318,7 +360,7 @@ class Media extends ActiveRecord
         $thumbWidth = $maxWidth;
         $thumbHeight = $maxHeight;
 
-        if ($cropped && extension_loaded('imagick') && $this->FilesystemPath) {
+        if ($cropped && extension_loaded('imagick') && ($localSourcePath = $this->getLocalPath())) {
             $originalTimeLimit = ini_get('max_execution_time');
 
             // check for existing facedetect job
@@ -345,9 +387,9 @@ class Media extends ActiveRecord
                 Cache::store($cacheKey, time());
                 set_time_limit(static::$faceDetectionTimeLimit);
 
-                $cropper = new CropFace($this->FilesystemPath);
+                $cropper = new CropFace($localSourcePath);
             } else {
-                $cropper = new stojg\crop\CropEntropy($this->FilesystemPath);
+                $cropper = new stojg\crop\CropEntropy($localSourcePath);
             }
 
             $croppedImage = $cropper->resizeAndCrop($thumbWidth, $thumbHeight);
@@ -673,6 +715,100 @@ class Media extends ActiveRecord
         return array_unique(array_merge(array_keys(static::$mimeHandlers), array_keys(static::$mimeRewrites)));
     }
 
+    /**
+     * Get the Flysystem filesystem backing the media storage bucket
+     *
+     * @return \League\Flysystem\FilesystemInterface
+     */
+    public static function getFilesystem()
+    {
+        return Storage::getFilesystem('media');
+    }
+
+    /**
+     * Get the bucket-relative storage path for a variant of this media,
+     * for use with static::getFilesystem()
+     */
+    public function getStoragePath($variant = 'original', $filename = null)
+    {
+        if ($this->isPhantom) {
+            return null;
+        }
+
+        return $variant.'/'.($filename ?: $this->getFilename($variant));
+    }
+
+    /**
+     * Get a local filesystem path to a variant of this media, materializing
+     * a temporary copy when the media bucket is remote (e.g. object storage).
+     * Returns null if the media is phantom or the file cannot be read.
+     */
+    public function getLocalPath($variant = 'original')
+    {
+        if ($this->isPhantom) {
+            return null;
+        }
+
+        if (!Storage::isRemote('media')) {
+            return $this->getFilesystemPath($variant);
+        }
+
+        return static::downloadToTemp($this->getStoragePath($variant));
+    }
+
+    /**
+     * Copy a path in the media storage bucket to a local temporary file
+     * and return its path, or null if the source cannot be read
+     */
+    protected static function downloadToTemp($storagePath)
+    {
+        try {
+            $remoteStream = static::getFilesystem()->readStream($storagePath);
+        } catch (\League\Flysystem\FileNotFoundException) {
+            return null;
+        }
+
+        if ($remoteStream === false) {
+            return null;
+        }
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'media-local-');
+        $localStream = fopen($tempPath, 'wb');
+        stream_copy_to_stream($remoteStream, $localStream);
+        fclose($localStream);
+
+        if (is_resource($remoteStream)) {
+            fclose($remoteStream);
+        }
+
+        return $tempPath;
+    }
+
+    /**
+     * Read EXIF data from an in-memory image string
+     *
+     * @return array|false
+     */
+    protected static function readExifData($fileData)
+    {
+        $stream = fopen('php://memory', 'r+b');
+        fwrite($stream, (string) $fileData);
+        rewind($stream);
+
+        $exifData = @exif_read_data($stream);
+
+        fclose($stream);
+
+        return $exifData;
+    }
+
+    /**
+     * Get the legacy local filesystem path for a variant of this media.
+     *
+     * Only meaningful when the media bucket is locally stored; prefer
+     * getStoragePath() with static::getFilesystem(), or getLocalPath()
+     * when a real local file is required (e.g. shelling out).
+     */
     public function getFilesystemPath($variant = 'original', $filename = null)
     {
         if ($this->isPhantom) {
@@ -698,20 +834,23 @@ class Media extends ActiveRecord
 
     public function writeFile($sourceFile)
     {
-        $targetDirectory = dirname($this->FilesystemPath);
+        $sourceStream = fopen($sourceFile, 'rb');
 
-        // create target directory if needed
-        if (!is_dir($targetDirectory)) {
-            mkdir($targetDirectory, static::$newDirectoryPermissions, true);
+        if ($sourceStream === false) {
+            throw new \Exception('Failed to open source file for media write');
         }
 
-        // move source file to target path
-        if (!rename($sourceFile, $this->FilesystemPath)) {
-            throw new \Exception('Failed to move source file to destination');
+        // write source file to storage bucket
+        if (!static::getFilesystem()->putStream($this->getStoragePath(), $sourceStream)) {
+            throw new \Exception('Failed to write source file to media storage');
         }
 
-        // set file permissions
-        chmod($this->FilesystemPath, static::$newFilePermissions);
+        if (is_resource($sourceStream)) {
+            fclose($sourceStream);
+        }
+
+        // remove source file (legacy contract: source was moved into place)
+        unlink($sourceFile);
     }
 
     public function isVariantAvailable($variant)
