@@ -25,8 +25,8 @@ abstract class Package implements IPackage
     // factories
     final public static function get($name, Framework $framework = null)
     {
-        foreach (static::$sources AS $source) {
-            if (!is_a($source, IPackage::Class, true)) {
+        foreach (static::$sources as $source) {
+            if (!is_a($source, IPackage::class, true)) {
                 throw new \Exception('Source is not a package subclass');
             }
 
@@ -142,7 +142,7 @@ abstract class Package implements IPackage
     public function getClassPaths()
     {
         if (!$this->classPaths) {
-            $this->classPaths = array_filter(explode(',', $this->getAntConfig('package.classpath')));
+            $this->classPaths = array_filter(explode(',', (string) $this->getAntConfig('package.classpath')));
         }
 
         return $this->classPaths;
@@ -156,7 +156,7 @@ abstract class Package implements IPackage
             $packagePath = $packagePath->RealPath;
         }
 
-        $packageConfig = json_decode(Util::cleanJson(file_get_contents($packagePath)), true);
+        $packageConfig = json_decode((string) Util::cleanJson(file_get_contents($packagePath)), true);
 
         if (!$packageConfig || empty($packageConfig['name'])) {
             throw new \Exception("Could not parse package.json for $packagePath");
@@ -167,7 +167,7 @@ abstract class Package implements IPackage
 
     public static function aggregatePackageDependencies(array $inputPackages, Framework $framework, array &$outputPackages = [])
     {
-        foreach ($inputPackages AS $packageName) {
+        foreach ($inputPackages as $packageName) {
             if (isset($outputPackages[$packageName])) {
                 $package = $outputPackages[$packageName];
             } else {

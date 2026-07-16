@@ -7,7 +7,6 @@ use SiteFile;
 use SiteCollection;
 use Emergence_FS;
 
-
 class IndexRequestHandler extends AbstractRequestHandler
 {
     public static $userResponseModes = [
@@ -36,15 +35,12 @@ class IndexRequestHandler extends AbstractRequestHandler
 
         return static::respond('collectionIndex', [
             'path' => '/' . implode('/', $path),
-            'nodes' => array_map(function ($node) {
-                return [
-                    'type' => is_a($node, SiteFile::class) ? 'file' : 'collection',
-                    'timestamp' => $node->Timestamp,
-                    'type' => $node->Type,
-                    'sha1' => $node->SHA1,
-                    'size' => (int)$node->Size
-                ];
-            }, $nodes)
+            'nodes' => array_map(fn ($node) => [
+                'timestamp' => $node->Timestamp,
+                'type' => $node->Type,
+                'sha1' => $node->SHA1,
+                'size' => (int)$node->Size
+            ], $nodes)
         ]);
     }
 }

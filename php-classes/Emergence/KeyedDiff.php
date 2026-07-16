@@ -34,7 +34,7 @@ class KeyedDiff
         $delta = [];
 
         foreach ($this->newValues as $key => $newValue) {
-            $oldValue = isset($this->oldValues[$key]) ? $this->oldValues[$key] : null;
+            $oldValue = $this->oldValues[$key] ?? null;
 
             if ($newValue === $oldValue) {
                 continue;

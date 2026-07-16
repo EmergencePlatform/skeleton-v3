@@ -12,58 +12,58 @@ abstract class AbstractItem extends \VersionedRecord
     public static $pluralNoun = 'content items';
 
     // required for shared-table subclassing support
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = 'Emergence\CMS\Item\Text';
-    public static $subClasses = array(
-        'Emergence\CMS\Item\Album'
-        ,'Emergence\CMS\Item\Embed'
-        ,'Emergence\CMS\Item\Media'
-        ,'Emergence\CMS\Item\RichText'
-        ,'Emergence\CMS\Item\Text'
-        ,'Emergence\CMS\Item\Markdown'
-    );
+    public static $rootClass = self::class;
+    public static $defaultClass = \Emergence\CMS\Item\Text::class;
+    public static $subClasses = [
+        \Emergence\CMS\Item\Album::class
+        ,\Emergence\CMS\Item\Embed::class
+        ,\Emergence\CMS\Item\Media::class
+        ,\Emergence\CMS\Item\RichText::class
+        ,\Emergence\CMS\Item\Text::class
+        ,\Emergence\CMS\Item\Markdown::class
+    ];
 
-    public static $fields = array(
-        'Title' => array(
+    public static $fields = [
+        'Title' => [
             'notnull' => false
             ,'blankisnull' => true
-        )
-        ,'ContentID' => array(
+        ]
+        ,'ContentID' => [
             'type'  => 'integer'
             ,'unsigned' => true
             ,'index' => true
-        )
-        ,'AuthorID' => array(
+        ]
+        ,'AuthorID' => [
             'type'  =>  'integer'
             ,'unsigned' => true
-        )
-        ,'Status' => array(
+        ]
+        ,'Status' => [
             'type' => 'enum'
-            ,'values' => array('Draft','Published','Hidden','Deleted')
+            ,'values' => ['Draft','Published','Hidden','Deleted']
             ,'default' => 'Published'
-        )
-        ,'Order' => array(
+        ]
+        ,'Order' => [
             'type' => 'integer'
             ,'unsigned' => true
             ,'notnull' => false
-        )
+        ]
         ,'Data' => 'json'
-    );
+    ];
 
-    public static $relationships = array(
-        'Author'    =>  array(
+    public static $relationships = [
+        'Author'    =>  [
             'type'  =>  'one-one'
             ,'class' => Person::class
-        )
-        ,'Content' =>   array(
+        ]
+        ,'Content' =>   [
             'type'  =>  'one-one'
-            ,'class' => 'Emergence\CMS\AbstractContent'
-        )
-    );
+            ,'class' => \Emergence\CMS\AbstractContent::class
+        ]
+    ];
 
-    public static $validators = array(
+    public static $validators = [
         'Content' => 'require-relationship'
-    );
+    ];
 
     public function validate($deep = true)
     {
@@ -77,7 +77,7 @@ abstract class AbstractItem extends \VersionedRecord
     public function save($deep = true)
     {
         // set author
-        if (!$this->AuthorID && !empty($_SESSION) && !empty($_SESSION['User'])) {
+        if (!$this->AuthorID && $_SESSION !== [] && !empty($_SESSION['User'])) {
             $this->Author = $_SESSION['User'];
         }
 

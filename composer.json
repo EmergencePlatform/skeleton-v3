@@ -5,6 +5,11 @@
     "license": "MIT",
     "repositories": [
         {
+            "name": "dwoo",
+            "type": "vcs",
+            "url": "https://github.com/EmergencePlatform/dwoo.git"
+        },
+        {
             "type": "vcs",
             "url": "https://github.com/EmergencePlatform/php-core.git"
         }
@@ -14,5 +19,20 @@
         "emergence/php-core": "dev-develop"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "require-dev": {
+        "rector/rector": "^2.5",
+        "phpstan/phpstan": "^2.2",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "vimeo/psalm": "^6.16",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "psr/http-message": "^1.0",
+        "michelf/php-markdown": "^1.9",
+        "michelf/php-smartypants": "^1.8",
+        "dflydev/apache-mime-types": "^1.0",
+        "dwoo/dwoo": "1.2.x-dev",
+        "stojg/crop": "*",
+        "gitonomy/gitlib": "*"
+    }
 }

@@ -5,10 +5,9 @@ namespace Sencha;
 use ActiveRecord;
 use VersionedRecord;
 
-
 class CodeGenerator
 {
-    const INDENT = '    ';
+    public const INDENT = '    ';
 
     public static $validatorTypes = [
         'presence' => 'Ext.data.validator.Presence',
@@ -40,7 +39,7 @@ class CodeGenerator
         $fieldGroups[$shortName] = array_diff_key($recordClass::aggregateStackedConfig('fields'), $fieldGroups['ActiveRecord'], $fieldGroups['VersionedRecord'] ?: []);
         unset($fieldGroups['VersionedRecord']['RevisionID']);
 
-        foreach ($fieldGroups as $groupName => &$fields) {
+        foreach ($fieldGroups as &$fields) {
             foreach ($fields as $fieldName => &$fieldConfig) {
                 $fieldConfig = static::buildFieldConfig($fieldName, $fieldConfig, $recordClass);
             }
@@ -50,7 +49,7 @@ class CodeGenerator
         $relationships = $recordClass::aggregateStackedConfig('relationships');
 
         $validators = [];
-        foreach ($recordClass::aggregateStackedConfig('validators') as $key => $config) {
+        foreach ($recordClass::aggregateStackedConfig('validators') as $config) {
             switch ($config['validator']) {
                 case 'require-relationship':
                     $fieldName = $relationships[$config['field']]['local'];
@@ -126,19 +125,15 @@ class CodeGenerator
 
         // write footer
         $out .= '});';
-        $out .= PHP_EOL;
 
 
-        return $out;
+        return $out . PHP_EOL;
     }
 
     public static function buildGroupedArrayCode($key, $data, $indent = 0, $appendComma = false)
     {
-        // analyze input
-        end($data);
-        $lastGroupName = key($data);
-        end ($data[$lastGroupName]);
-        $lastItemKey = key($data[$lastGroupName]);
+        $lastGroupName = array_key_last($data);
+        $lastItemKey = array_key_last($data[$lastGroupName]);
 
 
         // build output
@@ -170,18 +165,15 @@ class CodeGenerator
             $out .= ',';
         }
 
-        $out .= PHP_EOL;
-
-        return $out;
+        return $out . PHP_EOL;
     }
 
     public static function buildObjectKeyCode($key, $value, $indent = 0, $appendComma = false)
     {
         $out .= static::buildIndent($indent);
         $out .= "{$key}: ";
-        $out .= static::buildValueCode($value, $indent, $appendComma);
 
-        return $out;
+        return $out . static::buildValueCode($value, $indent, $appendComma);
     }
 
     public static function buildValueCode($value, $indent = 0, $appendComma = false)
@@ -203,9 +195,7 @@ class CodeGenerator
 
     public static function buildArrayCode($data, $indent = 0, $appendComma = false)
     {
-        // analyze input
-        end ($data);
-        $lastItemKey = key($data);
+        $lastItemKey = array_key_last($data);
 
 
         // build output
@@ -224,16 +214,12 @@ class CodeGenerator
             $out .= ',';
         }
 
-        $out .= PHP_EOL;
-
-        return $out;
+        return $out . PHP_EOL;
     }
 
     public static function buildObjectCode($data, $indent = 0, $appendComma = false)
     {
-        // analyze input
-        end($data);
-        $lastConfigKey = key($data);
+        $lastConfigKey = array_key_last($data);
 
 
         // build output
@@ -251,9 +237,7 @@ class CodeGenerator
             $out .= ',';
         }
 
-        $out .= PHP_EOL;
-
-        return $out;
+        return $out . PHP_EOL;
     }
 
     public static function buildRegexCode($value, $appendComma = false)
@@ -264,9 +248,7 @@ class CodeGenerator
             $out .= ',';
         }
 
-        $out .= PHP_EOL;
-
-        return $out;
+        return $out . PHP_EOL;
     }
 
     public static function buildJsonCode($value, $appendComma = false)
@@ -283,9 +265,7 @@ class CodeGenerator
             $out .= ',';
         }
 
-        $out .= PHP_EOL;
-
-        return $out;
+        return $out . PHP_EOL;
     }
 
     public static function buildIndent($indent)

@@ -10,7 +10,7 @@ class PDFMedia extends Media
     // magic methods
     public static function __classLoaded()
     {
-        $className = get_called_class();
+        $className = static::class;
 
         Media::$mimeHandlers['application/pdf'] = $className;
         Media::$mimeHandlers['application/postscript'] = $className;
@@ -38,6 +38,7 @@ class PDFMedia extends Media
                         throw new Exception('Unable to find document extension for mime-type: '.$this->MIMEType);
                 }
 
+                // no break
             default:
                 return parent::getValue($name);
         }
@@ -63,7 +64,7 @@ class PDFMedia extends Media
     }
 
     // static methods
-    public static function analyzeFile($filename, $mediaInfo = array())
+    public static function analyzeFile($filename, $mediaInfo = [])
     {
         $cmd = sprintf(static::$extractPageCommand, $filename, static::$extractPageIndex);
         $pageIm = @imagecreatefromstring(shell_exec($cmd));

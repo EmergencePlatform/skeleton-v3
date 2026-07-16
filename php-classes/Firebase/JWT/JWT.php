@@ -1,10 +1,11 @@
 <?php
 
 namespace Firebase\JWT;
-use \DomainException;
-use \InvalidArgumentException;
-use \UnexpectedValueException;
-use \DateTime;
+
+use DomainException;
+use InvalidArgumentException;
+use UnexpectedValueException;
+use DateTime;
 
 /**
  * JSON Web Token implementation, based on this spec:
@@ -21,7 +22,6 @@ use \DateTime;
  */
 class JWT
 {
-
     /**
      * When checking nbf, iat or expiration times,
      * we want to provide some extra leeway time to
@@ -35,14 +35,14 @@ class JWT
      *
      * Will default to PHP time() value if null.
      */
-    public static $timestamp = null;
+    public static $timestamp;
 
-    public static $supported_algs = array(
-        'HS256' => array('hash_hmac', 'SHA256'),
-        'HS512' => array('hash_hmac', 'SHA512'),
-        'HS384' => array('hash_hmac', 'SHA384'),
-        'RS256' => array('openssl', 'SHA256'),
-    );
+    public static $supported_algs = [
+        'HS256' => ['hash_hmac', 'SHA256'],
+        'HS512' => ['hash_hmac', 'SHA512'],
+        'HS384' => ['hash_hmac', 'SHA384'],
+        'RS256' => ['openssl', 'SHA256'],
+    ];
 
     /**
      * Decodes a JWT string into a PHP object.
@@ -64,9 +64,9 @@ class JWT
      * @uses jsonDecode
      * @uses urlsafeB64Decode
      */
-    public static function decode($jwt, $key, $allowed_algs = array())
+    public static function decode($jwt, $key, $allowed_algs = [])
     {
-        $timestamp = is_null(static::$timestamp) ? time() : static::$timestamp;
+        $timestamp = static::$timestamp ?? time();
 
         if (empty($key)) {
             throw new InvalidArgumentException('Key may not be empty');
@@ -75,10 +75,10 @@ class JWT
             throw new InvalidArgumentException('Algorithm not allowed');
         }
         $tks = explode('.', $jwt);
-        if (count($tks) != 3) {
+        if (count($tks) !== 3) {
             throw new UnexpectedValueException('Wrong number of segments');
         }
-        list($headb64, $bodyb64, $cryptob64) = $tks;
+        [$headb64, $bodyb64, $cryptob64] = $tks;
         if (null === ($header = static::jsonDecode(static::urlsafeB64Decode($headb64)))) {
             throw new UnexpectedValueException('Invalid header encoding');
         }
@@ -86,7 +86,7 @@ class JWT
             throw new UnexpectedValueException('Invalid claims encoding');
         }
         $sig = static::urlsafeB64Decode($cryptob64);
-        
+
         if (empty($header->alg)) {
             throw new UnexpectedValueException('Empty algorithm');
         }
@@ -152,14 +152,14 @@ class JWT
      */
     public static function encode($payload, $key, $alg = 'HS256', $keyId = null, $head = null)
     {
-        $header = array('typ' => 'JWT', 'alg' => $alg);
+        $header = ['typ' => 'JWT', 'alg' => $alg];
         if ($keyId !== null) {
             $header['kid'] = $keyId;
         }
-        if ( isset($head) && is_array($head) ) {
+        if (isset($head) && is_array($head)) {
             $header = array_merge($head, $header);
         }
-        $segments = array();
+        $segments = [];
         $segments[] = static::urlsafeB64Encode(static::jsonEncode($header));
         $segments[] = static::urlsafeB64Encode(static::jsonEncode($payload));
         $signing_input = implode('.', $segments);
@@ -187,18 +187,17 @@ class JWT
         if (empty(static::$supported_algs[$alg])) {
             throw new DomainException('Algorithm not supported');
         }
-        list($function, $algorithm) = static::$supported_algs[$alg];
-        switch($function) {
+        [$function, $algorithm] = static::$supported_algs[$alg];
+        switch ($function) {
             case 'hash_hmac':
-                return hash_hmac($algorithm, $msg, $key, true);
+                return hash_hmac((string) $algorithm, $msg, $key, true);
             case 'openssl':
                 $signature = '';
                 $success = openssl_sign($msg, $signature, $key, $algorithm);
                 if (!$success) {
                     throw new DomainException("OpenSSL unable to sign data");
-                } else {
-                    return $signature;
                 }
+                return $signature;
         }
     }
 
@@ -221,18 +220,17 @@ class JWT
             throw new DomainException('Algorithm not supported');
         }
 
-        list($function, $algorithm) = static::$supported_algs[$alg];
-        switch($function) {
+        [$function, $algorithm] = static::$supported_algs[$alg];
+        switch ($function) {
             case 'openssl':
                 $success = openssl_verify($msg, $signature, $key, $algorithm);
                 if (!$success) {
                     throw new DomainException("OpenSSL unable to verify data: " . openssl_error_string());
-                } else {
-                    return $signature;
                 }
+                return $signature;
             case 'hash_hmac':
             default:
-                $hash = hash_hmac($algorithm, $msg, $key, true);
+                $hash = hash_hmac((string) $algorithm, $msg, $key, true);
                 if (function_exists('hash_equals')) {
                     return hash_equals($signature, $hash);
                 }
@@ -259,7 +257,7 @@ class JWT
      */
     public static function jsonDecode($input)
     {
-        if (version_compare(PHP_VERSION, '5.4.0', '>=') && !(defined('JSON_C_VERSION') && PHP_INT_SIZE > 4)) {
+        if (version_compare(PHP_VERSION, '5.4.0', '>=') && (!defined('JSON_C_VERSION') || PHP_INT_SIZE <= 4)) {
             /** In PHP >=5.4.0, json_decode() accepts an options parameter, that allows you
              * to specify that large ints (like Steam Transaction IDs) should be treated as
              * strings, rather than the PHP default behaviour of converting them to floats.
@@ -272,7 +270,7 @@ class JWT
              */
             $max_int_length = strlen((string) PHP_INT_MAX) - 1;
             $json_without_bigints = preg_replace('/:\s*(-?\d{'.$max_int_length.',})/', ': "$1"', $input);
-            $obj = json_decode($json_without_bigints);
+            $obj = json_decode((string) $json_without_bigints);
         }
 
         if (function_exists('json_last_error') && $errno = json_last_error()) {
@@ -313,7 +311,7 @@ class JWT
     public static function urlsafeB64Decode($input)
     {
         $remainder = strlen($input) % 4;
-        if ($remainder) {
+        if ($remainder !== 0) {
             $padlen = 4 - $remainder;
             $input .= str_repeat('=', $padlen);
         }
@@ -341,15 +339,13 @@ class JWT
      */
     private static function handleJsonError($errno)
     {
-        $messages = array(
+        $messages = [
             JSON_ERROR_DEPTH => 'Maximum stack depth exceeded',
             JSON_ERROR_CTRL_CHAR => 'Unexpected control character found',
             JSON_ERROR_SYNTAX => 'Syntax error, malformed JSON'
-        );
+        ];
         throw new DomainException(
-            isset($messages[$errno])
-            ? $messages[$errno]
-            : 'Unknown JSON error: ' . $errno
+            $messages[$errno] ?? 'Unknown JSON error: ' . $errno
         );
     }
 
@@ -363,8 +359,8 @@ class JWT
     private static function safeStrlen($str)
     {
         if (function_exists('mb_strlen')) {
-            return mb_strlen($str, '8bit');
+            return mb_strlen((string) $str, '8bit');
         }
-        return strlen($str);
+        return strlen((string) $str);
     }
 }

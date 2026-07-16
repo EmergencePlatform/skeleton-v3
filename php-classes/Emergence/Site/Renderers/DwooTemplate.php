@@ -3,7 +3,6 @@
 namespace Emergence\Site\Renderers;
 
 use Exception;
-
 use Site;
 use SiteFile;
 use Emergence\Dwoo\Engine;
@@ -13,6 +12,7 @@ use Emergence\Site\IResponse;
 
 class DwooTemplate implements IRenderer
 {
+    public $mode;
     protected $template;
     protected $contentType = 'text/html; charset=utf-8';
 

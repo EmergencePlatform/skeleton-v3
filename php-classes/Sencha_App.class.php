@@ -2,6 +2,7 @@
 
 class Sencha_App
 {
+    public $_appCfg;
     protected $_name;
     protected $_buildCfg;
 
@@ -42,20 +43,20 @@ class Sencha_App
         }
 
         // try to get from shared cache - this seems annoying and unecessary
-#		$cacheKey = "app/$this->_name/config";
-#
-#		if($this->_buildCfg = Cache::fetch($cacheKey))
-#		{
-#			return $key ? $this->_buildCfg[$key] : $this->_buildCfg;
-#		}
+        #		$cacheKey = "app/$this->_name/config";
+        #
+        #		if($this->_buildCfg = Cache::fetch($cacheKey))
+        #		{
+        #			return $key ? $this->_buildCfg[$key] : $this->_buildCfg;
+        #		}
 
         // get from filesystem
-        $configPath = array('sencha-workspace', $this->_name, '.sencha', 'app', 'sencha.cfg');
+        $configPath = ['sencha-workspace', $this->_name, '.sencha', 'app', 'sencha.cfg'];
 
         if ($configNode = Site::resolvePath($configPath, true, false)) {
             $this->_buildCfg = Sencha::loadProperties($configNode->RealPath);
         } else {
-            $this->_buildCfg = array();
+            $this->_buildCfg = [];
         }
 
         if ($jsonCfg = $this->getAppCfg()) {
@@ -63,7 +64,7 @@ class Sencha_App
         }
 
         // store in cache
-#		Cache::store($cacheKey, $this->_buildCfg);
+        #		Cache::store($cacheKey, $this->_buildCfg);
 
         return $key ? $this->_buildCfg[$key] : $this->_buildCfg;
     }
@@ -75,7 +76,7 @@ class Sencha_App
         }
 
         // get from filesystem
-        $configPath = array('sencha-workspace', $this->_name, 'app.json');
+        $configPath = ['sencha-workspace', $this->_name, 'app.json'];
 
         if (!$configNode = Site::resolvePath($configPath, true, false)) {
             return null;
@@ -86,7 +87,7 @@ class Sencha_App
         // patch invalid json
         $json = Sencha::cleanJson($json);
 
-        $this->_appCfg = json_decode($json, true);
+        $this->_appCfg = json_decode((string) $json, true);
 
         return $key ? $this->_appCfg[$key] : $this->_appCfg;
     }
@@ -139,14 +140,13 @@ class Sencha_App
 
         if ($Asset) {
             return $assetPath.'?_sha1='.$Asset->SHA1;
-        } else {
-            return $assetPath;
         }
+        return $assetPath;
     }
 
     public function getMicroloader($mode = 'production', $debug = null)
     {
-        $debug = $debug === null ? !empty($_GET['jsdebug']) : $debug;
+        $debug ??= !empty($_GET['jsdebug']);
         $cacheKey = "app/$this->_name/microloader/$mode";
 
         if ($debug || !($code = Cache::fetch($cacheKey))) {
@@ -164,14 +164,14 @@ class Sencha_App
 
     public function getRequiredPackages($deep = true)
     {
-        $packages = $this->getAppCfg('requires') ?: array();
+        $packages = $this->getAppCfg('requires') ?: [];
 
         if ($themeName = $this->getBuildCfg('app.theme')) {
             $packages[] = $themeName;
         }
 
         if ($deep) {
-            $packages = array_unique(Sencha::crawlRequiredPackages($packages, $this->getFramework(), $this->getFrameworkVersion()));
+            return array_unique(Sencha::crawlRequiredPackages($packages, $this->getFramework(), $this->getFrameworkVersion()));
         }
 
         return $packages;

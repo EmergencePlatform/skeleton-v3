@@ -2,7 +2,7 @@
 
 trait FieldValuesRequestHandlerTrait
 {
-    public static function handleFieldValuesRequest($fieldName, array $additionalValues = array())
+    public static function handleFieldValuesRequest($fieldName, array $additionalValues = [])
     {
         $recordClass = static::$recordClass;
 
@@ -19,9 +19,7 @@ trait FieldValuesRequestHandlerTrait
             case 'enum':
                 $values = $field['values'];
                 if ($query) {
-                    $values = array_filter($values, function($value) use ($query) {
-                        return stripos($value, $query) !== false;
-                    });
+                    $values = array_filter($values, fn ($value) => stripos((string) $value, (string) $query) !== false);
                 }
 
                 break;
@@ -42,10 +40,10 @@ trait FieldValuesRequestHandlerTrait
                             $field['columnName'],
                             $recordClass::$tableName,
                             $recordClass::getTableAlias(),
-                            $conditions ? join(') AND (', $recordClass::mapConditions($conditions)) : 'TRUE'
+                            $conditions ? implode(') AND (', $recordClass::mapConditions($conditions)) : 'TRUE'
                         ]
                     );
-                } catch (\TableNotFoundException $e) {
+                } catch (\TableNotFoundException) {
                     $values = [];
                 }
 

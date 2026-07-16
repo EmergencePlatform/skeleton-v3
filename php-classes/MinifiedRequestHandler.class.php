@@ -2,16 +2,16 @@
 
 class MinifiedRequestHandler extends RequestHandler
 {
-    const ERROR_NOT_FOUND = -1;
-    const ERROR_TYPE_MISMATCH = -2;
+    public const ERROR_NOT_FOUND = -1;
+    public const ERROR_TYPE_MISMATCH = -2;
 
     public static function handleRequest()
     {
         switch (static::shiftPath()) {
             case 'js':
-                return static::handleAssetsRequest(array('site-root','js'), 'application/javascript', 'JSMin');
+                return static::handleAssetsRequest(['site-root','js'], 'application/javascript', 'JSMin');
             case 'css':
-                return static::handleAssetsRequest(array('site-root','css'), 'text/css', 'CssMin');
+                return static::handleAssetsRequest(['site-root','css'], 'text/css', 'CssMin');
             default:
                 return static::throwInvalidRequestError();
         }
@@ -53,10 +53,10 @@ class MinifiedRequestHandler extends RequestHandler
 
 
         // if URL includes correct hash, response can be cached permenantly by the client
-        if (!empty($_GET['_sha1']) && (empty($sourceReport) ||$_GET['_sha1'] == $sourceReport['hash'])) {
-            $expires = 60*60*24*365;
+        if (!empty($_GET['_sha1']) && (empty($sourceReport) || $_GET['_sha1'] == $sourceReport['hash'])) {
+            $expires = 60 * 60 * 24 * 365;
             header('Cache-Control: public, max-age='.$expires);
-            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time()+$expires));
+            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + $expires));
             header('Pragma: public');
         }
 
@@ -69,7 +69,7 @@ class MinifiedRequestHandler extends RequestHandler
 
         // output content
         header('Content-Type: '.$contentType);
-        header('Content-Length: '.strlen($code));
+        header('Content-Length: '.strlen((string) $code));
         header('Last-Modified: '.gmdate('D, d M Y H:i:s \G\M\T', time()));
         print $code;
         exit();
@@ -86,7 +86,7 @@ class MinifiedRequestHandler extends RequestHandler
 
         if (is_array($cacheHashOrSourceReport) && is_array($cacheHashOrSourceReport['files'])) {
             $code = '';
-            foreach ($cacheHashOrSourceReport['files'] AS $path => $fileData) {
+            foreach ($cacheHashOrSourceReport['files'] as $fileData) {
                 $code .= $minifier::minify(file_get_contents(SiteFile::getRealPathByID($fileData['ID'])));
             }
 
@@ -101,10 +101,10 @@ class MinifiedRequestHandler extends RequestHandler
     {
         $sourceFiles = static::getSourceNodes($paths, $root, $contentType);
 
-        return array(
+        return [
             'files' => $sourceFiles
             ,'hash' => static::getFilesHash($sourceFiles)
-        );
+        ];
     }
 
     public static function getSourceNodes($paths, $root, $contentType = null)
@@ -115,17 +115,17 @@ class MinifiedRequestHandler extends RequestHandler
             $root = Site::splitPath($root);
         }
 
-        $sourceFiles = array();
+        $sourceFiles = [];
 
-        foreach ($paths AS $path) {
+        foreach ($paths as $path) {
             $path = array_merge($root, $path);
-            list($filename) = array_slice($path, -1);
+            [$filename] = array_slice($path, -1);
 
             if ($filename == '*') {
                 array_pop($path);
 
                 Emergence_FS::cacheTree($path);
-                foreach (Emergence_FS::getTreeFiles($path, false, $contentType ? array('Type' => $contentType) : null) AS $path => $fileData) {
+                foreach (Emergence_FS::getTreeFiles($path, false, $contentType ? ['Type' => $contentType] : null) as $path => $fileData) {
                     $sourceFiles[$path] = $fileData;
                 }
             } else {
@@ -143,7 +143,7 @@ class MinifiedRequestHandler extends RequestHandler
                 if ($node->Type != $contentType) {
                     if (
                         $node->Type != 'application/php'
-                        && count($paths) == 1
+                        && count($paths) === 1
                         && method_exists($node, 'outputAsResponse')
                     ) {
                         // if the non-matching file is a static asset and the only path,
@@ -155,10 +155,10 @@ class MinifiedRequestHandler extends RequestHandler
                     throw new Exception('Source file "'.implode('/', $path).'" does not match requested content type "'.$contentType.'"', self::ERROR_TYPE_MISMATCH);
                 }
 
-                $sourceFiles[join('/', $path)] = array(
+                $sourceFiles[implode('/', $path)] = [
                     'ID' => $node->ID
                     ,'SHA1' => $node->SHA1
-                );
+                ];
             }
         }
 
@@ -171,16 +171,14 @@ class MinifiedRequestHandler extends RequestHandler
             $paths = implode('/', $paths);
         }
 
-        return array_map(function($path) {
-            return array_filter(explode('/', $path));
-        }, preg_split('/(\+|%2B|%20|\s+)/', $paths));
+        return array_map(fn ($path) => array_filter(explode('/', (string) $path)), preg_split('/(\+|%2B|%20|\s+)/', (string) $paths));
     }
 
     public static function getFilesHash($files)
     {
         $hashStr = '';
 
-        foreach ($files AS $path => $fileData) {
+        foreach ($files as $path => $fileData) {
             $hashStr .= "$path\t$fileData[SHA1]\n";
         }
 

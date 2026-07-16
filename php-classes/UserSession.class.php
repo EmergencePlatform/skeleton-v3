@@ -5,10 +5,10 @@ use Emergence\People\User;
 
 class UserSession extends Session
 {
-     // ActiveRecord configuration
+    // ActiveRecord configuration
     public static $subClasses = [
         Session::class,
-        __CLASS__
+        self::class
     ];
 
     public static $fields = [
@@ -35,7 +35,7 @@ class UserSession extends Session
 
     public function __construct(array $record = [])
     {
-         parent::__construct($record);
+        parent::__construct($record);
 
         if (!isset($this->authenticator)) {
             $this->authenticator = new static::$defaultAuthenticator($this);

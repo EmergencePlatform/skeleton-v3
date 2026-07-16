@@ -45,7 +45,7 @@ class Auto implements IRenderer
         $templateId = $response->getId();
 
         if ($this->templatePrefix) {
-            $templateId = trim($this->templatePrefix, '/').'/'.$templateId;
+            $templateId = trim((string) $this->templatePrefix, '/').'/'.$templateId;
         }
 
         return RequestHandler::respond($templateId, $response->getPayload(), $this->getMode());

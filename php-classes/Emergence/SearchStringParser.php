@@ -10,7 +10,7 @@ class SearchStringParser
     // parser state
     protected $string;
     protected $cursorMax;
-    protected $terms = array();
+    protected $terms = [];
 
     // scanning state
     protected $qualifier = '';
@@ -19,15 +19,15 @@ class SearchStringParser
     protected $state = self::STATE_READY;
 
     // scanning state modes
-    const STATE_READY = 0;
-    const STATE_QUALIFIER = 1;
-    const STATE_TERM = 2;
+    public const STATE_READY = 0;
+    public const STATE_QUALIFIER = 1;
+    public const STATE_TERM = 2;
 
 
-    function __construct($string)
+    public function __construct($string)
     {
         $this->string = $string;
-        $this->cursorMax = strlen($string) - 1;
+        $this->cursorMax = strlen((string) $string) - 1;
     }
 
     public static function parseString($string)
@@ -38,12 +38,12 @@ class SearchStringParser
 
     protected static function isQuote($character)
     {
-        return strpos(static::$quotes, $character) !== false;
+        return str_contains((string) static::$quotes, (string) $character);
     }
 
     protected static function isSpace($character)
     {
-        return ctype_space($character);
+        return ctype_space((string) $character);
     }
 
     protected static function isDelimiter($character)
@@ -78,6 +78,7 @@ class SearchStringParser
 
                     // continue into qualifier mode and continue scan without advancing cursor
 
+                    // no break
                 case self::STATE_QUALIFIER:
 
                     $this->qualifier = $this->readSubstring();
@@ -93,6 +94,7 @@ class SearchStringParser
                     // skip delimeter and continue into term parsing
                     $this->cursor++;
 
+                    // no break
                 case self::STATE_TERM:
                     $this->term = $this->readSubstring(false);
                     $this->flushTerm();
@@ -142,20 +144,20 @@ class SearchStringParser
         return $string;
     }
 
-     protected function flushTerm()
-     {
+    protected function flushTerm()
+    {
         if ($this->term || $this->qualifier) {
-            $this->terms[] = array(
+            $this->terms[] = [
                 'qualifier' => $this->qualifier ?: null,
                 'term' => $this->term ?: null
-            );
+            ];
 
             $this->qualifier = '';
             $this->term = '';
 
-            static::$debug && printf("Flushed term: %s\n", print_r($this->terms[count($this->terms)-1], true));
+            static::$debug && printf("Flushed term: %s\n", print_r($this->terms[count($this->terms) - 1], true));
         }
 
         $this->state = self::STATE_READY;
-     }
+    }
 }

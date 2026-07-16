@@ -5,21 +5,21 @@ abstract class VersionedRecord extends ActiveRecord
     // configure ActiveRecord
     public static $trackModified = true;
 
-    public static $fields = array(
-        'RevisionID' => array(
+    public static $fields = [
+        'RevisionID' => [
             'columnName' => 'RevisionID'
             ,'type' => 'integer'
             ,'unsigned' => true
             ,'notnull' => false
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'OldVersions' => array(
+    public static $relationships = [
+        'OldVersions' => [
             'type' => 'history'
-            ,'order' => array('RevisionID' => 'DESC')
-        )
-    );
+            ,'order' => ['RevisionID' => 'DESC']
+        ]
+    ];
 
 
 
@@ -47,10 +47,8 @@ abstract class VersionedRecord extends ActiveRecord
 
     protected static function _initRelationship($relationship, $options)
     {
-        if ($options['type'] == 'history') {
-            if (empty($options['class'])) {
-                $options['class'] = get_called_class();
-            }
+        if ($options['type'] == 'history' && empty($options['class'])) {
+            $options['class'] = static::class;
         }
 
         return parent::_initRelationship($relationship, $options);
@@ -81,36 +79,36 @@ abstract class VersionedRecord extends ActiveRecord
     /*
      * Implement specialized getters
      */
-    public static function getRevisionsByID($ID, $options = array())
+    public static function getRevisionsByID($ID, $options = [])
     {
         $options['conditions']['ID'] = $ID;
 
         return static::getRevisions($options);
     }
 
-    public static function getRevisions($options = array())
+    public static function getRevisions($options = [])
     {
         return static::instantiateRecords(static::getRevisionRecords($options));
     }
 
-    public static function getRevisionRecords($options = array())
+    public static function getRevisionRecords($options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'indexField' => false
-            ,'conditions' => array()
+            ,'conditions' => []
             ,'order' => false
             ,'limit' => false
             ,'offset' => 0
-        ), $options);
+        ], $options);
 
         $query = 'SELECT * FROM `%s` WHERE (%s)';
-        $params = array(
+        $params = [
             static::getHistoryTableName()
-            , count($options['conditions']) ? join(') AND (', static::_mapConditions($options['conditions'])) : 1
-        );
+            , count($options['conditions']) > 0 ? implode(') AND (', static::_mapConditions($options['conditions'])) : 1
+        ];
 
         if ($options['order']) {
-            $query .= ' ORDER BY '.join(',', static::_mapFieldOrder($options['order']));
+            $query .= ' ORDER BY '.implode(',', static::_mapFieldOrder($options['order']));
         }
 
         if ($options['limit']) {
@@ -120,9 +118,8 @@ abstract class VersionedRecord extends ActiveRecord
 
         if ($options['indexField']) {
             return DB::table(static::_cn($options['indexField']), $query, $params);
-        } else {
-            return DB::allRecords($query, $params);
         }
+        return DB::allRecords($query, $params);
     }
 
 
@@ -138,7 +135,7 @@ abstract class VersionedRecord extends ActiveRecord
         }
 
         // save record as usual
-        $return = parent::save($deep);
+        parent::save($deep);
 
         if ($this->_isSaving) {
             return null;
@@ -151,27 +148,28 @@ abstract class VersionedRecord extends ActiveRecord
             // maintain legacy behavior if trackModified is disabled and overwrite Creator
             if (!static::$trackModified) {
                 $recordValues['Created'] = 'CURRENT_TIMESTAMP';
-                $recordValues['CreatorID'] = !empty($_SESSION) && !empty($_SESSION['User']) ? $_SESSION['User']->ID : null;
+                $recordValues['CreatorID'] = $_SESSION !== [] && !empty($_SESSION['User']) ? $_SESSION['User']->ID : null;
             }
 
             $set = static::_mapValuesToSet($recordValues);
 
             DB::nonQuery(
-                'INSERT INTO `%s` SET %s'
-                , array(
+                'INSERT INTO `%s` SET %s',
+                [
                     static::getHistoryTableName()
-                    , join(',', $set)
-                )
+                    , implode(',', $set)
+                ]
             );
         }
+        return null;
     }
 
-    public static function getRootClass($boundingParentClass = __CLASS__)
+    public static function getRootClass($boundingParentClass = self::class)
     {
         return parent::getRootClass($boundingParentClass);
     }
 
-    public static function getStaticRootClass($boundingParentClass = __CLASS__)
+    public static function getStaticRootClass($boundingParentClass = self::class)
     {
         return parent::getStaticRootClass($boundingParentClass);
     }

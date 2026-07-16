@@ -11,7 +11,7 @@ class AudioMedia extends Media
     // magic methods
     public static function __classLoaded()
     {
-        $className = get_called_class();
+        $className = static::class;
 
         Media::$mimeHandlers['audio/mpeg'] = $className;
 
@@ -26,7 +26,6 @@ class AudioMedia extends Media
                 return 'image/png';
 
             case 'Width':
-                return 128;
 
             case 'Height':
                 return 128;
@@ -40,6 +39,7 @@ class AudioMedia extends Media
                         throw new Exception('Unable to find audio extension for mime-type: '.$this->MIMEType);
                 }
 
+                // no break
             default:
                 return parent::getValue($name);
         }
@@ -79,27 +79,27 @@ class AudioMedia extends Media
         }
 
         // create media instance
-        $PreviewMedia = Media::createFromFile($previewPath, array(
+        $PreviewMedia = Media::createFromFile($previewPath, [
             'ContextClass' => 'Media'
             ,'ContextID' => $this->ID
-            ,'Caption' => sprintf('%u sec preview (%us-%us)', static::$previewDuration, $startTime, $startTime+static::$previewDuration)
-        ));
+            ,'Caption' => sprintf('%u sec preview (%us-%us)', static::$previewDuration, $startTime, $startTime + static::$previewDuration)
+        ]);
 
         return $PreviewMedia;
     }
 
     // static methods
-#    public static function analyzeFile($filename, $mediaInfo = array())
-#    {
-#        // Initialize getID3 engine
-#        $getID3 = new getID3();
-#
-#        $mediaInfo['id3Info'] = $getID3->analyze($filename);
-#
-#        $mediaInfo['width'] = 0;
-#        $mediaInfo['height'] = 0;
-#        $mediaInfo['duration'] = $mediaInfo['id3Info']['playtime_seconds'];
-#
-#        return $mediaInfo;
-#    }
+    #    public static function analyzeFile($filename, $mediaInfo = array())
+    #    {
+    #        // Initialize getID3 engine
+    #        $getID3 = new getID3();
+    #
+    #        $mediaInfo['id3Info'] = $getID3->analyze($filename);
+    #
+    #        $mediaInfo['width'] = 0;
+    #        $mediaInfo['height'] = 0;
+    #        $mediaInfo['duration'] = $mediaInfo['id3Info']['playtime_seconds'];
+    #
+    #        return $mediaInfo;
+    #    }
 }

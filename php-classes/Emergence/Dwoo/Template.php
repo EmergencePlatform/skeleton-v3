@@ -37,7 +37,7 @@ class Template extends \Dwoo_Template_String
     public function getIsModifiedCode()
     {
         if ($this->path[0] == '/') {
-            $nodeExpression = 'Site::resolvePath(\''.substr($this->path, 1).'\')';
+            $nodeExpression = 'Site::resolvePath(\''.substr((string) $this->path, 1).'\')';
         } else {
             $nodeExpression = 'Emergence\Dwoo\Template::findNode(\''.$this->path.'\')';
         }
@@ -82,10 +82,10 @@ class Template extends \Dwoo_Template_String
         array_unshift($searchStack, 'html-templates');
 
         if ($searchScriptname = array_pop($searchStack)) {
-            array_push($searchStack, basename($searchScriptname, '.php'));
+            $searchStack[] = basename((string) $searchScriptname, '.php');
         }
 
-        $searchHistory = array();
+        $searchHistory = [];
 
         while (true) {
             $searchPath = array_merge($searchStack, $path);
@@ -106,9 +106,7 @@ class Template extends \Dwoo_Template_String
         if (!$templateNode && $throwExceptionOnNotFound) {
             throw new Exception(
                 "Could not find template match for \"".implode('/', $path)."\", checked paths:\n\n"
-                .implode(PHP_EOL, array_map(function($a) {
-                    return implode('/', $a);
-                }, $searchHistory))
+                .implode(PHP_EOL, array_map(fn ($a) => implode('/', $a), $searchHistory))
             );
         }
 
@@ -118,7 +116,7 @@ class Template extends \Dwoo_Template_String
     public static function templateFactory(Dwoo_Core $dwoo, $resourceId, $cacheTime = null, $cacheId = null, $compileId = null, \Dwoo_ITemplate $parentTemplate = null)
     {
         // return Dwoo_Template_File for absolute path
-        if (substr($resourceId, 0, strlen(Site::$rootPath)) == Site::$rootPath) {
+        if (str_starts_with((string) $resourceId, (string) Site::$rootPath)) {
             return new \Dwoo_Template_File($file, $cacheTime, $cacheId, $compileId, $includePath);
         }
 

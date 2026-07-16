@@ -22,7 +22,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
     {
         $requiredColumns = [];
 
-        foreach ($config AS $key => $value) {
+        foreach ($config as $key => $value) {
             if (!$value) {
                 if (is_string($key) && array_key_exists($key, $requiredColumns)) {
                     unset($requiredColumns[$key]);
@@ -47,8 +47,8 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
         $requiredColumns = array_keys(array_filter($requiredColumns));
 
         if ($columnsMap) {
-            $mappedColumns = array();
-            foreach ($columns AS $columnName) {
+            $mappedColumns = [];
+            foreach ($columns as $columnName) {
                 $mappedColumns[] = array_key_exists($columnName, $columnsMap) ? $columnsMap[$columnName] : $columnName;
             }
             $columns = $mappedColumns;
@@ -58,17 +58,17 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
 
         if (count($missingColumns)) {
             throw new \Exception(
-                $noun.' spreadsheet is missing required column'.(count($missingColumns) != 1 ? 's' : '').': '
-                .join(',', $missingColumns)
+                $noun.' spreadsheet is missing required column'.(count($missingColumns) !== 1 ? 's' : '').': '
+                .implode(',', $missingColumns)
                 .'. Found columns: '
-                .join(', ', $columns)
+                .implode(', ', $columns)
             );
         }
     }
 
     protected static function _readRow(array $row, array $columnsMap)
     {
-        $output = array();
+        $output = [];
 
         // extract columns via alias mappings
         foreach ($columnsMap as $alias => $key) {
@@ -79,8 +79,8 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
             }
 
             // a suffix of [] indicates a value that should be read into an array
-            if (substr($key, -2) == '[]') {
-                $key = substr($key, 0, -2);
+            if (str_ends_with((string) $key, '[]')) {
+                $key = substr((string) $key, 0, -2);
                 $arrayValue = true;
             } else {
                 $arrayValue = false;
@@ -117,7 +117,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
         }
 
         // filter out any empty cells in multi-value arrays
-        foreach ($output as $key => &$value) {
+        foreach ($output as &$value) {
             if (is_array($value)) {
                 $value = array_filter($value);
             }
@@ -176,7 +176,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
         return $isValid;
     }
 
-    protected static function _saveRecord(IJob $Job, ActiveRecord $Record, $pretend, array &$results, $logOptions = array())
+    protected static function _saveRecord(IJob $Job, ActiveRecord $Record, $pretend, array &$results, $logOptions = [])
     {
         // call configurable hook
         if (is_callable(static::$onBeforeSaveRecord)) {
@@ -191,7 +191,7 @@ class AbstractSpreadsheetConnector extends \Emergence\Connectors\AbstractConnect
             $results['created']++;
         } elseif ($logEntry['action'] == 'update') {
             $results['updated']++;
-            foreach (array_keys($logEntry['changes']->getNewValues()) AS $changedField) {
+            foreach (array_keys($logEntry['changes']->getNewValues()) as $changedField) {
                 $results['updated-fields'][$changedField]++;
             }
         }

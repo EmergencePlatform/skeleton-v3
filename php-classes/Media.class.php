@@ -10,82 +10,82 @@ class Media extends ActiveRecord
     public static $pluralNoun = 'media items';
 
     // support subclassing
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__, 'PhotoMedia', 'AudioMedia', 'VideoMedia', 'PDFMedia');
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class, 'PhotoMedia', 'AudioMedia', 'VideoMedia', 'PDFMedia'];
     public static $collectionRoute = '/media';
 
     // get rid of these??
-    public static $Namespaces = array();
-    public static $Types = array();
+    public static $Namespaces = [];
+    public static $Types = [];
 
 
     public static $tableName = 'media';
 
-    public static $fields = array(
-        'ContextClass' => array(
+    public static $fields = [
+        'ContextClass' => [
             'type' => 'string'
             ,'notnull' => false
-        )
-        ,'ContextID' => array(
+        ]
+        ,'ContextID' => [
             'type' => 'integer'
             ,'notnull' => false
-        )
+        ]
         ,'MIMEType' => 'string'
-        ,'Width' => array(
+        ,'Width' => [
             'type' => 'integer'
             ,'unsigned' => true
             ,'notnull' => false
-        )
-        ,'Height' => array(
+        ]
+        ,'Height' => [
             'type' => 'integer'
             ,'unsigned' => true
             ,'notnull' => false
-        )
-        ,'Duration' => array(
+        ]
+        ,'Duration' => [
             'type' => 'float'
             ,'unsigned' => true
             ,'notnull' => false
-        )
-        ,'Caption' => array(
+        ]
+        ,'Caption' => [
             'type' => 'string'
             ,'notnull' => false
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'Creator' => array(
+    public static $relationships = [
+        'Creator' => [
             'type' => 'one-one'
             ,'class' => Person::class
             ,'local' => 'CreatorID'
-        )
-        ,'Context' => array(
+        ]
+        ,'Context' => [
             'type' => 'context-parent'
-        )
-    );
+        ]
+    ];
 
-    public static $searchConditions = array(
-        'Caption' => array(
-            'qualifiers' => array('any','caption')
+    public static $searchConditions = [
+        'Caption' => [
+            'qualifiers' => ['any','caption']
             ,'points' => 2
             ,'sql' => 'Caption LIKE "%%%s%%"'
-        )
-        ,'CaptionLike' => array(
-            'qualifiers' => array('caption-like')
+        ]
+        ,'CaptionLike' => [
+            'qualifiers' => ['caption-like']
             ,'points' => 2
             ,'sql' => 'Caption LIKE "%s"'
-        )
-        ,'CaptionNot' => array(
-            'qualifiers' => array('caption-not')
+        ]
+        ,'CaptionNot' => [
+            'qualifiers' => ['caption-not']
             ,'points' => 2
             ,'sql' => 'Caption NOT LIKE "%%%s%%"'
-        )
-        ,'CaptionNotLike' => array(
-            'qualifiers' => array('caption-not-like')
+        ]
+        ,'CaptionNotLike' => [
+            'qualifiers' => ['caption-not-like']
             ,'points' => 2
             ,'sql' => 'Caption NOT LIKE "%s"'
-        )
-    );
+        ]
+    ];
 
     public static $webPathFormat = '/media/open/%u'; // 1=mediaID
     public static $thumbnailRequestFormat = '/thumbnail/%1$u/%2$ux%3$u%4$s'; // 1=media_id 2=width 3=height 4=fill_color
@@ -98,15 +98,15 @@ class Media extends ActiveRecord
     public static $useFaceDetection = true;
     public static $faceDetectionTimeLimit = 10;
 
-    public static $mimeHandlers = array();
+    public static $mimeHandlers = [];
 
-    public static $mimeRewrites = array(
+    public static $mimeRewrites = [
         'image/photoshop'               => 'application/psd'
         ,'image/x-photoshop'            => 'application/psd'
         ,'image/psd'                    => 'application/psd'
         ,'application/photoshop'        => 'application/psd'
         ,'image/vnd.adobe.photoshop'    => 'application/psd'
-    );
+    ];
 
 
     // privates
@@ -119,7 +119,7 @@ class Media extends ActiveRecord
         parent::__classLoaded();
 
         // load subclasses
-        foreach (static::$subClasses AS $subClass) {
+        foreach (static::$subClasses as $subClass) {
             Site::loadClass($subClass);
         }
     }
@@ -132,7 +132,7 @@ class Media extends ActiveRecord
             case 'Data':
             case 'SummaryData':
             case 'JsonTranslation':
-                return array(
+                return [
                     'ID' => $this->ID
                     ,'Class' => $this->Class
                     ,'ContextClass' => $this->ContextClass
@@ -141,7 +141,7 @@ class Media extends ActiveRecord
                     ,'Width' => $this->Width
                     ,'Height' => $this->Height
                     ,'Duration' => $this->Duration
-                );
+                ];
 
             case 'Filename':
                 return $this->getFilename();
@@ -156,8 +156,8 @@ class Media extends ActiveRecord
 
                 if (!isset($this->_webPath)) {
                     $this->_webPath = sprintf(
-                        static::$webPathFormat
-                        , $this->ID
+                        static::$webPathFormat,
+                        $this->ID
                     );
                 }
 
@@ -183,11 +183,11 @@ class Media extends ActiveRecord
     public static function getBlankThumbnailRequest($class, $width, $height, $fillColor = null)
     {
         return sprintf(
-            static::$blankThumbnailRequestFormat
-            , $class
-            , $width
-            , $height
-            , (isset($fillColor) ? 'x'.$fillColor : '')
+            static::$blankThumbnailRequestFormat,
+            $class,
+            $width,
+            $height,
+            (isset($fillColor) ? 'x'.$fillColor : '')
         );
     }
 
@@ -197,11 +197,11 @@ class Media extends ActiveRecord
     public function getThumbnailRequest($width, $height = null, $fillColor = null, $cropped = false)
     {
         return sprintf(
-            static::$thumbnailRequestFormat
-            , $this->ID
-            , $width
-            , $height ?: $width
-            , (is_string($fillColor) ? 'x'.$fillColor : '')
+            static::$thumbnailRequestFormat,
+            $this->ID,
+            $width,
+            $height ?: $width,
+            (is_string($fillColor) ? 'x'.$fillColor : '')
         ).($cropped ? '/cropped' : '');
     }
 
@@ -213,7 +213,7 @@ class Media extends ActiveRecord
         return $this->getThumbnailRequest(
             $maxWidth ?: $maxHeight,
             $maxHeight ?: $maxWidth,
-            !empty($options['fillColor']) ? $options['fillColor'] : null,
+            empty($options['fillColor']) ? null : $options['fillColor'],
             !empty($options['cropped'])
         );
     }
@@ -232,7 +232,7 @@ class Media extends ActiveRecord
 
             case 'application/pdf':
 
-               return PDFMedia::getImage();
+                return PDFMedia::getImage();
 
             case 'application/postscript':
 
@@ -287,7 +287,7 @@ class Media extends ActiveRecord
         $thumbFormat = sprintf('%ux%u', $maxWidth, $maxHeight);
 
         if ($fillColor) {
-            $thumbFormat .= 'x'.strtoupper($fillColor);
+            $thumbFormat .= 'x'.strtoupper((string) $fillColor);
         }
 
         if ($cropped) {
@@ -371,11 +371,7 @@ class Media extends ActiveRecord
                 $heightRatio = ($srcHeight > $maxHeight) ? ($maxHeight / $srcHeight) : 1;
 
                 // crop width/height to scale size if fill disabled
-                if ($cropped) {
-                    $ratio = max($widthRatio, $heightRatio);
-                } else {
-                    $ratio = min($widthRatio, $heightRatio);
-                }
+                $ratio = $cropped ? max($widthRatio, $heightRatio) : min($widthRatio, $heightRatio);
 
                 $scaledWidth = round($srcWidth * $ratio);
                 $scaledHeight = round($srcHeight * $ratio);
@@ -422,31 +418,39 @@ class Media extends ActiveRecord
                     imagesavealpha($image, true);
                 }
 
-    /*
-                $trans_index = imagecolorallocate($image, 218, 0, 245);
-                ImageColorTransparent($image, $background); // make the new temp image all transparent
-                imagealphablending($image, false); // turn off the alpha blending to keep the alpha channel
-    */
+                /*
+                            $trans_index = imagecolorallocate($image, 218, 0, 245);
+                            ImageColorTransparent($image, $background); // make the new temp image all transparent
+                            imagealphablending($image, false); // turn off the alpha blending to keep the alpha channel
+                */
             }
 
             // resize photo to thumbnail
             if ($cropped) {
                 imagecopyresampled(
-                      $image
-                    , $srcImage
-                    , ($thumbWidth - $scaledWidth) / 2, ($thumbHeight - $scaledHeight) / 2
-                    , 0, 0
-                    , $scaledWidth, $scaledHeight
-                    , $srcWidth, $srcHeight
+                    $image,
+                    $srcImage,
+                    ($thumbWidth - $scaledWidth) / 2,
+                    ($thumbHeight - $scaledHeight) / 2,
+                    0,
+                    0,
+                    $scaledWidth,
+                    $scaledHeight,
+                    $srcWidth,
+                    $srcHeight
                 );
             } else {
                 imagecopyresampled(
-                      $image
-                    , $srcImage
-                    , round(($thumbWidth - $scaledWidth) / 2), round(($thumbHeight - $scaledHeight) / 2)
-                    , 0, 0
-                    , $scaledWidth, $scaledHeight
-                    , $srcWidth, $srcHeight
+                    $image,
+                    $srcImage,
+                    round(($thumbWidth - $scaledWidth) / 2),
+                    round(($thumbHeight - $scaledHeight) / 2),
+                    0,
+                    0,
+                    $scaledWidth,
+                    $scaledHeight,
+                    $srcWidth,
+                    $srcHeight
                 );
             }
 
@@ -486,7 +490,7 @@ class Media extends ActiveRecord
 
 
     // static methods
-    public static function createFromUpload($uploadedFile, $fieldValues = array())
+    public static function createFromUpload($uploadedFile, $fieldValues = [])
     {
         // handle recieving a field array from $_FILES
         if (is_array($uploadedFile)) {
@@ -509,7 +513,7 @@ class Media extends ActiveRecord
         return static::createFromFile($uploadedFile, $fieldValues);
     }
 
-    public static function createFromFile($file, $fieldValues = array())
+    public static function createFromFile($file, $fieldValues = [])
     {
         try {
             // handle url input
@@ -536,13 +540,13 @@ class Media extends ActiveRecord
 
             return $Media;
         } catch (Exception $e) {
-            \Emergence\Logger::general_warning('Caught exception while processing media upload, aborting upload and returning null', array(
-                'exceptionClass' => get_class($e)
+            \Emergence\Logger::general_warning('Caught exception while processing media upload, aborting upload and returning null', [
+                'exceptionClass' => $e::class
                 ,'exceptionMessage' => $e->getMessage()
                 ,'exceptionCode' => $e->getCode()
                 ,'recordData' => $Media ? $Media->getData() : null
                 ,'mediaInfo' => $mediaInfo
-            ));
+            ]);
 
             // remove photo record
             if ($Media) {
@@ -601,23 +605,23 @@ class Media extends ActiveRecord
 
 
         // compile mime data
-        $mediaInfo = array(
+        $mediaInfo = [
             'mimeType' => $mimeType
-        );
+        ];
 
         // determine handler
-        $staticClass = get_called_class();
+        $staticClass = static::class;
 
         if (!isset(static::$mimeHandlers[$mediaInfo['mimeType']]) || $staticClass != 'Media') {
             // MICS::dump(static::$mimeHandlers, 'MIME Handlers');
-           // throw new MediaTypeException('No class registered for mime type "' . $mediaInfo['mimeType'] . '"');
+            // throw new MediaTypeException('No class registered for mime type "' . $mediaInfo['mimeType'] . '"');
 
             $mediaInfo['className'] = $staticClass;
         } else {
             $mediaInfo['className'] = static::$mimeHandlers[$mediaInfo['mimeType']];
 
             // call registered type's analyzer
-            $mediaInfo = call_user_func(array($mediaInfo['className'], 'analyzeFile'), $filename, $mediaInfo);
+            $mediaInfo = call_user_func([$mediaInfo['className'], 'analyzeFile'], $filename, $mediaInfo);
         }
 
         return $mediaInfo;
@@ -625,7 +629,7 @@ class Media extends ActiveRecord
 
     public static function getBlankPath($contextClass)
     {
-        $path = array('site-root','img',sprintf(static::$defaultFilenameFormat, $contextClass));
+        $path = ['site-root','img',sprintf(static::$defaultFilenameFormat, $contextClass)];
 
         if ($node = Site::resolvePath($path)) {
             return $node->RealPath;

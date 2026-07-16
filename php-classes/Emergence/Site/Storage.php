@@ -31,7 +31,6 @@ class Storage
      * Register filesystem for given bucket id
      *
      * @param string $bucketId
-     * @param FilesystemInterface $fs
      */
     public static function registerFilesystem($bucketId, FilesystemInterface $fs)
     {

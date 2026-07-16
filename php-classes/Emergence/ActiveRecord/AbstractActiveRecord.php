@@ -12,7 +12,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
     // static configuration
     public static $singularNoun = 'record';
     public static $pluralNoun = 'records';
-    public static $collectionRoute = null;
+    public static $collectionRoute;
 
     public static $behaviors = [
         Behaviors\Eventable::class
@@ -83,7 +83,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
 
     public static function hasField($name)
     {
-        return (boolean)static::getStackedConfig('fields', $name);
+        return (bool)static::getStackedConfig('fields', $name);
     }
 
 
@@ -117,7 +117,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
     protected static function initBehaviors(array $config)
     {
         $behaviors = [];
-        foreach ($config AS $key => $value) {
+        foreach ($config as $key => $value) {
             if (!$value) {
                 if (is_string($key) && array_key_exists($key, $behaviors)) {
                     unset($behaviors[$key]);
@@ -144,9 +144,9 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
 
     protected static function executeBehaviors($method, array $arguments)
     {
-        $class = get_called_class();
+        $class = static::class;
 
-        foreach (static::getBehaviors() AS $behavior) {
+        foreach (static::getBehaviors() as $behavior) {
             if (method_exists($behavior['class'], $method)) {
                 call_user_func_array([$behavior['class'], $method], [&$arguments, &$behavior, $class]);
             }
@@ -162,7 +162,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
         $fields = [];
 
         // apply defaults to field definitions
-        foreach ($config AS $field => $options) {
+        foreach ($config as $field => $options) {
             if (!$options) {
                 continue;
             }
@@ -217,7 +217,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
             'primary' => null,
             'unique' => null,
             'autoIncrement' => null,
-            'null' => array_key_exists('default', $options) && $options['default'] === null ? true : false,
+            'null' => array_key_exists('default', $options) && $options['default'] === null,
             'default' => null
         ], static::$fieldDefaults, ['columnName' => $field], $options);
 
@@ -287,22 +287,15 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
         $fieldHandlers = [];
 
         // apply defaults to field definitions
-        foreach ($config AS $key => $value) {
+        foreach ($config as $key => $value) {
             if (!$value) {
                 continue;
             }
+            $config = is_string($value) ? [
+                'class' => $value
+            ] : $value;
 
-            $config = is_array($value) ? $value : [];
-
-            if (is_string($value)) {
-                $config = [
-                    'class' => $value
-                ];
-            } else {
-                $config = $value;
-            }
-
-            $aliases = !empty($config['aliases']) ? $config['aliases'] : [];
+            $aliases = empty($config['aliases']) ? [] : $config['aliases'];
             unset($config['aliases']);
 
             if (is_string($key)) {
@@ -313,11 +306,11 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
                 }
             }
 
-            if (!count($aliases)) {
+            if (count($aliases) === 0) {
                 $aliases = $config['class']::getAliases();
             }
 
-            foreach ($aliases AS $alias) {
+            foreach ($aliases as $alias) {
                 $fieldHandlers[$alias] = $config;
             }
         }
@@ -338,9 +331,9 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
     // magic methods
     public function __construct(array $data = [], array $options = [])
     {
-        $this->phantom = isset($options['phantom']) ? $options['phantom'] : empty($data);
+        $this->phantom = $options['phantom'] ?? $data === [];
         $this->dirty = $this->phantom || !empty($options['dirty']);
-        $this->valid = isset($options['valid']) ? $options['valid'] : null;
+        $this->valid = $options['valid'] ?? null;
         $this->new = !empty($options['new']);
         $this->destroyed = !empty($options['destroyed']);
 
@@ -447,7 +440,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
             $options = static::getField($name);
         }
 
-        $value = array_key_exists($name, $this->packedData) ? $this->packedData[$name] : null;
+        $value = $this->packedData[$name] ?? null;
 
         if (!empty($options['fieldHandler'])) {
             $value = $options['fieldHandler']['class']::unpack($value, $options);
@@ -460,7 +453,7 @@ abstract class AbstractActiveRecord implements ActiveRecordInterface
     {
         $values = [];
 
-        foreach (static::getFields() AS $fieldName => $fieldOptions) {
+        foreach (static::getFields() as $fieldName => $fieldOptions) {
             if (!empty($fieldOptions['excludeFromValues'])) {
                 continue;
             }

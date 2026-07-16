@@ -8,12 +8,10 @@ class Navigation
 
     public static function getItems()
     {
-        $items = array_filter(static::$items, function ($item) {
-            return empty($item['requireAccountLevel']) || (!empty($GLOBALS['Session']) && $GLOBALS['Session']->hasAccountLevel($item['requireAccountLevel']));
-        });
+        $items = array_filter(static::$items, fn ($item) => empty($item['requireAccountLevel']) || (!empty($GLOBALS['Session']) && $GLOBALS['Session']->hasAccountLevel($item['requireAccountLevel'])));
 
         // decorate array items with keys
-        foreach ($items AS $key => &$value) {
+        foreach ($items as $key => &$value) {
             $value['key'] = $key;
         }
 

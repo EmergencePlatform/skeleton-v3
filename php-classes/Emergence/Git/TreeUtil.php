@@ -29,7 +29,7 @@ class TreeUtil
 
         $result = trim(shell_exec($command));
 
-        return $result ? explode(PHP_EOL, $result) : [];
+        return $result !== '' && $result !== '0' ? explode(PHP_EOL, $result) : [];
     }
 
     /**
@@ -57,7 +57,7 @@ class TreeUtil
             } else {
                 try {
                     $pathCache = trim($repository->run('rev-parse', ["$tree:$path"]));
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     $pathCache = false;
                 }
             }
@@ -74,7 +74,7 @@ class TreeUtil
 
         try {
             return $repository->run('cat-file', ['-p', "$tree:$path"]);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -119,11 +119,7 @@ class TreeUtil
 
         $refPath = "$tree:$path";
 
-        if ($path) {
-            $objectType = trim($repository->run('cat-file', ['-t', $refPath]));
-        } else {
-            $objectType = $this->getObjectType();
-        }
+        $objectType = $path ? trim($repository->run('cat-file', ['-t', $refPath])) : $this->getObjectType();
 
         if ('tree' == $objectType) {
             if (!is_dir($outputPath)) {

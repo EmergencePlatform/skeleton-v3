@@ -1,6 +1,6 @@
 <?php
 
-function Dwoo_Plugin_cssmin(Dwoo_Core $dwoo, $files, $root = array('site-root','css'), $embed = false, $debug = false)
+function Dwoo_Plugin_cssmin(Dwoo_Core $dwoo, $files, $root = ['site-root','css'], $embed = false, $debug = false)
 {
     if (is_array($files)) {
         $files = implode('+', $files);
@@ -11,8 +11,8 @@ function Dwoo_Plugin_cssmin(Dwoo_Core $dwoo, $files, $root = array('site-root','
 
     if ($debug || !empty($_GET['css-debug']) || !empty($_GET['cssdebug'])) {
         $html = '';
-        foreach ($sourceReport['files'] AS $filename => $fileData) {
-            $html .= "<link rel='stylesheet' type='text/css' href='".preg_replace('/^site-root/', '', $filename)."?_sha1=$fileData[SHA1]'>\n";
+        foreach ($sourceReport['files'] as $filename => $fileData) {
+            $html .= "<link rel='stylesheet' type='text/css' href='".preg_replace('/^site-root/', '', (string) $filename)."?_sha1=$fileData[SHA1]'>\n";
         }
 
         return $html;
@@ -20,7 +20,6 @@ function Dwoo_Plugin_cssmin(Dwoo_Core $dwoo, $files, $root = array('site-root','
 
     if ($embed) {
         return '<style>'.MinifiedRequestHandler::getSourceCode('CssMin', $sourceReport).'</style>';
-    } else {
-        return "<link rel='stylesheet' type='text/css' href='/min/css/$files?_sha1=$sourceReport[hash]'>";
     }
+    return "<link rel='stylesheet' type='text/css' href='/min/css/$files?_sha1=$sourceReport[hash]'>";
 }

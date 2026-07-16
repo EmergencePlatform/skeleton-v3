@@ -42,7 +42,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
      */
     public static function hasDefaultInstance()
     {
-        return (boolean)static::$defaultInstance;
+        return (bool)static::$defaultInstance;
     }
 
     /**
@@ -50,10 +50,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
      */
     public static function getDefaultInstance()
     {
-        if (!static::$defaultInstance instanceof static) {
-            if (!static::$defaultInstance = static::createInstance(static::$defaultInstance)) {
-                throw new \Exception('Unable to create default instance of ' . get_called_class());
-            }
+        if (!static::$defaultInstance instanceof static && !static::$defaultInstance = static::createInstance(static::$defaultInstance)) {
+            throw new \Exception('Unable to create default instance of ' . static::class);
         }
 
         return static::$defaultInstance;
@@ -169,7 +167,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['with']) && is_array($options['with'])) {
             $with = [];
 
-            foreach ($options['with'] AS $withAlias => $withBody) {
+            foreach ($options['with'] as $withAlias => $withBody) {
                 if (is_array($withBody)) {
                     if (isset($withBody['params'])) {
                         throw new \Exception('CTE query spec may not include params');
@@ -188,14 +186,14 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['columns'])) {
             if (is_array($options['columns'])) {
                 $select = [];
-                foreach ($options['columns'] AS $columnAlias => $columnValue) {
-                    $select[] = $columnValue . ( is_string($columnAlias) ? ' AS ' . $this->quoteIdentifier($columnAlias) : '' );
+                foreach ($options['columns'] as $columnAlias => $columnValue) {
+                    $select[] = $columnValue . (is_string($columnAlias) ? ' AS ' . $this->quoteIdentifier($columnAlias) : '');
                 }
                 $select = implode(', ', $select);
             } else {
                 $select = $options['columns'];
             }
-        } elseif(!empty($options['from']) || !empty($options['table'])) {
+        } elseif (!empty($options['from']) || !empty($options['table'])) {
             $select = '*';
         } else {
             throw new \Exception('SELECT query must have columns, from, or table configured');
@@ -208,8 +206,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['from'])) {
             if (is_array($options['from'])) {
                 $from = [];
-                foreach ($options['from'] AS $fromAlias => $fromValue) {
-                    $from[] = $fromValue . ( is_string($fromAlias) ? ' AS ' . $fromAlias : '' );
+                foreach ($options['from'] as $fromAlias => $fromValue) {
+                    $from[] = $fromValue . (is_string($fromAlias) ? ' AS ' . $fromAlias : '');
                 }
                 $from = implode(', ', $from);
             } else {
@@ -224,11 +222,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
 
         // join
         if (!empty($options['join'])) {
-            if (is_array($options['join'])) {
-                $join = implode(' ', $options['join']);
-            } else {
-                $join = $options['join'];
-            }
+            $join = is_array($options['join']) ? implode(' ', $options['join']) : $options['join'];
 
             $query .= ' ' . $join;
         }
@@ -238,7 +232,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['where'])) {
             if (is_array($options['where'])) {
                 $where = [];
-                foreach ($options['where'] AS $whereKey => $whereValue) {
+                foreach ($options['where'] as $whereKey => $whereValue) {
                     if (is_string($whereKey)) {
                         $where[] = $this->quoteIdentifier($whereKey) . ' = ' . $this->quoteValue($whereValue);
                     } else {
@@ -256,11 +250,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
 
         // group
         if (!empty($options['group'])) {
-            if (is_array($options['group'])) {
-                $group = implode(', ', $options['group']);
-            } else {
-                $group = $options['group'];
-            }
+            $group = is_array($options['group']) ? implode(', ', $options['group']) : $options['group'];
 
             $query .= ' GROUP BY ' . $group;
         }
@@ -270,12 +260,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if (!empty($options['order'])) {
             if (is_array($options['order'])) {
                 $order = [];
-                foreach ($options['order'] AS $orderKey => $orderValue) {
-                    if (is_string($orderKey)) {
-                        $order[] = $orderKey . ' ' . $orderValue;
-                    } else {
-                        $order[] = $orderValue;
-                    }
+                foreach ($options['order'] as $orderKey => $orderValue) {
+                    $order[] = is_string($orderKey) ? $orderKey . ' ' . $orderValue : $orderValue;
                 }
                 $order = implode(', ', $order);
             } else {
@@ -307,11 +293,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
 
         // prepare params
         if (!empty($options['params'])) {
-            if (!is_array($options['params'])) {
-                $params = [$options['params']];
-            } else {
-                $params = $options['params'];
-            }
+            $params = is_array($options['params']) ? $options['params'] : [$options['params']];
         } else {
             $params = [];
         }
@@ -350,8 +332,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         $query = 'INSERT INTO ' . $this->quoteIdentifier($table);
 
         if ($values) {
-            $query .= ' (' . implode(',', array_map([$this, 'quoteIdentifier'], array_keys($values))) . ')';
-            $query .= ' VALUES (' . implode(',', array_map([$this, 'quoteValue'], array_values($values))) . ')';
+            $query .= ' (' . implode(',', array_map($this->quoteIdentifier(...), array_keys($values))) . ')';
+            $query .= ' VALUES (' . implode(',', array_map($this->quoteValue(...), array_values($values))) . ')';
         } else {
             $query .= ' DEFAULT VALUES';
         }
@@ -359,9 +341,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if ($returning) {
             $query .= ' RETURNING ' . (is_array($returning) ? implode(',', $returning) : $returning);
             return $this->oneRow($query);
-        } else {
-            return $this->nonQuery($query);
         }
+        return $this->nonQuery($query);
     }
 
     public function update($table, $values, $where = [], $returning = null)
@@ -369,7 +350,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         $query = 'UPDATE ' . $this->quoteIdentifier($table);
 
         $set = [];
-        foreach ($values AS $key => $value) {
+        foreach ($values as $key => $value) {
             $set[] = $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value);
         }
 
@@ -379,12 +360,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
             if (is_array($where)) {
                 $conditions = [];
 
-                foreach ($where AS $key => $value) {
-                    if (is_string($key)) {
-                        $conditions[] = $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value);
-                    } else {
-                        $conditions[] = $value;
-                    }
+                foreach ($where as $key => $value) {
+                    $conditions[] = is_string($key) ? $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value) : $value;
                 }
 
                 $where = '(' . implode(') AND (', $conditions) . ')';
@@ -396,9 +373,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if ($returning) {
             $query .= ' RETURNING ' . (is_array($returning) ? implode(',', $returning) : $returning);
             return $this->oneRow($query);
-        } else {
-            return $this->nonQuery($query);
         }
+        return $this->nonQuery($query);
     }
 
     public function delete($table, $where = [], $returning = null)
@@ -409,12 +385,8 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
             if (is_array($where)) {
                 $conditions = [];
 
-                foreach ($where AS $key => $value) {
-                    if (is_string($key)) {
-                        $conditions[] = $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value);
-                    } else {
-                        $conditions[] = $value;
-                    }
+                foreach ($where as $key => $value) {
+                    $conditions[] = is_string($key) ? $this->quoteIdentifier($key) . ' = ' . $this->quoteValue($value) : $value;
                 }
 
                 $where = '(' . implode(') AND (', $conditions) . ')';
@@ -426,8 +398,7 @@ abstract class AbstractSqlConnection implements SqlConnectionInterface
         if ($returning) {
             $query .= ' RETURNING ' . (is_array($returning) ? implode(',', $returning) : $returning);
             return $this->oneRow($query);
-        } else {
-            return $this->nonQuery($query);
         }
+        return $this->nonQuery($query);
     }
 }

@@ -2,47 +2,39 @@
 
 class SpreadsheetReader
 {
-    protected $_options = array(
+    protected $_options = [
         'parseHeader' => true
         ,'autoTrim' => true
         ,'packedColumn' => false // set to an integer index to pack extra columns into given column by comma
         ,'arrayValues' => false
-    );
+    ];
     protected $_fh;
     protected $_columnNames;
     protected $_bomFound;
 
 
-    public static function createFromFile($filename, $options = array())
+    public static function createFromFile($filename, $options = [])
     {
         return static::createFromStream(fopen($filename, 'r'), File::getMIMEType($filename), $options);
     }
 
-    public static function createFromStream($stream, $mimeType = 'text/csv', $options = array())
+    public static function createFromStream($stream, $mimeType = 'text/csv', $options = [])
     {
         switch ($mimeType) {
             case 'text/plain':
             case 'text/csv':
-            {
                 return new static($stream, $options);
-            }
 
             case 'application/vnd.ms-office':
-            {
                 throw new Exception('Excel import not yet supported');
-            }
 
             default:
-            {
                 throw new Exception('Unsupported spreadsheet mime-type: '.$mimeType);
-            }
         }
-
-        return $mimeType;
     }
 
 
-    public function __construct($fileHandle, $options = array())
+    public function __construct($fileHandle, $options = [])
     {
         $this->_fh = $fileHandle;
         $this->_options = array_merge($this->_options, $options);
@@ -64,8 +56,8 @@ class SpreadsheetReader
             return false;
         }
 
-        if (!isset($this->_bomFound)) {
-            $this->_bomFound = count($row) && substr($row[0], 0, 3) == "\xEF\xBB\xBF";
+        if ($this->_bomFound === null) {
+            $this->_bomFound = count($row) && str_starts_with($row[0], "\xEF\xBB\xBF");
 
             if ($this->_bomFound) {
                 $row[0] = str_getcsv(substr($row[0], 3))[0];
@@ -73,12 +65,12 @@ class SpreadsheetReader
         }
 
         if ($this->_options['autoTrim']) {
-            $row = array_map('trim', $row);
+            $row = array_map(trim(...), $row);
         }
 
-        if ($assoc && isset($this->_columnNames)) {
+        if ($assoc && $this->_columnNames !== null) {
             if (is_int($this->_options['packedColumn']) && ($columnCount = count($this->_columnNames)) < ($rowCount = count($row))) {
-                $row[$this->_options['packedColumn']] .= ','.join(',', array_splice($row, $this->_options['packedColumn'] + 1, $rowCount - $columnCount));
+                $row[$this->_options['packedColumn']] .= ','.implode(',', array_splice($row, $this->_options['packedColumn'] + 1, $rowCount - $columnCount));
             }
 
             if ($this->_options['arrayValues']) {
@@ -99,9 +91,8 @@ class SpreadsheetReader
                 }
 
                 return $row;
-            } else {
-                return array_combine($this->_columnNames, $row);
             }
+            return array_combine($this->_columnNames, $row);
         }
 
         return $row;
@@ -125,9 +116,7 @@ class SpreadsheetReader
 
     public function writeToTable($tableName, $type = 'MyISAM', $temporary = false)
     {
-        $fieldDefs = array_map(function($cn) {
-            return sprintf('`%s` varchar(255) default NULL', $cn);
-        }, $this->_columnNames);
+        $fieldDefs = array_map(fn ($cn) => sprintf('`%s` varchar(255) default NULL', $cn), $this->_columnNames);
 
         // trim blank last column
         $trimLast = false;
@@ -138,12 +127,12 @@ class SpreadsheetReader
 
         // create table
         DB::nonQuery(
-            'CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8;'
-            ,array(
+            'CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8;',
+            [
                 $tableName
-                ,join(',', $fieldDefs)
+                ,implode(',', $fieldDefs)
                 ,$type
-            )
+            ]
         );
 
         // write rows
@@ -154,11 +143,11 @@ class SpreadsheetReader
             }
 
             DB::nonQuery(
-                'INSERT INTO `%s` VALUES ("%s")'
-                ,array(
+                'INSERT INTO `%s` VALUES ("%s")',
+                [
                     $tableName
-                    ,implode('","', array_map(array('DB', 'escape'), $row))
-                )
+                    ,implode('","', array_map(['DB', 'escape'], $row))
+                ]
             );
             $count++;
         }

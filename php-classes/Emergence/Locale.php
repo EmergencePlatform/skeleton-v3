@@ -5,7 +5,6 @@ namespace Emergence;
 use Site;
 use Cache;
 use Emergence_FS;
-
 use Emergence\Site\Storage;
 
 class Locale
@@ -47,7 +46,7 @@ class Locale
         }
 
         // find matching locale from Accept-Language header
-        foreach (preg_split('/\s*,\s*/', $_SERVER['HTTP_ACCEPT_LANGUAGE']) AS $requestedLanguage) {
+        foreach (preg_split('/\s*,\s*/', $_SERVER['HTTP_ACCEPT_LANGUAGE']) as $requestedLanguage) {
             $requestedLanguage = preg_replace('/;.*/', '', $requestedLanguage);
             $requestedLanguage = static::normalizeLocaleName($requestedLanguage);
 
@@ -63,7 +62,7 @@ class Locale
     {
         $locale = strtr($locale, '-', '_');
 
-        if (strpos($locale, '.') === false) {
+        if (!str_contains($locale, '.')) {
             $locale .= '.utf8';
         }
 
@@ -109,7 +108,7 @@ class Locale
             copy($node->RealPath, $poPath);
 
             // erase any old files
-            foreach (glob("$messagesPath/site-*.mo") AS $oldFile) {
+            foreach (glob("$messagesPath/site-*.mo") as $oldFile) {
                 unlink($oldFile);
             }
 

@@ -10,7 +10,7 @@ class MediaRequestHandler extends RecordsRequestHandler
     public static $accountLevelWrite = 'Staff';
     public static $accountLevelAPI = false;
     public static $browseLimit = 100;
-    public static $browseOrder = array('ID' => 'DESC');
+    public static $browseOrder = ['ID' => 'DESC'];
 
     // configurables
     public static $defaultPage = 'browse';
@@ -19,28 +19,28 @@ class MediaRequestHandler extends RecordsRequestHandler
     public static $uploadFileFieldName = 'mediaFile';
     public static $responseMode = 'html';
 
-    public static $searchConditions = array(
-        'Caption' => array(
-            'qualifiers' => array('any','caption')
+    public static $searchConditions = [
+        'Caption' => [
+            'qualifiers' => ['any','caption']
             ,'points' => 2
             ,'sql' => 'Caption LIKE "%%%s%%"'
-        )
-        ,'CaptionLike' => array(
-            'qualifiers' => array('caption-like')
+        ]
+        ,'CaptionLike' => [
+            'qualifiers' => ['caption-like']
             ,'points' => 2
             ,'sql' => 'Caption LIKE "%s"'
-        )
-        ,'CaptionNot' => array(
-            'qualifiers' => array('caption-not')
+        ]
+        ,'CaptionNot' => [
+            'qualifiers' => ['caption-not']
             ,'points' => 2
             ,'sql' => 'Caption NOT LIKE "%%%s%%"'
-        )
-        ,'CaptionNotLike' => array(
-            'qualifiers' => array('caption-not-like')
+        ]
+        ,'CaptionNotLike' => [
+            'qualifiers' => ['caption-not-like']
             ,'points' => 2
             ,'sql' => 'Caption NOT LIKE "%s"'
-        )
-    );
+        ]
+    ];
 
     public static function handleRequest()
     {
@@ -52,84 +52,58 @@ class MediaRequestHandler extends RecordsRequestHandler
         // handle action
         switch ($action = static::shiftPath()) {
 
-#    		case 'media':
-#			{
-#				return static::handleMediaRequest();
-#			}
+            #    		case 'media':
+            #			{
+            #				return static::handleMediaRequest();
+            #			}
 
             case 'upload':
-            {
                 return static::handleUploadRequest();
-            }
 
             case 'open':
-            {
                 $mediaID = static::shiftPath();
-
                 return static::handleMediaRequest($mediaID);
-            }
 
             case 'download':
-            {
                 $mediaID = static::shiftPath();
-                $filename = urldecode(static::shiftPath());
-
+                $filename = urldecode((string) static::shiftPath());
                 return static::handleDownloadRequest($mediaID, $filename);
-            }
 
             case 'info':
-            {
                 $mediaID = static::shiftPath();
-
                 return static::handleInfoRequest($mediaID);
-            }
 
             case 'caption':
-            {
                 $mediaID = static::shiftPath();
-
                 return static::handleCaptionRequest($mediaID);
-            }
 
             case 'delete':
-            {
                 return static::handleDeleteRequest();
-            }
 
             case 'thumbnail':
-            {
                 return static::handleThumbnailRequest();
-            }
 
             case 'manage':
-            {
                 return MediaManagerRequestHandler::handleRequest();
-            }
 
             case false:
             case '':
             case 'browse':
-            {
                 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     return static::handleUploadRequest();
                 }
-
                 return static::handleBrowseRequest();
-            }
 
             default:
-            {
-                if (ctype_digit($action)) {
+                if (ctype_digit((string) $action)) {
                     return static::handleMediaRequest($action);
-                } else {
-                    return parent::handleRecordsRequest($action);
                 }
-            }
+                return parent::handleRecordsRequest($action);
         }
     }
 
 
-    public static function handleUploadRequest($options = array(), $authenticationRequired = true)
+    public static function handleUploadRequest($options = [], $authenticationRequired = true)
     {
         global $Session;
 
@@ -140,9 +114,9 @@ class MediaRequestHandler extends RecordsRequestHandler
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // init options
-            $options = array_merge(array(
+            $options = array_merge([
                 'fieldName' => static::$uploadFileFieldName
-            ), $options);
+            ], $options);
 
 
             // check upload
@@ -180,7 +154,7 @@ class MediaRequestHandler extends RecordsRequestHandler
             // create media
             try {
                 $Media = Media::createFromUpload($_FILES[$options['fieldName']]['tmp_name'], $options);
-            } catch (MediaTypeException $e) {
+            } catch (MediaTypeException) {
                 return static::throwInvalidRequestError('The file you uploaded is not of a supported media format');
             }
         } elseif ($_SERVER['REQUEST_METHOD'] == 'PUT') {
@@ -201,7 +175,7 @@ class MediaRequestHandler extends RecordsRequestHandler
             // create media
             try {
                 $Media = Media::createFromFile($tmp, $options);
-            } catch (MediaTypeException $e) {
+            } catch (MediaTypeException) {
                 return static::throwInvalidRequestError('The file you uploaded is not of a supported media format');
             }
         } else {
@@ -219,18 +193,18 @@ class MediaRequestHandler extends RecordsRequestHandler
                 || !in_array($_REQUEST['ContextClass']::getStaticRootClass(), Media::$fields['ContextClass']['values'])
                 || !is_numeric($_REQUEST['ContextID'])) {
                 return static::throwError('Context is invalid');
-            } elseif (!$Media->Context = $_REQUEST['ContextClass']::getByID($_REQUEST['ContextID'])) {
+            }
+            if (!$Media->Context = $_REQUEST['ContextClass']::getByID($_REQUEST['ContextID'])) {
                 return static::throwError('Context class not found');
             }
-
             $Media->save();
         }
 
-        return static::respond('uploadComplete', array(
-            'success' => (boolean)$Media
+        return static::respond('uploadComplete', [
+            'success' => (bool)$Media
             ,'data' => $Media
             ,'TagID' => isset($Tag) ? $Tag->ID : null
-        ));
+        ]);
     }
 
 
@@ -243,7 +217,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         // get media
         try {
             $Media = Media::getById($mediaID);
-        } catch (UserUnauthorizedException $e) {
+        } catch (UserUnauthorizedException) {
             return static::throwUnauthorizedError('You are not authorized to download this media');
         }
 
@@ -256,10 +230,10 @@ class MediaRequestHandler extends RecordsRequestHandler
         }
 
         if (static::$responseMode == 'json' || $_SERVER['HTTP_ACCEPT'] == 'application/json') {
-            JSON::translateAndRespond(array(
+            JSON::translateAndRespond([
                 'success' => true
                 ,'data' => $Media
-            ));
+            ]);
         } else {
 
             // determine variant
@@ -272,9 +246,9 @@ class MediaRequestHandler extends RecordsRequestHandler
             }
 
             // send caching headers
-            $expires = 60*60*24*365;
+            $expires = 60 * 60 * 24 * 365;
             header("Cache-Control: public, max-age=$expires");
-            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time()+$expires));
+            header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + $expires));
             header('Pragma: public');
 
             // media are immutable for a given URL, so no need to actually check anything if the browser wants to revalidate its cache
@@ -303,13 +277,13 @@ class MediaRequestHandler extends RecordsRequestHandler
 
                 list(, $range) = explode('=', $_SERVER['HTTP_RANGE'], 2);
 
-                if (strpos($range, ',') !== false) {
+                if (str_contains($range, ',')) {
                     header('HTTP/1.1 416 Requested Range Not Satisfiable');
                     header("Content-Range: bytes $start-$end/$size");
                     exit();
                 }
 
-                if ($range == '-') {
+                if ($range === '-') {
                     $chunkStart = $size - substr($range, 1);
                 } else {
                     $range = explode('-', $range);
@@ -361,7 +335,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         // get media
         try {
             $Media = Media::getById($mediaID);
-        } catch (UserUnauthorizedException $e) {
+        } catch (UserUnauthorizedException) {
             return static::throwUnauthorizedError('You are not authorized to download this media');
         }
 
@@ -385,7 +359,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         // get media
         try {
             $Media = Media::getById($media_id);
-        } catch (UserUnauthorizedException $e) {
+        } catch (UserUnauthorizedException) {
             return static::throwUnauthorizedError('You are not authorized to download this media');
         }
 
@@ -403,7 +377,7 @@ class MediaRequestHandler extends RecordsRequestHandler
             $filename = $Media->Caption ? $Media->Caption : sprintf('%s_%u', $Media->ContextClass, $Media->ContextID);
         }
 
-        if (strpos($filename, '.') === false) {
+        if (!str_contains((string) $filename, '.')) {
             // add extension
             $filename .= '.'.$Media->Extension;
         }
@@ -428,7 +402,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         // get media
         try {
             $Media = Media::getById($media_id);
-        } catch (UserUnauthorizedException $e) {
+        } catch (UserUnauthorizedException) {
             return static::throwUnauthorizedError('You are not authorized to download this media');
         }
 
@@ -441,15 +415,15 @@ class MediaRequestHandler extends RecordsRequestHandler
             $Media->Caption = $_REQUEST['Caption'];
             $Media->save();
 
-            return static::respond('mediaCaptioned', array(
+            return static::respond('mediaCaptioned', [
                 'success' => true
                 ,'data' => $Media
-            ));
+            ]);
         }
 
-        return static::respond('mediaCaption', array(
+        return static::respond('mediaCaption', [
             'data' => $Media
-        ));
+        ]);
     }
 
     public static function handleDeleteRequest(ActiveRecord $Record)
@@ -458,15 +432,15 @@ class MediaRequestHandler extends RecordsRequestHandler
         $GLOBALS['Session']->requireAccountLevel('Staff');
 
         if ($mediaID = static::peekPath()) {
-            $mediaIDs = array($mediaID);
+            $mediaIDs = [$mediaID];
         } elseif (!empty($_REQUEST['mediaID'])) {
-            $mediaIDs = array($_REQUEST['mediaID']);
+            $mediaIDs = [$_REQUEST['mediaID']];
         } elseif (is_array($_REQUEST['media'])) {
             $mediaIDs = $_REQUEST['media'];
         }
 
-        $deleted = array();
-        foreach ($mediaIDs AS $mediaID) {
+        $deleted = [];
+        foreach ($mediaIDs as $mediaID) {
             if (!is_numeric($mediaID)) {
                 static::throwError('Invalid mediaID');
             }
@@ -483,10 +457,10 @@ class MediaRequestHandler extends RecordsRequestHandler
             }
         }
 
-        return static::respond('mediaDeleted', array(
+        return static::respond('mediaDeleted', [
             'success' => true
             ,'data' => $deleted
-        ));
+        ]);
     }
 
 
@@ -497,9 +471,9 @@ class MediaRequestHandler extends RecordsRequestHandler
     public static function handleThumbnailRequest(Media $Media = null)
     {
         // send caching headers
-        $expires = 60*60*24*365;
+        $expires = 60 * 60 * 24 * 365;
         header("Cache-Control: public, max-age=$expires");
-        header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time()+$expires));
+        header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + $expires));
         header('Pragma: public');
 
 
@@ -511,21 +485,22 @@ class MediaRequestHandler extends RecordsRequestHandler
 
 
         // get media
-        if (!$Media) {
+        if (!$Media instanceof \Media) {
             if (!$mediaID = static::shiftPath()) {
                 return static::throwError('Invalid request');
-            } elseif (!$Media = Media::getByID($mediaID)) {
+            }
+            if (!$Media = Media::getByID($mediaID)) {
                 return static::throwNotFoundError('Media not found');
             }
         }
 
 
         // get format
-        if (preg_match('/^(\d+)x(\d+)(x([0-9A-F]{6})?)?$/i', static::peekPath(), $matches)) {
+        if (preg_match('/^(\d+)x(\d+)(x([0-9A-F]{6})?)?$/i', (string) static::peekPath(), $matches)) {
             static::shiftPath();
             $maxWidth = $matches[1];
             $maxHeight = $matches[2];
-            $fillColor = !empty($matches[4]) ? $matches[4] : false;
+            $fillColor = empty($matches[4]) ? false : $matches[4];
         } else {
             $maxWidth = static::$defaultThumbnailWidth;
             $maxHeight = static::$defaultThumbnailHeight;
@@ -564,7 +539,7 @@ class MediaRequestHandler extends RecordsRequestHandler
 
 
 
-    public static function handleBrowseRequest($options = array(), $conditions = array(), $responseID = null, $responseData = array())
+    public static function handleBrowseRequest($options = [], $conditions = [], $responseID = null, $responseData = [])
     {
         // apply tag filter
         if (!empty($_REQUEST['tag'])) {
@@ -591,34 +566,34 @@ class MediaRequestHandler extends RecordsRequestHandler
 
 
 
-#	public static function handleMediaRequest()
-#	{
-#		if(static::peekPath() == 'delete')
-#		{
-#			return static::handleMediaDeleteRequest();
-#		}
-#
-#
-#		// get media
-#		$media = JSON::translateRecords(Media::getAll(), true);
-#
-#		// get tag media assignments
-#		$media_tags = Tag::getAllItems('media');
-#
-#		// inject album assignments to photo records
-#		foreach($media_tags AS $media_id => $tags)
-#		{
-#			foreach($tags AS $tag)
-#			{
-#				$media[$media_id]['tags'][] = $tag['tag_id'];
-#			}
-#		}
-#
-#		return static::respond('media', array(
-#			'success' => true
-#			,'data' => array_values($media)
-#		));
-#	}
+    #	public static function handleMediaRequest()
+    #	{
+    #		if(static::peekPath() == 'delete')
+    #		{
+    #			return static::handleMediaDeleteRequest();
+    #		}
+    #
+    #
+    #		// get media
+    #		$media = JSON::translateRecords(Media::getAll(), true);
+    #
+    #		// get tag media assignments
+    #		$media_tags = Tag::getAllItems('media');
+    #
+    #		// inject album assignments to photo records
+    #		foreach($media_tags AS $media_id => $tags)
+    #		{
+    #			foreach($tags AS $tag)
+    #			{
+    #				$media[$media_id]['tags'][] = $tag['tag_id'];
+    #			}
+    #		}
+    #
+    #		return static::respond('media', array(
+    #			'success' => true
+    #			,'data' => array_values($media)
+    #		));
+    #	}
 
 
     public static function handleMediaDeleteRequest()
@@ -629,8 +604,8 @@ class MediaRequestHandler extends RecordsRequestHandler
         }
 
         // retrieve photos
-        $media_array = array();
-        foreach ($_REQUEST['media'] AS $media_id) {
+        $media_array = [];
+        foreach ($_REQUEST['media'] as $media_id) {
             if (!is_numeric($media_id)) {
                 static::throwError('Invalid request');
             }
@@ -645,16 +620,16 @@ class MediaRequestHandler extends RecordsRequestHandler
         }
 
         // delete
-        $deleted = array();
-        foreach ($media_array AS $media_id => $Media) {
+        $deleted = [];
+        foreach ($media_array as $media_id => $Media) {
             if ($Media->delete()) {
                 $deleted[] = $media_id;
             }
         }
 
-        return static::respond('mediaDeleted', array(
+        return static::respond('mediaDeleted', [
             'success' => true
             ,'deleted' => $deleted
-        ));
+        ]);
     }
 }

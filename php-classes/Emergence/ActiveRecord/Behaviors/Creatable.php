@@ -11,12 +11,11 @@ class Creatable implements BehaviorInterface
                 'created' => 'Created',
                 'creator_id' => 'CreatorID'
             ];
-        } else {
-            return [
-                'created' => 'created',
-                'creator_id' => 'creator_id'
-            ];
         }
+        return [
+            'created' => 'created',
+            'creator_id' => 'creator_id'
+        ];
     }
 
     public static function beforeInitFields(array &$arguments = [], array &$options = [])
@@ -29,7 +28,7 @@ class Creatable implements BehaviorInterface
                 'default' => 'CURRENT_TIMESTAMP'
             ];
         }
-        
+
         if (empty($arguments['config'][$fieldNames['creator_id']])) {
             $arguments['config'][$fieldNames['creator_id']] = [
                 'type' => 'uint',

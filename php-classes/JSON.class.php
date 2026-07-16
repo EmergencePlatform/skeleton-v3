@@ -32,25 +32,25 @@ class JSON
             $siteDataPrefix = Site::$rootPath.'/'.SiteFile::$dataPath.'/';
             $siteDataPrefixLength = strlen($siteDataPrefix);
 
-            $data['_profile'] = array(
+            $data['_profile'] = [
                 'log' => Debug::$log,
-                'time' => array(
+                'time' => [
                     'initialized' => Site::$initializeTime,
                     'finished' => $now,
                     'elapsed' => $now - Site::$initializeTime
-                ),
-                'memory' => array(
+                ],
+                'memory' => [
                     'finished' => memory_get_usage(),
                     'peak' => memory_get_peak_usage()
-                ),
+                ],
                 'included' => array_map(function ($path) use ($siteDataPrefix, $siteDataPrefixLength) {
-                    if (substr($path, 0, $siteDataPrefixLength) == $siteDataPrefix) {
+                    if (substr($path, 0, $siteDataPrefixLength) === $siteDataPrefix) {
                         return 'site://'.SiteFile::getByID(substr($path, $siteDataPrefixLength))->FullPath;
                     }
 
                     return 'file://'.$path;
                 }, get_included_files())
-            );
+            ];
         }
 
         $text = json_encode($data);
@@ -95,10 +95,10 @@ class JSON
 
         $args = func_get_args();
 
-        self::respond(array(
+        self::respond([
             'success' => false
             ,'message' => vsprintf($message, array_slice($args, 1))
-        ));
+        ]);
     }
 
     public static function translateObjects($input, $summary = null, $include = null, $stringsOnly = false)
@@ -108,26 +108,26 @@ class JSON
                 !empty($include) &&
                 $summary ? method_exists($input, 'getSummary') : method_exists($input, 'getDetails')
             ) {
-                $includeThisLevel = array();
-                $includeLater = array();
+                $includeThisLevel = [];
+                $includeLater = [];
 
                 if (!empty($include)) {
                     if (is_string($include)) {
                         $include = explode(',', $include);
                     }
 
-                    foreach ($include AS $value) {
+                    foreach ($include as $value) {
                         if ($value == '*') {
                             $includeThisLevel = '*';
                             continue;
                         }
 
-                        if (strpos($value, '.') !== false) {
-                            list($prefix, $rest) = explode('.', $value, 2);
+                        if (str_contains((string) $value, '.')) {
+                            [$prefix, $rest] = explode('.', (string) $value, 2);
 
-                            if ($prefix == '*') {
+                            if ($prefix === '*') {
                                 $includeThisLevel = '*';
-                            } elseif ($includeThisLevel != '*' &&!in_array($prefix, $includeThisLevel)) {
+                            } elseif ($includeThisLevel != '*' && !in_array($prefix, $includeThisLevel)) {
                                 $includeThisLevel[] = $prefix;
                             }
 
@@ -135,7 +135,7 @@ class JSON
                         } else {
                             if ($value[0] == '~') {
                                 $includeLater['*'] = $value;
-                                $value = substr($value, 1);
+                                $value = substr((string) $value, 1);
                             }
 
                             if ($includeThisLevel != '*') {
@@ -152,9 +152,9 @@ class JSON
         }
 
         if (is_array($input)) {
-            foreach ($input AS $key => &$item) {
+            foreach ($input as $key => &$item) {
                 if (isset($includeLater)) {
-                    $includeNext = array_key_exists('*', $includeLater) ? $includeLater['*'] : array();
+                    $includeNext = array_key_exists('*', $includeLater) ? $includeLater['*'] : [];
 
                     if (array_key_exists($key, $includeLater)) {
                         $includeNext = array_merge($includeNext, $includeLater[$key]);
@@ -167,56 +167,55 @@ class JSON
             }
 
             return $input;
-        } else {
-            return $input;
         }
+        return $input;
     }
 
-#    public static function mapArrayToRecords($array)
-#    {
-#		return array_map(create_function('$value', 'return array($value);'), $array);
-#	}
-#
-#	static public function indent($json)
-#    {
-#
-#		$result	   = '';
-#		$pos	   = 0;
-#		$strLen	   = strlen($json);
-#		$indentStr = "\t";
-#		$newLine   = "\n";
-#
-#		for($i = 0; $i <= $strLen; $i++) {
-#
-#			// Grab the next character in the string
-#			$char = substr($json, $i, 1);
-#
-#			// If this character is the end of an element,
-#			// output a new line and indent the next line
-#			if($char == '}' || $char == ']') {
-#				$result .= $newLine;
-#				$pos --;
-#				for ($j=0; $j<$pos; $j++) {
-#					$result .= $indentStr;
-#				}
-#			}
-#
-#			// Add the character to the result string
-#			$result .= $char;
-#
-#			// If the last character was the beginning of an element,
-#			// output a new line and indent the next line
-#			if ($char == ',' || $char == '{' || $char == '[') {
-#				$result .= $newLine;
-#				if ($char == '{' || $char == '[') {
-#					$pos ++;
-#				}
-#				for ($j = 0; $j < $pos; $j++) {
-#					$result .= $indentStr;
-#				}
-#			}
-#		}
-#
-#		return $result;
-#	}
+    #    public static function mapArrayToRecords($array)
+    #    {
+    #		return array_map(create_function('$value', 'return array($value);'), $array);
+    #	}
+    #
+    #	static public function indent($json)
+    #    {
+    #
+    #		$result	   = '';
+    #		$pos	   = 0;
+    #		$strLen	   = strlen($json);
+    #		$indentStr = "\t";
+    #		$newLine   = "\n";
+    #
+    #		for($i = 0; $i <= $strLen; $i++) {
+    #
+    #			// Grab the next character in the string
+    #			$char = substr($json, $i, 1);
+    #
+    #			// If this character is the end of an element,
+    #			// output a new line and indent the next line
+    #			if($char == '}' || $char == ']') {
+    #				$result .= $newLine;
+    #				$pos --;
+    #				for ($j=0; $j<$pos; $j++) {
+    #					$result .= $indentStr;
+    #				}
+    #			}
+    #
+    #			// Add the character to the result string
+    #			$result .= $char;
+    #
+    #			// If the last character was the beginning of an element,
+    #			// output a new line and indent the next line
+    #			if ($char == ',' || $char == '{' || $char == '[') {
+    #				$result .= $newLine;
+    #				if ($char == '{' || $char == '[') {
+    #					$pos ++;
+    #				}
+    #				for ($j = 0; $j < $pos; $j++) {
+    #					$result .= $indentStr;
+    #				}
+    #			}
+    #		}
+    #
+    #		return $result;
+    #	}
 }

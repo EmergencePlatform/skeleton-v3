@@ -8,10 +8,10 @@ class Tree implements HashableInterface
 {
     use HashableTrait;
 
-    const REMOTES_MODE_FETCH = 'fetch';
-    const REMOTES_MODE_LINK = 'link';
-    const TREE_REGEX = '/^(?<mode>[^ ]+) (?<type>[^ ]+) (?<hash>[^\t]+)\t(?<path>.*)/';
-    const EMPTY_TREE_HASH = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+    public const REMOTES_MODE_FETCH = 'fetch';
+    public const REMOTES_MODE_LINK = 'link';
+    public const TREE_REGEX = '/^(?<mode>[^ ]+) (?<type>[^ ]+) (?<hash>[^\t]+)\t(?<path>.*)/';
+    public const EMPTY_TREE_HASH = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 
     protected $root = [];
     protected $remotesMode = self::REMOTES_MODE_FETCH;
@@ -112,7 +112,7 @@ class Tree implements HashableInterface
                     if ($node instanceof self || $node instanceof File) {
                         $node = (string) $node;
                     } elseif (is_object($node)) {
-                        $node = get_class($node)."($node".($node instanceof HashableInterface ? ", {$node->getRepository()->getGitDir()}, {$node->getObjectType()}, {$node->getHash()}" : '').')';
+                        $node = $node::class."($node".($node instanceof HashableInterface ? ", {$node->getRepository()->getGitDir()}, {$node->getObjectType()}, {$node->getHash()}" : '').')';
                     }
 
                     $output .= "$node\n";
@@ -126,14 +126,14 @@ class Tree implements HashableInterface
 
         if ($return) {
             return $output;
-        } else {
-            echo $output;
         }
+        echo $output;
+        return null;
     }
 
     public function commit($message = 'Commit tree')
     {
-        return trim($this->getRepository()->run('commit-tree', [
+        return trim((string) $this->getRepository()->run('commit-tree', [
             '-m', $message,
             $this->write(),
         ]));
@@ -142,7 +142,7 @@ class Tree implements HashableInterface
     // internal library
     protected function &getNodeRef($path)
     {
-        $path = explode('/', $path);
+        $path = explode('/', (string) $path);
         $tree = &$this->root;
 
         while (($name = array_shift($path)) && count($path)) {
@@ -167,7 +167,8 @@ class Tree implements HashableInterface
         foreach ($tree as $name => &$content) {
             if (!$content) {
                 continue;
-            } elseif (is_string($content)) {
+            }
+            if (is_string($content)) {
                 $type = 'tree';
                 $hash = $content;
             } elseif (is_array($content)) {
@@ -205,7 +206,7 @@ class Tree implements HashableInterface
         }
 
         // short-circuit for empty trees
-        if (!$treeContent) {
+        if ($treeContent === '' || $treeContent === '0') {
             return static::EMPTY_TREE_HASH;
         }
 

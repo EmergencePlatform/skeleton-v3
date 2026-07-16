@@ -26,7 +26,7 @@ class Cmd
     {
         $availableVersions = static::getAvailableVersions();
 
-        if (!count($availableVersions)) {
+        if (count($availableVersions) === 0) {
             throw new \Exception(sprintf('No version of %s/%s is installed', static::$pkgOrigin, static::$pkgName));
         }
 
@@ -47,7 +47,7 @@ class Cmd
 
     public function getVersion()
     {
-        return basename(dirname($this->ident));
+        return basename(dirname((string) $this->ident));
     }
 
     public function getPath()
@@ -66,7 +66,7 @@ class Cmd
         $shellCommand = $this->getExecutable();
 
         $args = array_filter(func_get_args());
-        foreach ($args AS $arg) {
+        foreach ($args as $arg) {
             if (is_string($arg)) {
                 $shellCommand .= ' '.$arg;
             } elseif (is_array($arg)) {
@@ -102,7 +102,7 @@ class Cmd
             $result = $result['ident'];
         }
 
-        uksort($results, 'version_compare');
+        uksort($results, version_compare(...));
 
         return $results;
     }

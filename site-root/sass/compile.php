@@ -43,10 +43,10 @@ passthru($cmd, $cmdStatus);
 Benchmark::mark("CMD finished: exitCode=$cmdStatus");
 
 // import build
-if ($cmdStatus == 0) {
+if ($cmdStatus === 0) {
     Benchmark::mark("importing $cssTmpPath");
 
-    $importResults = Emergence_FS::importTree($cssTmpPath, "site-root/css", array('transferDelete' => false));
+    $importResults = Emergence_FS::importTree($cssTmpPath, "site-root/css", ['transferDelete' => false]);
     Benchmark::mark("imported files: ".http_build_query($importResults));
 }
 

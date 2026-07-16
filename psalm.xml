@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="7"
+    resolveFromConfigFile="true"
+    errorBaseline="psalm-baseline.xml"
+    findUnusedBaselineEntry="false"
+    findUnusedCode="false"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <directory name="php-classes"/>
+        <directory name="php-config"/>
+        <directory name="php-migrations"/>
+        <directory name="event-handlers"/>
+        <directory name="site-root"/>
+        <directory name="site-tasks"/>
+        <directory name="console-commands"/>
+        <directory name="data-exporters"/>
+        <directory name="dwoo-plugins"/>
+        <ignoreFiles>
+            <directory name="vendor"/>
+        </ignoreFiles>
+    </projectFiles>
+</psalm>

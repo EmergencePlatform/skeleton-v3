@@ -3,14 +3,12 @@
 namespace Emergence\Exports;
 
 use Exception;
-
 use DB;
 use Site;
 use SiteFile;
 use Emergence_FS;
 use ActiveRecord;
 use SpreadsheetWriter;
-
 
 class ExportsRequestHandler extends \RequestHandler
 {
@@ -29,11 +27,11 @@ class ExportsRequestHandler extends \RequestHandler
 
             Emergence_FS::cacheTree($rootCollection);
             foreach (Emergence_FS::getTreeFiles($rootCollection) as $nodePath => $node) {
-                if (basename($nodePath) == '_index.php') {
+                if (basename((string) $nodePath) === '_index.php') {
                     continue;
                 }
 
-                $path = substr($nodePath, $prefixLength, -4);
+                $path = substr((string) $nodePath, $prefixLength, -4);
 
                 $config = include(SiteFile::getRealPathByID($node['ID']));
 
@@ -47,9 +45,9 @@ class ExportsRequestHandler extends \RequestHandler
                     && (
                         !$Session
                         || !$Session->hasAccountLevel(
-                            !empty($config['requireAccountLevel'])
-                                ? $config['requireAccountLevel']
-                                : static::$accountLevelUseDefault
+                            empty($config['requireAccountLevel'])
+                                ? static::$accountLevelUseDefault
+                                : $config['requireAccountLevel']
                         )
                     )
                 ) {
@@ -100,9 +98,9 @@ class ExportsRequestHandler extends \RequestHandler
 
         // check account level
         $GLOBALS['Session']->requireAccountLevel(
-            !empty($config['requireAccountLevel'])
-                ? $config['requireAccountLevel']
-                : static::$accountLevelUseDefault
+            empty($config['requireAccountLevel'])
+                ? static::$accountLevelUseDefault
+                : $config['requireAccountLevel']
         );
 
         // check config
@@ -147,14 +145,14 @@ class ExportsRequestHandler extends \RequestHandler
                 $row = [];
 
                 foreach ($columns as $key => $header) {
-                    $value = isset($result[$key]) ? $result[$key] : null;
+                    $value = $result[$key] ?? null;
                     $row[$header] = $value !== '' ? $value : null;
                 }
 
                 $spreadsheetWriter->writeRow($row);
 
                 // flush results periodically
-                if ($i % 10 == 0) {
+                if ($i % 10 === 0) {
                     ob_flush();
                     flush();
                 }
@@ -173,7 +171,7 @@ class ExportsRequestHandler extends \RequestHandler
                 $spreadsheetWriter->close();
             }
 
-             DB::resumeQueryLogging();
+            DB::resumeQueryLogging();
         }
 
         // finish output
@@ -187,7 +185,7 @@ class ExportsRequestHandler extends \RequestHandler
 
         // configure writer
         $spreadsheetWriter = new SpreadsheetWriter([
-            'filename' => !empty($config['filename']) ? $config['filename'] : HandleBehavior::transformText($config['title'])
+            'filename' => empty($config['filename']) ? HandleBehavior::transformText($config['title']) : $config['filename']
         ]);
 
         // write column headers row

@@ -25,7 +25,7 @@ class Discourse extends \Emergence\Connectors\AbstractConnector implements \Emer
             return static::throwInvalidRequestError('sig parameter missing');
         }
 
-        if ($_GET['sig'] != hash_hmac('sha256', $_GET['sso'], static::$ssoSecret)) {
+        if ($_GET['sig'] != hash_hmac('sha256', $_GET['sso'], (string) static::$ssoSecret)) {
             return static::throwInvalidRequestError('sig is invalid');
         }
 
@@ -59,7 +59,7 @@ class Discourse extends \Emergence\Connectors\AbstractConnector implements \Emer
         // redirect with payload and its signature
         Site::redirect($returnUrl, [
             'sso' => $payload,
-            'sig' => hash_hmac('sha256', $payload, static::$ssoSecret)
+            'sig' => hash_hmac('sha256', $payload, (string) static::$ssoSecret)
         ]);
     }
 }

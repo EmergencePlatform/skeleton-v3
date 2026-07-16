@@ -1,0 +1,19 @@
+includes:
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+    phpVersion: 80300
+    paths:
+        - php-classes
+        - php-config
+        - php-migrations
+        - event-handlers
+        - site-root
+        - site-tasks
+        - console-commands
+        - data-exporters
+        - dwoo-plugins
+    treatPhpDocTypesAsCertain: false

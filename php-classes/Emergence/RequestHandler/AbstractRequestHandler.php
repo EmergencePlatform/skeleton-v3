@@ -17,7 +17,7 @@ abstract class AbstractRequestHandler
     // protected static methods
     protected static function setPath(array $path = null)
     {
-        static::$_path = isset($path) ? $path : \Site::$pathStack;
+        static::$_path = $path ?? \Site::$pathStack;
     }
 
     protected static function peekPath()
@@ -25,7 +25,7 @@ abstract class AbstractRequestHandler
         if (!isset(static::$_path)) {
             static::setPath();
         }
-        return count(static::$_path) ? static::$_path[0] : false;
+        return count(static::$_path) > 0 ? static::$_path[0] : false;
     }
 
     protected static function shiftPath()
@@ -56,11 +56,11 @@ abstract class AbstractRequestHandler
     {
         if (!empty($_GET['format']) && in_array($_GET['format'], static::$userResponseModes)) {
             return $_GET['format'];
-        } elseif (!empty($_SERVER['HTTP_ACCEPT']) && array_key_exists($_SERVER['HTTP_ACCEPT'], static::$userResponseModes)) {
-            return static::$userResponseModes[$_SERVER['HTTP_ACCEPT']];
-        } else {
-            return static::$defaultResponseMode;
         }
+        if (!empty($_SERVER['HTTP_ACCEPT']) && array_key_exists($_SERVER['HTTP_ACCEPT'], static::$userResponseModes)) {
+            return static::$userResponseModes[$_SERVER['HTTP_ACCEPT']];
+        }
+        return static::$defaultResponseMode;
     }
 
     public static function respond($responseId, array $responseData = [], $responseMode = false)
@@ -106,18 +106,19 @@ abstract class AbstractRequestHandler
 
     public static function respondJson($responseId, array $responseData = [])
     {
-        return \JSON::translateAndRespond($responseData, !empty($_GET['summary']), !empty($_GET['include']) ? $_GET['include'] : null);
+        return \JSON::translateAndRespond($responseData, !empty($_GET['summary']), empty($_GET['include']) ? null : $_GET['include']);
     }
 
     public static function respondCsv($responseId, array $responseData = [])
     {
         if (!empty($_REQUEST['downloadToken'])) {
-            setcookie('downloadToken', $_REQUEST['downloadToken'], time()+300, '/');
+            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time() + 300, 'path' => '/']);
+        }
+        if (is_array($responseData['data'])) {
+            return CSV::respond($responseData['data'], $responseId, empty($_GET['columns']) ? null : $_GET['columns']);
         }
 
-        if (is_array($responseData['data'])) {
-            return CSV::respond($responseData['data'], $responseId, !empty($_GET['columns']) ? $_GET['columns'] : null);
-        } elseif ($responseId == 'error') {
+        if ($responseId == 'error') {
             print($responseData['message']);
         } else {
             print 'Unable to render data to CSV: '.$responseId;
@@ -128,7 +129,7 @@ abstract class AbstractRequestHandler
     public static function respondPdf($responseId, array $responseData = [])
     {
         if (!empty($_REQUEST['downloadToken'])) {
-            setcookie('downloadToken', $_REQUEST['downloadToken'], time()+300, '/');
+            setcookie('downloadToken', $_REQUEST['downloadToken'], ['expires' => time() + 300, 'path' => '/']);
         }
 
         $tmpPath = tempnam('/tmp', 'e_pdf_');
@@ -171,7 +172,7 @@ abstract class AbstractRequestHandler
         header('HTTP/1.0 403 Forbidden');
         $args = func_get_args();
         $args[0] = $message;
-        return call_user_func_array([get_called_class(), 'throwError'], $args);
+        return call_user_func_array(static::throwError(...), $args);
     }
 
     public static function throwAPIUnauthorizedError($message = 'You do not have authorization to access this resource')
@@ -192,7 +193,7 @@ abstract class AbstractRequestHandler
         header('HTTP/1.0 404 Not Found');
         $args = func_get_args();
         $args[0] = $message;
-        return call_user_func_array([get_called_class(), 'throwError'], $args);
+        return call_user_func_array(static::throwError(...), $args);
     }
 
     public static function throwServerError($message = 'An unknown problem has prevented the server from completing your request')
@@ -200,7 +201,7 @@ abstract class AbstractRequestHandler
         header('HTTP/1.0 500 Internal Server Error');
         $args = func_get_args();
         $args[0] = $message;
-        return call_user_func_array([get_called_class(), 'throwError'], $args);
+        return call_user_func_array(static::throwError(...), $args);
     }
 
     public static function throwValidationError(RecordValidationException $e, $message = 'There were errors validating your submission')
@@ -210,7 +211,7 @@ abstract class AbstractRequestHandler
             'success' => false
             ,'message' => $message
             ,'validationErrors' => $e->recordObject->validationErrors
-            ,'recordClass' => get_class($e->recordObject)
+            ,'recordClass' => $e->recordObject::class
             ,'recordID' => $e->recordObject->ID
         ]);
     }

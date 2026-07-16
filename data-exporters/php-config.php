@@ -10,11 +10,7 @@ return [
         'property',
         'value'
     ],
-    'readQuery' => function (array $input) {
-        $query = [];
-
-        return $query;
-    },
+    'readQuery' => fn (array $input) => [],
     'buildRows' => function (array $query = [], array $config = []) {
 
         $classNodes = Emergence_FS::findFiles('\.php$', true, 'php-classes');
@@ -27,9 +23,11 @@ return [
 
             $classPath = $classNode->getFullPath(null, false);
             array_shift($classPath);
-            $className = preg_replace('/(\.class)?\.php$/i', '', join('\\', $classPath));
-
-            if (preg_match('/^(Dwoo|PHPUnit|Psr|stojg|CropFace)/', $className) || !class_exists($className)) {
+            $className = preg_replace('/(\.class)?\.php$/i', '', implode('\\', $classPath));
+            if (preg_match('/^(Dwoo|PHPUnit|Psr|stojg|CropFace)/', (string) $className)) {
+                continue;
+            }
+            if (!class_exists($className)) {
                 continue;
             }
 

@@ -8,23 +8,23 @@ use Emergence\People\User;
 class BlogRequestHandler extends AbstractRequestHandler
 {
     // RecordsRequestHandler config
-    public static $recordClass = 'Emergence\CMS\BlogPost';
+    public static $recordClass = \Emergence\CMS\BlogPost::class;
     public static $accountLevelAPI = false;
     public static $accountLevelWrite = 'User';
     public static $accountLevelWriteAll = 'Staff';
-    public static $browseConditions = array(
-        'Class' => 'Emergence\CMS\BlogPost'
+    public static $browseConditions = [
+        'Class' => \Emergence\CMS\BlogPost::class
         ,'Status' => 'Published'
-    );
-    public static $userResponseModes = array(
+    ];
+    public static $userResponseModes = [
         'application/json' => 'json'
         ,'text/csv' => 'csv'
         ,'application/rss+xml' => 'rss'
-    );
+    ];
 
     public static $browseLimitDefault = 25;
 
-    public static function handleBrowseRequest($options = array(), $conditions = array(), $responseID = null, $responseData = array())
+    public static function handleBrowseRequest($options = [], $conditions = [], $responseID = null, $responseData = [])
     {
         if (empty($GLOBALS['Session']) || !$GLOBALS['Session']->Person) {
             $conditions['Visibility'] = 'Public';
@@ -61,7 +61,7 @@ class BlogRequestHandler extends AbstractRequestHandler
         return parent::checkWriteAccess($BlogPost, $suppressLogin);
     }
 
-    public static function respond($responseID, $responseData = Array(), $responseMode = false)
+    public static function respond($responseID, $responseData = [], $responseMode = false)
     {
         if (static::$responseMode == 'rss') {
             static::$responseMode = 'xml';
@@ -73,8 +73,7 @@ class BlogRequestHandler extends AbstractRequestHandler
             }
 
             return parent::respond('rss', $responseData);
-        } else {
-            return parent::respond($responseID, $responseData);
         }
+        return parent::respond($responseID, $responseData);
     }
 }

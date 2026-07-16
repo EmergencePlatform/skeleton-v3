@@ -1,4 +1,5 @@
 <?php
+
 namespace Emergence\Http\Message;
 
 use Psr\Http\Message\StreamInterface;
@@ -58,9 +59,7 @@ class Stream implements StreamInterface
             $this->size = $options['size'];
         }
 
-        $this->customMetadata = isset($options['metadata'])
-            ? $options['metadata']
-            : [];
+        $this->customMetadata = $options['metadata'] ?? [];
 
         $this->stream = $stream;
         $meta = stream_get_meta_data($this->stream);
@@ -83,14 +82,14 @@ class Stream implements StreamInterface
         try {
             $this->seek(0);
             return (string) stream_get_contents($this->stream);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return '';
         }
     }
 
     public function getContents()
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             throw new \RuntimeException('Stream is detached');
         }
 
@@ -105,7 +104,7 @@ class Stream implements StreamInterface
 
     public function close()
     {
-        if (isset($this->stream)) {
+        if ($this->stream !== null) {
             if (is_resource($this->stream)) {
                 fclose($this->stream);
             }
@@ -115,7 +114,7 @@ class Stream implements StreamInterface
 
     public function detach()
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             return null;
         }
 
@@ -133,7 +132,7 @@ class Stream implements StreamInterface
             return $this->size;
         }
 
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             return null;
         }
 
@@ -168,7 +167,7 @@ class Stream implements StreamInterface
 
     public function eof()
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             throw new \RuntimeException('Stream is detached');
         }
 
@@ -177,7 +176,7 @@ class Stream implements StreamInterface
 
     public function tell()
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             throw new \RuntimeException('Stream is detached');
         }
 
@@ -197,7 +196,7 @@ class Stream implements StreamInterface
 
     public function seek($offset, $whence = SEEK_SET)
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             throw new \RuntimeException('Stream is detached');
         }
         if (!$this->seekable) {
@@ -211,7 +210,7 @@ class Stream implements StreamInterface
 
     public function read($length)
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             throw new \RuntimeException('Stream is detached');
         }
         if (!$this->readable) {
@@ -235,7 +234,7 @@ class Stream implements StreamInterface
 
     public function write($string)
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             throw new \RuntimeException('Stream is detached');
         }
         if (!$this->writable) {
@@ -255,16 +254,18 @@ class Stream implements StreamInterface
 
     public function getMetadata($key = null)
     {
-        if (!isset($this->stream)) {
+        if ($this->stream === null) {
             return $key ? null : [];
-        } elseif (!$key) {
+        }
+        if (!$key) {
             return $this->customMetadata + stream_get_meta_data($this->stream);
-        } elseif (isset($this->customMetadata[$key])) {
+        }
+        if (isset($this->customMetadata[$key])) {
             return $this->customMetadata[$key];
         }
 
         $meta = stream_get_meta_data($this->stream);
 
-        return isset($meta[$key]) ? $meta[$key] : null;
+        return $meta[$key] ?? null;
     }
 }

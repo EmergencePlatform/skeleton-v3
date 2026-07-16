@@ -10,17 +10,17 @@ class Logger extends \Psr\Log\AbstractLogger
 {
     public static $logger; // set from a config script to override general logger instance
     public static $logPath;
-    public static $logLevelsWrite = array(
+    public static $logLevelsWrite = [
         LogLevel::EMERGENCY
         ,LogLevel::ALERT
         ,LogLevel::CRITICAL
         ,LogLevel::ERROR
-    );
-    public static $logLevelsEmail = array(
+    ];
+    public static $logLevelsEmail = [
         LogLevel::EMERGENCY
         ,LogLevel::ALERT
         ,LogLevel::CRITICAL
-    );
+    ];
 
     public static function __classLoaded()
     {
@@ -39,31 +39,30 @@ class Logger extends \Psr\Log\AbstractLogger
     }
 
     // handle logging
-    public function log($level, $message, array $context = array())
+    public function log($level, $message, array $context = [])
     {
-        \Debug::log(array(
+        \Debug::log([
             'level' => $level
             ,'message' => $message
             ,'context' => $context
-        ));
+        ]);
 
         if (in_array($level, static::$logLevelsWrite)) {
             file_put_contents(
-                static::$logPath
-                ,
-                    date('Y-m-d H:i:s')." [$level] $message\n\t"
+                static::$logPath,
+                date('Y-m-d H:i:s')." [$level] $message\n\t"
                     ."context: ".trim(str_replace(PHP_EOL, "\n\t", print_r($context, true)))."\n"
                     ."\tbacktrace:\n\t\t".implode("\n\t\t", static::buildBacktraceLines())
-                    ."\n\n"
-                ,FILE_APPEND
+                    ."\n\n",
+                FILE_APPEND
             );
         }
 
         if (in_array($level, static::$logLevelsEmail)) {
             \Emergence\Mailer\Mailer::send(
-                \Site::$webmasterEmail
-                ,"$level logged on $_SERVER[HTTP_HOST]"
-                ,'<dl>'
+                \Site::$webmasterEmail,
+                "$level logged on $_SERVER[HTTP_HOST]",
+                '<dl>'
                     .'<dt>Timestamp</dt><dd>'.date('Y-m-d H:i:s').'</dd>'
                     .'<dt>Level</dt><dd>'.$level.'</dd>'
                     .'<dt>Message</dt><dd>'.htmlspecialchars($message).'</dd>'
@@ -85,42 +84,41 @@ class Logger extends \Psr\Log\AbstractLogger
     public static function buildBacktraceLines()
     {
         $backtrace = debug_backtrace();
-        $lines = array();
+        $lines = [];
 
         // trim call to this method
         array_shift($backtrace);
 
         // build friendly output lines from backtrace frames
         while ($frame = array_shift($backtrace)) {
-            if (!empty($frame['file']) && strpos($frame['file'], \Site::$rootPath.'/data/') === 0) {
+            if (!empty($frame['file']) && str_starts_with($frame['file'], \Site::$rootPath.'/data/')) {
                 $fileNode = \SiteFile::getByID(basename($frame['file']));
 
                 if ($fileNode) {
                     $frame['file'] = 'emergence:'.$fileNode->FullPath;
                 }
             }
-
             // ignore log-routing frames
-            if (
-                !empty($frame['file']) &&
-                (
-                    $frame['file'] == 'emergence:_parent/php-classes/Psr/Log/AbstractLogger.php' ||
-                    $frame['file'] == 'emergence:_parent/php-classes/Emergence/Logger.php'
-                ) ||
-                (empty($frame['file']) && !empty($frame['class']) && $frame['class'] == 'Psr\Log\AbstractLogger') ||
-                (!empty($frame['class']) && $frame['class'] == 'Emergence\Logger' && !empty($frame['function']) && $frame['function'] == '__callStatic')
-            ) {
+            if (!empty($frame['file']) &&
+            (
+                $frame['file'] == 'emergence:_parent/php-classes/Psr/Log/AbstractLogger.php' ||
+                $frame['file'] == 'emergence:_parent/php-classes/Emergence/Logger.php'
+            )) {
+                continue;
+            }
+            if (empty($frame['file']) && !empty($frame['class']) && $frame['class'] == \Psr\Log\AbstractLogger::class) {
+                continue;
+            }
+            if (!empty($frame['class']) && $frame['class'] == \Emergence\Logger::class && (isset($frame['function']) && ($frame['function'] !== '' && $frame['function'] !== '0')) && $frame['function'] == '__callStatic') {
                 continue;
             }
 
             $lines[] =
-                 (!empty($frame['class']) ? $frame['class'] : '')
-                .(!empty($frame['type']) ? $frame['type'] : '')
-                .(!empty($frame['function']) ? $frame['function'] : '')
-                .(!empty($frame['args']) ? '('.implode(',', array_map(function($arg) {
-                    return is_string($arg) || is_numeric($arg) ? var_export($arg, true) : gettype($arg);
-                }, $frame['args'])).')' : '')
-                .(!empty($frame['file']) ? " called at $frame[file]:$frame[line]" : '');
+                 (empty($frame['class']) ? '' : $frame['class'])
+                .(empty($frame['type']) ? '' : $frame['type'])
+                .(empty($frame['function']) ? '' : $frame['function'])
+                .(empty($frame['args']) ? '' : '('.implode(',', array_map(fn ($arg) => is_string($arg) || is_numeric($arg) ? var_export($arg, true) : gettype($arg), $frame['args'])).')')
+                .(empty($frame['file']) ? '' : " called at $frame[file]:$frame[line]");
         }
 
         return $lines;
@@ -147,18 +145,19 @@ class Logger extends \Psr\Log\AbstractLogger
                     $formatted[] = "{$key} = {$value}";
                 }
             }
-
             return '[ '.implode(', ', $formatted).' ]';
-        } elseif (is_bool($value)) {
+        }
+        if (is_bool($value)) {
             // return $value ? '✔' : '✘';
             return $value ? 'T' : 'F';
-        } elseif ($value === null) {
+        }
+        if ($value === null) {
             return '∅';
-        } elseif ($value instanceof KeyedDiff) {
+        }
+        if ($value instanceof KeyedDiff) {
             $newValues = $value->getNewValues();
             $oldValues = $value->getOldValues();
             $diff = [];
-
             foreach ($newValues as $key => $newValue) {
                 $diff[$key] = sprintf(
                     '%s → %s',
@@ -168,7 +167,6 @@ class Logger extends \Psr\Log\AbstractLogger
                     static::toLogString($newValue)
                 );
             }
-
             return static::toLogString($diff);
         }
 
@@ -180,8 +178,8 @@ class Logger extends \Psr\Log\AbstractLogger
     {
         $logger = static::getLogger();
 
-        if (preg_match('/^general_(.*)$/', $name, $matches) && method_exists($logger, $matches[1])) {
-            call_user_func_array(array(&$logger, $matches[1]), $arguments);
+        if (preg_match('/^general_(.*)$/', (string) $name, $matches) && method_exists($logger, $matches[1])) {
+            call_user_func_array([&$logger, $matches[1]], $arguments);
         } else {
             throw new \Exception('Undefined logger method');
         }

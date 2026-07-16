@@ -25,11 +25,12 @@ class CSV
     {
         if (!is_array($records)) {
             throw new Exception('fromRecords expects an array');
-        } elseif (empty($records)) {
+        }
+        if ($records === []) {
             return 'No data';
         }
 
-        if (is_string($columns) && $columns != '*') {
+        if (is_string($columns) && $columns !== '*') {
             $columns = explode(',', $columns);
         }
 
@@ -45,7 +46,7 @@ class CSV
             $columnNames = array_merge(array_keys($fields), array_keys($dynamicFields));
             $columnNames = array_combine($columnNames, $columnNames);
 
-            foreach ($columnNames AS &$columnName) {
+            foreach ($columnNames as &$columnName) {
                 $dynamicField = $dynamicFields[$columnName];
                 $field = $fields[$columnName];
 
@@ -59,7 +60,7 @@ class CSV
 
         fputcsv($stream, static::getColumns($columnNames, $columns));
 
-        foreach ($records AS $record) {
+        foreach ($records as $record) {
             fputcsv(
                 $stream,
                 static::getColumns(
@@ -68,13 +69,14 @@ class CSV
                 )
             );
         }
+        return null;
     }
 
     public static function getColumns($array, $columns = null)
     {
         if (is_array($columns)) {
-            $newArray = array();
-            foreach ($columns AS $key) {
+            $newArray = [];
+            foreach ($columns as $key) {
                 $newArray[$key] = $array[$key];
             }
             $array = $newArray;

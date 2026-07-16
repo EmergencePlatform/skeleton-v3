@@ -18,7 +18,7 @@ $timestampColumns = DB::allRecords('
        AND TABLE_TYPE = "BASE TABLE"
 ');
 
-foreach($timestampColumns as $timestampColumn) {
+foreach ($timestampColumns as $timestampColumn) {
     $rowsCount = DB::oneValue(
         'SELECT COUNT(*) FROM `%s` WHERE `%s` = 0',
         [

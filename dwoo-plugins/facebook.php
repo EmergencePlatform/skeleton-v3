@@ -4,16 +4,16 @@
 
 function Dwoo_Plugin_facebook(Dwoo_Core $dwoo, $page, $assign = 'fbFeed', $limit = 5, $since = false, $cacheTime = 60, $acessToken = '207886205923030|XNMhiHAb8MQp6KmSSIzfd3QH560')
 {
-    $url = 'https://graph.facebook.com/'.urlencode($page).'/feed?access_token='.urlencode($acessToken);
+    $url = 'https://graph.facebook.com/'.urlencode((string) $page).'/feed?access_token='.urlencode((string) $acessToken);
     $cacheKey = 'fbFeed:'.$page;
 
     if ($limit) {
-        $url .= '&limit='.urlencode($limit);
+        $url .= '&limit='.urlencode((string) $limit);
         $cacheKey .= ';limit:'.$limit;
     }
 
     if ($since) {
-        $url .= '&since='.urlencode($since);
+        $url .= '&since='.urlencode((string) $since);
         $cacheKey .= ';since:'.$since;
     }
 
@@ -26,7 +26,7 @@ function Dwoo_Plugin_facebook(Dwoo_Core $dwoo, $page, $assign = 'fbFeed', $limit
     if (!empty($result['data']) && is_array($result['data'])) {
         $dwoo->assignInScope($result['data'], $assign);
     } else {
-        $dwoo->assignInScope(array(), $assign);
+        $dwoo->assignInScope([], $assign);
     }
 
 

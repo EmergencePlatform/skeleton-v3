@@ -25,9 +25,9 @@ class WorkspacePackage extends Package
 
         // find the best version
         $matchedVersion = null;
-    
-        if ($framework) {
-            $versionStack = explode('.', $framework->getVersion());
+
+        if ($framework instanceof \Jarvus\Sencha\Framework) {
+            $versionStack = explode('.', (string) $framework->getVersion());
 
             while (
                 count($versionStack) &&
@@ -112,7 +112,7 @@ class WorkspacePackage extends Package
 
             $packageNodes = Emergence_FS::getAggregateChildren('sencha-workspace/packages');
 
-            foreach ($packageNodes AS $packageDir => $packageNode) {
+            foreach ($packageNodes as $packageDir => $packageNode) {
                 $packagePath = "sencha-workspace/packages/$packageDir";
                 $packageJsonNode = Site::resolvePath("$packagePath/package.json");
 
@@ -123,7 +123,7 @@ class WorkspacePackage extends Package
                 $packageConfig = static::loadPackageConfig($packageJsonNode);
                 $packageName = $packageConfig['name'];
 
-                if (!preg_match('/^([\\w-]+)(@((\\w+)(-(\\d+(\\.\\d+){0,3}))?))?$/m', $packageDir, $matches)) {
+                if (!preg_match('/^([\\w-]+)(@((\\w+)(-(\\d+(\\.\\d+){0,3}))?))?$/m', (string) $packageDir, $matches)) {
                     \Emergence\Logger::general_warning("Unparsable package directory name for $packagePath");
                     continue;
                 }

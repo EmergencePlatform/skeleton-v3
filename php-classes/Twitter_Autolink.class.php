@@ -8,7 +8,7 @@
 class Twitter_Autolink
 {
     /* HTML attribute to add when noFollow is true (default) */
-    const NO_FOLLOW_HTML_ATTRIBUTE = " rel=\"nofollow\"";
+    public const NO_FOLLOW_HTML_ATTRIBUTE = " rel=\"nofollow\"";
 
     /* Default CSS class for auto-linked URLs */
     protected $urlClass = "tweet-url";
@@ -32,10 +32,6 @@ class Twitter_Autolink
     protected $hashtagUrlBase = "http://twitter.com/search?q=%23";
     protected $noFollow = true;
 
-    public function __construct()
-    {
-    }
-
     public function autolink($tweet)
     {
         return $this->autoLinkUsernamesAndLists($this->autoLinkURLs($this->autoLinkHashtags($tweet)));
@@ -44,9 +40,11 @@ class Twitter_Autolink
     public function autoLinkHashtags($tweet)
     {
         // TODO Match latin chars with accents
-        return preg_replace('$(^|[^0-9A-Z&/]+)([#?]+)([0-9A-Z_]*[A-Z_]+[a-z0-9_uA-OO-oo-y]*)$i',
+        return preg_replace(
+            '$(^|[^0-9A-Z&/]+)([#?]+)([0-9A-Z_]*[A-Z_]+[a-z0-9_uA-OO-oo-y]*)$i',
             '${1}<a href="'.$this->hashtagUrlBase.'${3}" title="#${3}" class="'.$this->urlClass.' '.$this->hashtagClass.'">${2}${3}</a>',
-                            $tweet);
+            (string) $tweet
+        );
     }
 
     public function autoLinkURLs($tweet)
@@ -54,10 +52,10 @@ class Twitter_Autolink
         $URL_VALID_PRECEEDING_CHARS = "(?:[^/\"':!=]|^|\\:)";
         $URL_VALID_DOMAIN = "(?:[\\.-]|[^\\p{P}\\s])+\\.[a-z]{2,}(?::[0-9]+)?";
         $URL_VALID_URL_PATH_CHARS = "[a-z0-9!\\*'\\(\\);:&=\\+\\$/%#\\[\\]\\-_\\.,~@]";
-          // Valid end-of-path chracters (so /foo. does not gobble the period).
-          //   1. Allow ) for Wikipedia URLs.
-          //   2. Allow =&# for empty URL parameters and other URL-join artifacts
-          $URL_VALID_URL_PATH_ENDING_CHARS = "[a-z0-9\\)=#/]";
+        // Valid end-of-path chracters (so /foo. does not gobble the period).
+        //   1. Allow ) for Wikipedia URLs.
+        //   2. Allow =&# for empty URL parameters and other URL-join artifacts
+        $URL_VALID_URL_PATH_ENDING_CHARS = "[a-z0-9\\)=#/]";
         $URL_VALID_URL_QUERY_CHARS = "[a-z0-9!\\*'\\(\\);:&=\\+\\$/%#\\[\\]\\-_\\.,~]";
         $URL_VALID_URL_QUERY_ENDING_CHARS = "[a-z0-9_&=#]";
         $VALID_URL_PATTERN_STRING = '$('.//  $1 total match
@@ -72,9 +70,11 @@ class Twitter_Autolink
             ")".
           ')$i';
 
-        return preg_replace_callback($VALID_URL_PATTERN_STRING,
-                                     array($this, 'replacementURLs'),
-                                     $tweet);
+        return preg_replace_callback(
+            $VALID_URL_PATTERN_STRING,
+            $this->replacementURLs(...),
+            (string) $tweet
+        );
     }
 
     /**
@@ -83,7 +83,7 @@ class Twitter_Autolink
     private function replacementURLs($matches)
     {
         $replacement  = $matches[2];
-        if (substr($matches[3], 0, 7) == 'http://' || substr($matches[3], 0, 8) == 'https://') {
+        if (str_starts_with($matches[3], 'http://') || str_starts_with($matches[3], 'https://')) {
             $replacement .= '<a href="'.$matches[3].'">'.$matches[3].'</a>';
         } else {
             $replacement .= '<a href="http://'.$matches[3].'">'.$matches[3].'</a>';
@@ -93,9 +93,11 @@ class Twitter_Autolink
 
     public function autoLinkUsernamesAndLists($tweet)
     {
-        return preg_replace_callback('$([^a-z0-9_]|^)([@|?])([a-z0-9_]{1,20})(/[a-z][a-z0-9\x80-\xFF-]{0,79})?$i',
-                                     array($this, 'replacementUsernameAndLists'),
-                                     $tweet);
+        return preg_replace_callback(
+            '$([^a-z0-9_]|^)([@|?])([a-z0-9_]{1,20})(/[a-z][a-z0-9\x80-\xFF-]{0,79})?$i',
+            $this->replacementUsernameAndLists(...),
+            (string) $tweet
+        );
     }
 
     /**

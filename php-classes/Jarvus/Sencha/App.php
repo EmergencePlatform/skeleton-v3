@@ -6,6 +6,7 @@ use Site;
 
 class App
 {
+    public $workspaceConfig;
     protected $name;
     protected $config;
 
@@ -35,7 +36,7 @@ class App
             throw new \Exception("Could read app.json for $appPath");
         }
 
-        $appConfig = @json_decode(Util::cleanJson($appJson), true);
+        $appConfig = @json_decode((string) Util::cleanJson($appJson), true);
 
         if (!$appConfig || empty($appConfig['name'])) {
             throw new \Exception("Could not parse app.json for $appPath");
@@ -137,12 +138,7 @@ class App
         if (!$this->appAntConfig) {
             $appPath = "sencha-workspace/$this";
             $antConfigNode = Site::resolvePath("$appPath/.sencha/app/sencha.cfg");
-
-            if ($antConfigNode) {
-                $this->appAntConfig = Util::loadAntProperties($antConfigNode->RealPath);
-            } else {
-                $this->appAntConfig = [];
-            }
+            $this->appAntConfig = $antConfigNode ? Util::loadAntProperties($antConfigNode->RealPath) : [];
         }
 
         return $key ? $this->appAntConfig[$key] : $this->appAntConfig;
@@ -172,7 +168,7 @@ class App
             $configPath = 'sencha-workspace/workspace.json';
             $configNode = Site::resolvePath($configPath);
 
-            $this->workspaceConfig = $configNode ? @json_decode(Util::cleanJson(file_get_contents($configNode->RealPath)), true) : [];
+            $this->workspaceConfig = $configNode ? @json_decode((string) Util::cleanJson(file_get_contents($configNode->RealPath)), true) : [];
         }
 
         return $key ? $this->workspaceConfig[$key] : $this->workspaceConfig;
@@ -202,8 +198,8 @@ class App
     {
         if (!$this->classPaths) {
             $this->classPaths = array_unique(array_filter(array_merge(
-                explode(',', $this->getAntConfig('app.classpath')),
-                explode(',', $this->getAntConfig('workspace.classpath'))
+                explode(',', (string) $this->getAntConfig('app.classpath')),
+                explode(',', (string) $this->getAntConfig('workspace.classpath'))
             )));
         }
 

@@ -9,48 +9,48 @@ class GlobalHandle extends ActiveRecord
     public static $pluralNoun = 'handles';
 
     // required for shared-table subclassing support
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__);
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class];
 
-    public static $fields = array(
-        'ContextClass' => array(
+    public static $fields = [
+        'ContextClass' => [
             'type' => 'string'
             ,'notnull' => false
-        )
-        ,'ContextID' => array(
+        ]
+        ,'ContextID' => [
             'type' => 'integer'
             ,'notnull' => false
-        )
-        ,'Handle' => array(
+        ]
+        ,'Handle' => [
             'unique' => true
-        )
-        ,'Type' => array(
+        ]
+        ,'Type' => [
             'type' => 'enum'
-            ,'values' => array('Alias', 'Reserve')
+            ,'values' => ['Alias', 'Reserve']
             ,'default' => 'Alias'
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'Context' => array(
+    public static $relationships = [
+        'Context' => [
             'type' => 'context-parent'
-        )
-    );
+        ]
+    ];
 
     public static function createAlias(ActiveRecord $Context, $handle = false)
     {
         if ($handle) {
-            $handle = HandleBehavior::getUniqueHandle(__CLASS__, $handle);
+            $handle = HandleBehavior::getUniqueHandle(self::class, $handle);
         } else {
-            $handle = HandleBehavior::generateRandomHandle(__CLASS__, 4);
+            $handle = HandleBehavior::generateRandomHandle(self::class, 4);
         }
 
-        return static::create(array(
+        return static::create([
             'Handle' => $handle
             ,'Type' => 'Alias'
             ,'Context' => $Context
-        ), !$Context->isPhantom);
+        ], !$Context->isPhantom);
     }
 
     public function validate($deep = true)
@@ -58,19 +58,19 @@ class GlobalHandle extends ActiveRecord
         // call parent
         parent::validate($deep);
 
-        $this->_validator->validate(array(
+        $this->_validator->validate([
             'field' => 'Type'
             ,'validator' => 'selection'
             ,'choices' => self::$fields['Type']['values']
             ,'required' => false
-        ));
+        ]);
 
-        $this->_validator->validate(array(
+        $this->_validator->validate([
             'field' => 'Handle'
             ,'required' => false
             ,'validator' => 'handle'
             ,'errorMessage' => 'URL handle can only contain letters, numbers, hyphens, and underscores'
-        ));
+        ]);
 
         if ($this->Type == 'Alias' && (!$this->Context || !is_a($this->Context, 'ActiveRecord'))) {
             $this->_validator->addError('Context', 'Context required to create alias handle');

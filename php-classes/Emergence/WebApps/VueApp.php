@@ -4,7 +4,6 @@ namespace Emergence\WebApps;
 
 use DOMDocument;
 use Exception;
-
 use Site;
 use Cache;
 use JSON;
@@ -58,7 +57,7 @@ class VueApp extends App
 
         foreach ($this->indexDoc->getElementsByTagName('link') as $element) {
             if ($href = $element->getAttribute('href')) {
-                $href = parse_url($href, PHP_URL_PATH);
+                $href = parse_url((string) $href, PHP_URL_PATH);
                 $href = $this->getAssetUrl($href);
                 $element->setAttribute('href', $href);
             }
@@ -100,7 +99,7 @@ class VueApp extends App
 
         foreach ($this->indexDoc->getElementsByTagName('script') as $element) {
             if ($src = $element->getAttribute('src')) {
-                $src = parse_url($src, PHP_URL_PATH);
+                $src = parse_url((string) $src, PHP_URL_PATH);
                 $src = $this->getAssetUrl($src);
                 $element->setAttribute('src', $src);
             }

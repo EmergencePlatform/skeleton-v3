@@ -5,9 +5,9 @@ use Emergence\People\Person;
 class Tag extends ActiveRecord
 {
     // support subclassing
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__);
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class];
 
     // configure ActiveRecord
     public static $tableName = 'tags';
@@ -15,55 +15,55 @@ class Tag extends ActiveRecord
     public static $pluralNoun = 'tags';
     public static $collectionRoute = '/tags';
 
-    public static $fields = array(
-        'Title' => array(
+    public static $fields = [
+        'Title' => [
             'includeInSummary' => true
-        )
-        ,'Handle' => array(
+        ]
+        ,'Handle' => [
             'unique' => true,
             'includeInSummary' => true
-        )
-        ,'Description' => array(
+        ]
+        ,'Description' => [
             'notnull' => false
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'Creator' => array(
+    public static $relationships = [
+        'Creator' => [
             'type' => 'one-one'
             ,'local' => 'CreatorID'
             ,'class' => Person::class
-        )
-        ,'Items' => array(
+        ]
+        ,'Items' => [
             'type' => 'one-many'
             ,'class' => 'TagItem'
-        )
-    );
+        ]
+    ];
 
-    public static $searchConditions = array(
-        'Prefix' => array(
-            'qualifiers' => array('prefix')
+    public static $searchConditions = [
+        'Prefix' => [
+            'qualifiers' => ['prefix']
             ,'points' => 2
             ,'sql' => 'Handle LIKE "%1$s.%%"'
-        ),
-        'Title' => array(
+        ],
+        'Title' => [
             'qualifiers' => ['any', 'title'],
             'points' => 1,
             'sql' => 'Title LIKE "%%%1$s%%"'
-        ),
-        'Handle' => array(
+        ],
+        'Handle' => [
             'qualifiers' => ['any', 'handle'],
             'points' => 1,
             'sql' => 'Handle LIKE "%%%1$s%%"'
-        )
-    );
+        ]
+    ];
 
     // public methods
     public static function assignTags($contextClass, $contextID, $tags, $autoCreate = true)
     {
-        $assignedTags = array();
+        $assignedTags = [];
 
-        foreach ($tags AS $tagTitle) {
+        foreach ($tags as $tagTitle) {
             if (!$tagTitle) {
                 continue;
             }
@@ -85,12 +85,12 @@ class Tag extends ActiveRecord
 
     public static function setTags(ActiveRecord $Context, $tags, $autoCreate = true, $prefix = null)
     {
-        $assignedTags = array();
+        $assignedTags = [];
 
         if (is_string($tags)) {
             $tags = static::splitTags($tags);
         } elseif (is_array($tags)) {
-            $newTags = array();
+            $newTags = [];
 
             foreach ($tags as $string) {
                 $splitString = static::splitTags($string);
@@ -103,7 +103,7 @@ class Tag extends ActiveRecord
             $tags = $newTags;
         }
 
-        foreach ($tags AS $tag) {
+        foreach ($tags as $tag) {
             if ($tag && (is_string($tag) || is_int($tag))) {
                 $tag = static::getFromHandle($tag, $autoCreate, $prefix);
             }
@@ -118,12 +118,12 @@ class Tag extends ActiveRecord
 
         if ($prefix) {
             try {
-                $prefixTags = DB::allValues('ID', 'SELECT ID FROM `%s` WHERE Handle LIKE "%s.%%"', array(
+                $prefixTags = DB::allValues('ID', 'SELECT ID FROM `%s` WHERE Handle LIKE "%s.%%"', [
                     \Tag::$tableName,
                     DB::escape($prefix)
-                ));
-            } catch (TableNotFoundException $e) {
-                $prefixTags = array();
+                ]);
+            } catch (TableNotFoundException) {
+                $prefixTags = [];
             }
         }
 
@@ -131,16 +131,16 @@ class Tag extends ActiveRecord
         if (!$prefix || count($prefixTags)) { // if there are no existing tags with this prefix there are no items to delete
             try {
                 DB::query(
-                    'DELETE FROM `%s` WHERE ContextClass = "%s" AND ContextID = %u AND TagID NOT IN (%s) %s'
-                    ,array(
+                    'DELETE FROM `%s` WHERE ContextClass = "%s" AND ContextID = %u AND TagID NOT IN (%s) %s',
+                    [
                         TagItem::$tableName
                         ,DB::escape($Context->getRootClass())
                         ,$Context->ID
-                        ,count($assignedTags) ? join(',', array_keys($assignedTags)) : '0'
-                        ,!empty($prefixTags) ? (' AND TagID IN ('.implode(',', $prefixTags).')') : ''
-                    )
+                        ,count($assignedTags) ? implode(',', array_keys($assignedTags)) : '0'
+                        ,empty($prefixTags) ? ('') : ' AND TagID IN ('.implode(',', $prefixTags).')'
+                    ]
                 );
-            } catch (TableNotFoundException $e) {
+            } catch (TableNotFoundException) {
             }
         }
 
@@ -164,10 +164,10 @@ class Tag extends ActiveRecord
         }
 
         if (!$Tag && $autoCreate) {
-            $Tag = static::create(array(
+            return static::create([
                 'Title' => $handle,
-                'Handle' => HandleBehavior::getUniqueHandle(__CLASS__, $prefix ? "$prefix.$handle" : $handle)
-            ), true);
+                'Handle' => HandleBehavior::getUniqueHandle(self::class, $prefix ? "$prefix.$handle" : $handle)
+            ], true);
         }
 
         return $Tag;
@@ -180,21 +180,20 @@ class Tag extends ActiveRecord
 
     public static function getAllPrefixes()
     {
-        return DB::allValues('Handle', 'SELECT DISTINCT(SUBSTRING_INDEX(tags.Handle, ".", 1 )) AS Handle FROM `%s` tags WHERE Handle LIKE "%%.%%"', array(
+        return DB::allValues('Handle', 'SELECT DISTINCT(SUBSTRING_INDEX(tags.Handle, ".", 1 )) AS Handle FROM `%s` tags WHERE Handle LIKE "%%.%%"', [
             static::$tableName
-        ));
+        ]);
     }
 
     public static function getByTitle($title, $prefix = null)
     {
         if ($prefix) {
-            return static::getByWhere(array(
+            return static::getByWhere([
                 'Title' => $title,
                 'Handle LIKE "'.DB::escape($prefix).'.%%"'
-            ));
-        } else {
-            return static::getByField('Title', $title, true);
+            ]);
         }
+        return static::getByField('Title', $title, true);
     }
 
     public function getValue($name)
@@ -218,9 +217,9 @@ class Tag extends ActiveRecord
         // call parent
         parent::validate();
 
-        $this->_validator->validate(array(
+        $this->_validator->validate([
             'field' => 'Title'
-        ));
+        ]);
 
         // check title uniqueness
         if ($this->isDirty && !$this->_validator->hasErrors('Title') && $this->Title) {
@@ -252,7 +251,7 @@ class Tag extends ActiveRecord
     public function destroy()
     {
         // delete all TagItems
-        DB::nonQuery('DELETE FROM `%s` WHERE TagID = %u', array(TagItem::$tableName, $this->ID));
+        DB::nonQuery('DELETE FROM `%s` WHERE TagID = %u', [TagItem::$tableName, $this->ID]);
 
         return parent::destroy();
     }
@@ -264,25 +263,25 @@ class Tag extends ActiveRecord
             $contextClass = $contextClass->getRootClass();
         }
 
-        $tagData = array(
+        $tagData = [
             'TagID' => $this->ID
             ,'ContextClass' => $contextClass
             ,'ContextID' => $contextID
-        );
+        ];
 
         try {
             return TagItem::create($tagData, true);
-        } catch (DuplicateKeyException $e) {
+        } catch (DuplicateKeyException) {
             return TagItem::getByWhere($tagData);
         }
     }
 
 
-    public static function getAll($options = array())
+    public static function getAll($options = [])
     {
-        $options = array_merge(array(
-            'order' => array('Title' => 'ASC')
-        ), $options);
+        $options = array_merge([
+            'order' => ['Title' => 'ASC']
+        ], $options);
 
         return parent::getAll($options);
     }
@@ -290,17 +289,17 @@ class Tag extends ActiveRecord
 
     public function getRandomItem($options)
     {
-        return array_shift(static::getRandomItems(array_merge(array('limit' => 1), $options)));
+        return array_shift(static::getRandomItems(array_merge(['limit' => 1], $options)));
     }
 
-    public function getRandomItems($options = array())
+    public function getRandomItems($options = [])
     {
         // apply defaults
-        $options = array_merge(array(
+        $options = array_merge([
             'contextClass' => false
             ,'conditions' => false
             ,'limit' => false
-        ), $options);
+        ], $options);
 
         $where[] = sprintf('`%s` = %u', TagItem::getColumnName('TagID'), $this->ID);
 
@@ -309,42 +308,42 @@ class Tag extends ActiveRecord
         }
 
         return TagItem::instantiateRecords(DB::allRecords(
-            'SELECT * FROM `%s` WHERE (%s) ORDER BY rand() %s'
-            , array(
+            'SELECT * FROM `%s` WHERE (%s) ORDER BY rand() %s',
+            [
                 TagItem::$tableName
-                , join(') AND (', $where)
+                , implode(') AND (', $where)
                 , $options['limit'] ? sprintf('LIMIT %u', $options['limit']) : ''
-            )
+            ]
         ));
     }
 
 
-    public function getItems($options = array())
+    public function getItems($options = [])
     {
     }
 
-    public function getItemsByClass($class, $options = array())
+    public function getItemsByClass($class, $options = [])
     {
         // apply defaults
-        $options = array_merge(array(
+        $options = array_merge([
             'conditions' => false
             ,'order' => false
             ,'limit' => is_numeric($options) ? $options : false
             ,'offset' => 0
             ,'overlayTag' => false
             ,'calcFoundRows' => false
-        ), $options);
+        ], $options);
 
         // build TagItem query
-        $tagWhere = array();
+        $tagWhere = [];
         $tagWhere[] = sprintf('`%s` = %u', TagItem::getColumnName('TagID'), $this->ID);
         $tagWhere[] = sprintf('`%s` = "%s"', TagItem::getColumnName('ContextClass'), DB::escape($class::getStaticRootClass()));
 
         $tagQuery = sprintf(
-            'SELECT ContextID FROM `%s` TagItem WHERE (%s)'
-            , TagItem::$tableName
-            , count($tagWhere) ? join(') AND (', $tagWhere) : '1'
-            , ($options['limit'] ? sprintf('LIMIT %u', $options['limit']) : '')
+            'SELECT ContextID FROM `%s` TagItem WHERE (%s)',
+            TagItem::$tableName,
+            count($tagWhere) ? implode(') AND (', $tagWhere) : '1',
+            ($options['limit'] ? sprintf('LIMIT %u', $options['limit']) : '')
         );
 
         if (!empty($options['overlayTag'])) {
@@ -353,26 +352,26 @@ class Tag extends ActiveRecord
             }
 
             $tagQuery .= sprintf(
-                ' AND (TagItem.`%s`,TagItem.`%s`) IN (SELECT OverlayTagItem.`%s`, OverlayTagItem.`%s` FROM `%s` OverlayTagItem WHERE OverlayTagItem.`%s` = %u)'
-                ,TagItem::getColumnName('ContextClass')
-                ,TagItem::getColumnName('ContextID')
-                ,TagItem::getColumnName('ContextClass')
-                ,TagItem::getColumnName('ContextID')
-                ,TagItem::$tableName
-                ,TagItem::getColumnName('TagID')
-                ,$OverlayTag->ID
+                ' AND (TagItem.`%s`,TagItem.`%s`) IN (SELECT OverlayTagItem.`%s`, OverlayTagItem.`%s` FROM `%s` OverlayTagItem WHERE OverlayTagItem.`%s` = %u)',
+                TagItem::getColumnName('ContextClass'),
+                TagItem::getColumnName('ContextID'),
+                TagItem::getColumnName('ContextClass'),
+                TagItem::getColumnName('ContextID'),
+                TagItem::$tableName,
+                TagItem::getColumnName('TagID'),
+                $OverlayTag->ID
             );
         }
 
         // built class table query
         if ($options['conditions']) {
             if (!is_array($options['conditions'])) {
-                $options['conditions'] = array($options['conditions']);
+                $options['conditions'] = [$options['conditions']];
             }
 
             $classWhere = $class::_mapConditions($options['conditions']);
         } else {
-            $classWhere = array();
+            $classWhere = [];
         }
 
         // return objects
@@ -381,16 +380,18 @@ class Tag extends ActiveRecord
             .' Content.*'
             .' FROM (%s) TagItem'
             .' JOIN `%s` Content ON (Content.ID = TagItem.ContextID)'
-            .' WHERE (%s)'
-            , $options['calcFoundRows'] ? 'SQL_CALC_FOUND_ROWS' : ''
-            , $tagQuery                                                 // tag_items query
-            , $class::$tableName                                        // item's table name
-            , count($classWhere) ? join(') AND (', $classWhere) : '1'   // optional where clause
+            .' WHERE (%s)',
+            $options['calcFoundRows'] ? 'SQL_CALC_FOUND_ROWS' : '',
+            $tagQuery                                                 // tag_items query
+            ,
+            $class::$tableName                                        // item's table name
+            ,
+            count($classWhere) > 0 ? implode(') AND (', $classWhere) : '1'   // optional where clause
         );
 
 
         if ($options['order']) {
-            $classQuery .= ' ORDER BY '.join(',', $class::_mapFieldOrder($options['order']));
+            $classQuery .= ' ORDER BY '.implode(',', $class::_mapFieldOrder($options['order']));
         }
 
         if ($options['limit']) {
@@ -403,42 +404,34 @@ class Tag extends ActiveRecord
     public static function getTagsString($tags, $prefix = null)
     {
         if ($prefix) {
-            $tags = array_filter($tags, function($Tag) use ($prefix) {
-                return $Tag->HandlePrefix == $prefix;
-            });
+            $tags = array_filter($tags, fn ($Tag) => $Tag->HandlePrefix == $prefix);
         }
 
-        return implode(', ', array_map(function($Tag) {
-            return $Tag->Title;
-        }, $tags));
+        return implode(', ', array_map(fn ($Tag) => $Tag->Title, $tags));
     }
 
     public static function getAllTitles()
     {
-        return array_map(function($Tag) {
-            return $Tag->Title;
-        }, static::getAll());
+        return array_map(fn ($Tag) => $Tag->Title, static::getAll());
     }
 
     public static function filterTagsByPrefix(array $tags, $prefix)
     {
-        return array_filter($tags, function($Tag) use ($prefix) {
-            return $Tag->HandlePrefix == $prefix;
-        });
+        return array_filter($tags, fn ($Tag) => $Tag->HandlePrefix == $prefix);
     }
 
     public function getReadableItems()
     {
-        $items = array();
+        $items = [];
 
-        foreach ($this->Items AS $item) {
+        foreach ($this->Items as $item) {
             try {
                 if (!$item->Context) {
                     continue;
                 }
 
                 $items[] = $item;
-            } catch (UserUnauthorizedException $e) {
+            } catch (UserUnauthorizedException) {
                 continue;
             }
         }

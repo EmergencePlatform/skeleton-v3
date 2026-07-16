@@ -1,4 +1,5 @@
 <?php
+
 namespace Emergence\Http\Message;
 
 use Psr\Http\Message\UriInterface;
@@ -18,7 +19,7 @@ class Uri implements UriInterface
      * we apply this default host when no host is given yet to form a
      * valid URI.
      */
-    const HTTP_DEFAULT_HOST = 'localhost';
+    public const HTTP_DEFAULT_HOST = 'localhost';
 
     private static $defaultPorts = [
         'http'  => 80,
@@ -120,7 +121,7 @@ class Uri implements UriInterface
             $uri .= $scheme . ':';
         }
 
-        if ($authority != ''|| $scheme === 'file') {
+        if ($authority != '' || $scheme === 'file') {
             $uri .= '//' . $authority;
         }
 
@@ -143,14 +144,15 @@ class Uri implements UriInterface
      * `Psr\Http\Message\UriInterface::getPort` may return null or the standard port. This method can be used
      * independently of the implementation.
      *
-     * @param UriInterface $uri
      *
      * @return bool
      */
     public static function isDefaultPort(UriInterface $uri)
     {
-        return $uri->getPort() === null
-            || (isset(self::$defaultPorts[$uri->getScheme()]) && $uri->getPort() === self::$defaultPorts[$uri->getScheme()]);
+        if ($uri->getPort() === null) {
+            return true;
+        }
+        return isset(self::$defaultPorts[$uri->getScheme()]) && $uri->getPort() === self::$defaultPorts[$uri->getScheme()];
     }
 
     /**
@@ -163,7 +165,6 @@ class Uri implements UriInterface
      * - absolute-path references, e.g. '/path'
      * - relative-path references, e.g. 'subpath'
      *
-     * @param UriInterface $uri
      *
      * @return bool
      * @see Uri::isNetworkPathReference
@@ -181,7 +182,6 @@ class Uri implements UriInterface
      *
      * A relative reference that begins with two slash characters is termed an network-path reference.
      *
-     * @param UriInterface $uri
      *
      * @return bool
      * @link https://tools.ietf.org/html/rfc3986#section-4.2
@@ -196,7 +196,6 @@ class Uri implements UriInterface
      *
      * A relative reference that begins with a single slash character is termed an absolute-path reference.
      *
-     * @param UriInterface $uri
      *
      * @return bool
      * @link https://tools.ietf.org/html/rfc3986#section-4.2
@@ -214,7 +213,6 @@ class Uri implements UriInterface
      *
      * A relative reference that does not begin with a slash character is termed a relative-path reference.
      *
-     * @param UriInterface $uri
      *
      * @return bool
      * @link https://tools.ietf.org/html/rfc3986#section-4.2
@@ -241,7 +239,7 @@ class Uri implements UriInterface
      */
     public static function isSameDocumentReference(UriInterface $uri, UriInterface $base = null)
     {
-        if ($base !== null) {
+        if ($base instanceof \Psr\Http\Message\UriInterface) {
             $uri = UriResolver::resolve($base, $uri);
 
             return ($uri->getScheme() === $base->getScheme())
@@ -307,9 +305,7 @@ class Uri implements UriInterface
         }
 
         $decodedKey = rawurldecode($key);
-        $result = array_filter(explode('&', $current), function ($part) use ($decodedKey) {
-            return rawurldecode(explode('=', $part)[0]) !== $decodedKey;
-        });
+        $result = array_filter(explode('&', $current), fn ($part) => rawurldecode(explode('=', (string) $part)[0]) !== $decodedKey);
 
         return $uri->withQuery(implode('&', $result));
     }
@@ -337,9 +333,7 @@ class Uri implements UriInterface
             $result = [];
         } else {
             $decodedKey = rawurldecode($key);
-            $result = array_filter(explode('&', $current), function ($part) use ($decodedKey) {
-                return rawurldecode(explode('=', $part)[0]) !== $decodedKey;
-            });
+            $result = array_filter(explode('&', $current), fn ($part) => rawurldecode(explode('=', (string) $part)[0]) !== $decodedKey);
         }
 
         // Query string separators ("=", "&") within the key or value need to be encoded
@@ -347,11 +341,7 @@ class Uri implements UriInterface
         // chars that need percent-encoding will be encoded by withQuery().
         $key = strtr($key, self::$replaceQuery);
 
-        if ($value !== null) {
-            $result[] = $key . '=' . strtr($value, self::$replaceQuery);
-        } else {
-            $result[] = $key;
-        }
+        $result[] = $value !== null ? $key . '=' . strtr($value, self::$replaceQuery) : $key;
 
         return $uri->withQuery(implode('&', $result));
     }
@@ -359,11 +349,9 @@ class Uri implements UriInterface
     /**
      * Creates a URI from a hash of `parse_url` components.
      *
-     * @param array $parts
      *
      * @return UriInterface
      * @link http://php.net/manual/en/function.parse-url.php
-     *
      * @throws \InvalidArgumentException If the components do not form a valid URI.
      */
     public static function fromParts(array $parts)
@@ -542,7 +530,7 @@ class Uri implements UriInterface
         $this->scheme = isset($parts['scheme'])
             ? $this->filterScheme($parts['scheme'])
             : '';
-        $this->userInfo = isset($parts['user']) ? $parts['user'] : '';
+        $this->userInfo = $parts['user'] ?? '';
         $this->host = isset($parts['host'])
             ? $this->filterHost($parts['host'])
             : '';
@@ -644,7 +632,7 @@ class Uri implements UriInterface
 
         return preg_replace_callback(
             '/(?:[^' . self::$charUnreserved . self::$charSubDelims . '%:@\/]++|%(?![A-Fa-f0-9]{2}))/',
-            [$this, 'rawurlencodeMatchZero'],
+            $this->rawurlencodeMatchZero(...),
             $path
         );
     }
@@ -666,7 +654,7 @@ class Uri implements UriInterface
 
         return preg_replace_callback(
             '/(?:[^' . self::$charUnreserved . self::$charSubDelims . '%:@\/\?]++|%(?![A-Fa-f0-9]{2}))/',
-            [$this, 'rawurlencodeMatchZero'],
+            $this->rawurlencodeMatchZero(...),
             $str
         );
     }
@@ -683,10 +671,10 @@ class Uri implements UriInterface
         }
 
         if ($this->getAuthority() === '') {
-            if (0 === strpos($this->path, '//')) {
+            if (str_starts_with($this->path, '//')) {
                 throw new \InvalidArgumentException('The path of a URI without an authority must not start with two slashes "//"');
             }
-            if ($this->scheme === '' && false !== strpos(explode('/', $this->path, 2)[0], ':')) {
+            if ($this->scheme === '' && str_contains(explode('/', $this->path, 2)[0], ':')) {
                 throw new \InvalidArgumentException('A relative URI must not have a path beginning with a segment containing a colon');
             }
         } elseif (isset($this->path[0]) && $this->path[0] !== '/') {

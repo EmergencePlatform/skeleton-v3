@@ -2,11 +2,11 @@
 
 class TableManagerRequestHandler extends RequestHandler
 {
-    public static $classFilters = array(
+    public static $classFilters = [
         '/^(Dwoo|Sabre|PHPUnit|Symfony|Gitonomy)[\\\\_]/',
         '/^getID3/',
         '/(Trait|Interface|Test)$/'
-    );
+    ];
 
     public static function handleRequest()
     {
@@ -20,40 +20,25 @@ class TableManagerRequestHandler extends RequestHandler
             case '':
             case false:
             case 'classes':
-            {
                 return static::handleClassesRequest();
-            }
 
             case 'sql':
-            {
                 return static::handleSQLRequest();
-            }
 
             case 'ext-model':
-            {
                 return static::handleExtModelRequest();
-            }
 
             case 'ext-columns':
-            {
                 return static::handleExtColumnsRequest();
-            }
 
             case 'index':
-            {
                 return static::handleManagerRequest();
-            }
 
             case 'renest':
-            {
                 return static::handleRenestRequest();
 
-            }
-
             default:
-            {
                 return static::throwNotFoundError();
-            }
         }
     }
 
@@ -67,9 +52,9 @@ class TableManagerRequestHandler extends RequestHandler
     public static function handleClassesRequest()
     {
         // discover activerecord classes
-        $recordClasses = array();
+        $recordClasses = [];
 
-        foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') AS $classNode) {
+        foreach (Emergence_FS::findFiles('\.php$', true, 'php-classes') as $classNode) {
             if ($classNode->Type != 'application/php') {
                 continue;
             }
@@ -77,10 +62,10 @@ class TableManagerRequestHandler extends RequestHandler
             $classPath = $classNode->getFullPath(null, false);
             array_shift($classPath);
 
-            $className = preg_replace('/(\.class)?\.php$/i', '', join('\\', $classPath));
+            $className = preg_replace('/(\.class)?\.php$/i', '', implode('\\', $classPath));
 
-            foreach (static::$classFilters AS $pattern) {
-                if (preg_match($pattern, $className)) {
+            foreach (static::$classFilters as $pattern) {
+                if (preg_match($pattern, (string) $className)) {
                     continue 2;
                 }
             }
@@ -92,9 +77,9 @@ class TableManagerRequestHandler extends RequestHandler
 
         natsort($recordClasses);
 
-        return static::respond('classes', array(
+        return static::respond('classes', [
             'classes' => $recordClasses
-        ));
+        ]);
     }
 
     public static function handleSQLRequest()
@@ -110,18 +95,18 @@ class TableManagerRequestHandler extends RequestHandler
             if (!$success = DB::getMysqli()->multi_query($sql)) {
                 $error = DB::getMysqli()->error;
             }
-            return static::respond('sqlExecuted', array(
+            return static::respond('sqlExecuted', [
                 'query' => $_REQUEST['sql']
                 ,'class' => $_REQUEST['class']
                 ,'success' => $success
-                ,'error' => isset($error) ? $error : null
-            ));
+                ,'error' => $error ?? null
+            ]);
         }
 
-        return static::respond('sql', array(
+        return static::respond('sql', [
             'query' => SQL::getCreateTable($_REQUEST['class'])
             ,'class' => $_REQUEST['class']
-        ));
+        ]);
     }
 
 
@@ -131,10 +116,10 @@ class TableManagerRequestHandler extends RequestHandler
             return static::throwInvalidRequestError();
         }
 
-        return static::respond('ext-model', array(
+        return static::respond('ext-model', [
             'data' => Sencha\CodeGenerator::getRecordModel($_REQUEST['class'])
             ,'class' => $_REQUEST['class']
-        ));
+        ]);
     }
 
     public static function handleExtColumnsRequest()
@@ -143,10 +128,10 @@ class TableManagerRequestHandler extends RequestHandler
             return static::throwInvalidRequestError();
         }
 
-        return static::respond('ext-columns', array(
+        return static::respond('ext-columns', [
             'data' => Sencha\CodeGenerator::getRecordColumns($_REQUEST['class'])
             ,'class' => $_REQUEST['class']
-        ));
+        ]);
     }
 
     public static function handleRenestRequest()
@@ -157,8 +142,8 @@ class TableManagerRequestHandler extends RequestHandler
 
         NestingBehavior::repairTable($_REQUEST['class']);
 
-        return static::respond('message', array(
+        return static::respond('message', [
             'message' => 'Renesting complete'
-        ));
+        ]);
     }
 }

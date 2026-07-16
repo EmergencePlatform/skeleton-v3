@@ -8,10 +8,11 @@ class PasswordToken extends Token
     public function handleRequest($data)
     {
         parent::handleRequest($data);
-
         if (empty($data['Password'])) {
             throw new Exception('Enter a new password for your account');
-        } elseif ($data['Password'] != $data['PasswordConfirm']) {
+        }
+
+        if ($data['Password'] != $data['PasswordConfirm']) {
             throw new Exception('Enter your new password twice for confirmation');
         }
 

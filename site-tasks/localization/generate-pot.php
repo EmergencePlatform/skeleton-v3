@@ -11,14 +11,12 @@ return [
         $extractStrings = function ($pattern, $contents, $fileVirtualPath, &$strings) {
             preg_match_all($pattern, $contents, $matches, PREG_OFFSET_CAPTURE);
 
-            foreach ($matches[3] AS list($string, $offset)) {
+            foreach ($matches[3] as [$string, $offset]) {
                 $strings[stripslashes($string)][] = $fileVirtualPath.':'.(substr_count(substr($contents, 0, $offset), "\n") + 1);
             }
         };
 
-        $encodeString = function ($string) {
-            return '"'.str_replace(PHP_EOL, '\n', addcslashes($string, '"\\')).'"';
-        };
+        $encodeString = (fn ($string) => '"'.str_replace(PHP_EOL, '\n', addcslashes((string) $string, '"\\')).'"');
 
         // patterns for matching translatable strings
         $patternTemplate = '/(_|gettext)\(\s*(\'|")(.*?)\2\s*\)/si';
@@ -33,7 +31,7 @@ return [
         // extract strings from templates
         $files = Emergence_FS::getTreeFiles('html-templates', false, ['Type' => 'text/x-html-template']);
 
-        foreach ($files AS $path => $fileData) {
+        foreach ($files as $path => $fileData) {
             $contents = file_get_contents(SiteFile::getByID($fileData['ID'])->RealPath);
             $extractStrings($patternTemplate, $contents, $path, $strings);
             $extractStrings($patternTemplateShort, $contents, $path, $strings);
@@ -42,18 +40,18 @@ return [
         // extract strings from PHP files
         $files = Emergence_FS::getTreeFiles(null, false, ['Type' => 'application/php']);
 
-        foreach ($files AS $path => $fileData) {
+        foreach ($files as $path => $fileData) {
             $contents = file_get_contents(SiteFile::getByID($fileData['ID'])->RealPath);
             $extractStrings($patternPHP, $contents, $path, $strings);
             $extractStrings($patternPHPValidators, $contents, $path, $strings);
         }
 
         // write pot file
-        foreach ($strings AS $string => $sources) {
+        foreach ($strings as $string => $sources) {
             fwrite($pot, '#: '.implode(' ', $sources).PHP_EOL);
 
             // switch output format if embedded newlines found (see https://www.gnu.org/software/gettext/manual/html_node/Normalizing.html)
-            if (preg_match('/[^\n]\n+[^\n]/', $string)) {
+            if (preg_match('/[^\n]\n+[^\n]/', (string) $string)) {
                 // multiline output format
                 fwrite($pot, 'msgid ""'.PHP_EOL);
                 fwrite($pot, str_replace('\n', '\n"'.PHP_EOL.'"', $encodeString($string)).PHP_EOL);

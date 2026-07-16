@@ -4,21 +4,21 @@ use Emergence\People\Person;
 
 class ProfileRequestHandler extends RequestHandler
 {
-    public static $profileFields = array('Location','About','Phone','Email');
+    public static $profileFields = ['Location','About','Phone','Email'];
     public static $accountLevelEditOthers = 'Staff';
 
     public static $onBeforeProfileValidated = false;
     public static $onBeforeProfileSaved = false;
     public static $onProfileSaved = false;
 
-    public static $userResponseModes = array(
+    public static $userResponseModes = [
         'application/json' => 'json'
-    );
+    ];
 
     public static function handleRequest()
     {
         // route request
-        switch ($action = strtolower(static::shiftPath())) {
+        switch ($action = strtolower((string) static::shiftPath())) {
             case 'uploadphoto':
                 return static::handlePhotoUploadRequest();
             case 'primaryphoto':
@@ -50,11 +50,7 @@ class ProfileRequestHandler extends RequestHandler
         $User = static::_getRequestedUser();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if ($_SERVER['CONTENT_TYPE'] == 'application/json') {
-                $requestData = JSON::getRequestData();
-            } else {
-                $requestData = $_REQUEST;
-            }
+            $requestData = $_SERVER['CONTENT_TYPE'] == 'application/json' ? JSON::getRequestData() : $_REQUEST;
 
             if (!$GLOBALS['Session']->hasAccountLevel('Administrator')) {
                 $profileChanges = array_intersect_key($requestData, array_flip(static::$profileFields));
@@ -82,18 +78,18 @@ class ProfileRequestHandler extends RequestHandler
                 }
 
                 // fire created response
-                return static::respond('profileSaved', array(
+                return static::respond('profileSaved', [
                     'success' => true
                     ,'data' => $User
-                ));
+                ]);
             }
 
             // fall through back to form if validation failed
         }
 
-        return static::respond('profileEdit', array(
+        return static::respond('profileEdit', [
             'data' => $User
-        ));
+        ]);
     }
 
     public static function handlePhotoUploadRequest()
@@ -102,11 +98,11 @@ class ProfileRequestHandler extends RequestHandler
         $User = static::_getRequestedUser();
 
         // process photo upload with MediaRequestHandler
-        $Photo = \Media::createFromUpload($_FILES['photoFile'], array(
+        $Photo = \Media::createFromUpload($_FILES['photoFile'], [
             'ContextClass' => $User->getRootClass()
             ,'ContextID' => $User->ID
             ,'Caption' => $User->FullName
-        ));
+        ]);
 
         // set primary if none set
         if ($Photo && (!$User->PrimaryPhoto || !empty($_POST['primary']))) {
@@ -114,10 +110,10 @@ class ProfileRequestHandler extends RequestHandler
             $User->save();
         }
 
-        return static::respond('profilePhotoUploaded', array(
-            'success' => (boolean)$Photo
+        return static::respond('profilePhotoUploaded', [
+            'success' => (bool)$Photo
             ,'data' => $Photo
-        ));
+        ]);
     }
 
     public static function handlePhotoPrimaryRequest()
@@ -140,10 +136,10 @@ class ProfileRequestHandler extends RequestHandler
         $User->PrimaryPhoto = $Media;
         $User->save();
 
-        return static::respond('profilePhotoPrimaried', array(
+        return static::respond('profilePhotoPrimaried', [
             'success' => true
             ,'data' => $Media
-        ));
+        ]);
     }
 
     public static function handlePhotoDeleteRequest()
@@ -170,34 +166,37 @@ class ProfileRequestHandler extends RequestHandler
 
         $Media->destroy();
 
-        return static::respond('profilePhotoDeleted', array(
+        return static::respond('profilePhotoDeleted', [
             'success' => true
             ,'data' => $Media
-        ));
+        ]);
     }
 
     public static function handlePasswordRequest()
     {
         $GLOBALS['Session']->requireAuthentication();
         $User = static::_getRequestedUser();
-
         if (empty($_REQUEST['OldPassword'])) {
             return static::throwError('Enter your current password for verification');
-        } elseif (!$User->verifyPassword($_REQUEST['OldPassword'])) {
+        }
+        if (!$User->verifyPassword($_REQUEST['OldPassword'])) {
             return static::throwError('You did not enter your current password correctly');
-        } elseif (empty($_REQUEST['Password']) || empty($_REQUEST['PasswordConfirm'])) {
+        }
+        if (empty($_REQUEST['Password']) || empty($_REQUEST['PasswordConfirm'])) {
             return static::throwError('Enter your new password twice to change it');
-        } elseif ($_REQUEST['Password'] != $_REQUEST['PasswordConfirm']) {
+        }
+
+        if ($_REQUEST['Password'] != $_REQUEST['PasswordConfirm']) {
             return static::throwError('The passwords you supplied did not match');
         }
 
         $User->setClearPassword($_REQUEST['Password']);
         $User->save();
 
-        return static::respond('passwordChanged', array(
+        return static::respond('passwordChanged', [
             'success' => true
             ,'data' => $User
-        ));
+        ]);
     }
 
     protected static function _getRequestedUser()

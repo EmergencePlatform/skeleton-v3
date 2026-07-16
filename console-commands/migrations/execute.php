@@ -71,8 +71,9 @@ foreach ($migrations as $migration) {
     }
 
     $migration = MigrationsRequestHandler::executeMigration($migration, $force || $retrying);
+    $output = trim($migration['output']);
 
-    if ($output = trim($migration['output'])) {
+    if ($output !== '' && $output !== '0') {
         $output = explode(PHP_EOL, $output);
         foreach ($output as $line) {
             $logger->debug($line);

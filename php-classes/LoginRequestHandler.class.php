@@ -8,9 +8,9 @@ class LoginRequestHandler extends RequestHandler
     public static $onLoginComplete = false;
     public static $onLogoutComplete = false;
 
-    public static $userResponseModes = array(
+    public static $userResponseModes = [
         'application/json' => 'json'
-    );
+    ];
 
     // event templates
     protected static function onLoginComplete(Session $Session, $returnURL)
@@ -45,11 +45,11 @@ class LoginRequestHandler extends RequestHandler
         static::onLoginComplete($GLOBALS['Session'], $returnURL);
 
         // respond
-        return static::respond('login/loginComplete', array(
+        return static::respond('login/loginComplete', [
             'success' => true
             ,'data' => $GLOBALS['Session']
             ,'returnURL' => $returnURL
-        ));
+        ]);
     }
 
     public static function handleLogoutRequest($returnURL = null)
@@ -69,28 +69,32 @@ class LoginRequestHandler extends RequestHandler
 
         // send redirect header
         // respond
-        return static::respond('login/logoutComplete', array(
+        return static::respond('login/logoutComplete', [
             'success' => true
             ,'returnURL' => static::getReturnURL($returnURL)
-        ));
+        ]);
     }
 
     public static function getReturnURL($returnURL = null)
     {
         if (static::$forceRedirect) {
             return static::$forceRedirect;
-        } elseif ($returnURL) {
-            return $returnURL;
-        } elseif (!empty($_REQUEST['returnUrl'])) {
-            return $_REQUEST['returnUrl'];
-        } elseif (!empty($_REQUEST['returnURL'])) {
-            return $_REQUEST['returnURL'];
-        } elseif (!empty($_REQUEST['return'])) {
-            return $_REQUEST['return'];
-        } elseif (!empty($_SERVER['HTTP_REFERER']) && !preg_match('|^https?://[^/]+/login|i', $_SERVER['HTTP_REFERER'])) {
-            return $_SERVER['HTTP_REFERER'];
-        } else {
-            return (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].static::$defaultRedirect;
         }
+        if ($returnURL) {
+            return $returnURL;
+        }
+        if (!empty($_REQUEST['returnUrl'])) {
+            return $_REQUEST['returnUrl'];
+        }
+        if (!empty($_REQUEST['returnURL'])) {
+            return $_REQUEST['returnURL'];
+        }
+        if (!empty($_REQUEST['return'])) {
+            return $_REQUEST['return'];
+        }
+        if (!empty($_SERVER['HTTP_REFERER']) && !preg_match('|^https?://[^/]+/login|i', $_SERVER['HTTP_REFERER'])) {
+            return $_SERVER['HTTP_REFERER'];
+        }
+        return (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].static::$defaultRedirect;
     }
 }

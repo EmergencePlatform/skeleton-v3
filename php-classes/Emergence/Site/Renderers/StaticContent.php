@@ -3,7 +3,6 @@
 namespace Emergence\Site\Renderers;
 
 use InvalidArgumentException;
-
 use Emergence\Site\IRenderer;
 use Emergence\Site\IResponse;
 

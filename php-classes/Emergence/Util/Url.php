@@ -4,7 +4,6 @@ namespace Emergence\Util;
 
 use Site;
 
-
 class Url
 {
     public static function buildAbsolute($path = null, $params = null)
@@ -13,10 +12,11 @@ class Url
         $url .= '://' . ($_SERVER['HTTP_HOST'] ?: Site::getConfig('primary_hostname'));
 
         if (is_array($path)) {
-            $path = implode($path, '/');
+            $path = implode('/', $path);
         }
+        $path = ltrim((string) $path, '/');
 
-        if ($path = ltrim($path, '/')) {
+        if ($path !== '' && $path !== '0') {
             $url .= '/' . $path;
         }
 

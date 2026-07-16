@@ -2,10 +2,10 @@
 
 class Sencha
 {
-    public static $frameworks = array(
-        'ext' => array(
+    public static $frameworks = [
+        'ext' => [
             'defaultVersion' => '5.0.1.1255'
-            ,'mappedVersions' => array(
+            ,'mappedVersions' => [
                 '4.2.1'     => '4.2.1.883'
                 ,'4.2.2'    => '4.2.2.1144'
                 ,'4.2.3'    => '4.2.3.1477'
@@ -13,26 +13,26 @@ class Sencha
                 ,'5.0.0'    => '5.0.0.970'
                 ,'5.0.1'    => '5.0.1.1255'
                 ,'5.0'      => '5.0.1.1255'
-            )
-        )
-        ,'touch' => array(
+            ]
+        ]
+        ,'touch' => [
             'defaultVersion' => '2.4.0'
-            ,'mappedVersions' => array(
+            ,'mappedVersions' => [
                 '2.2.1' => '2.2.1.2'
                 ,'2.3.1.410' => '2.3.1'
                 ,'2.4.0.487' => '2.4.0'
                 ,'2.4.1.527' => '2.4.1'
-            )
-        )
-    );
+            ]
+        ]
+    ];
 
     public static $defaultCmdVersion = '5.1.2.52';
 
     public static $cmdPath = '/usr/local/bin/Sencha/Cmd';
-    public static $binPaths = array('/bin','/usr/bin','/usr/local/bin');
+    public static $binPaths = ['/bin','/usr/bin','/usr/local/bin'];
 
     protected static $_workspaceCfg;
-    protected static $_packageDependencies = array();
+    protected static $_packageDependencies = [];
 
     public static function buildCmd()
     {
@@ -43,7 +43,7 @@ class Sencha
 
         $cmd = sprintf('SENCHA_CMD_3_0_0="%1$s" PATH="%2$s" %1$s/sencha', static::$cmdPath.'/'.$cmdVersion, implode(':', static::$binPaths));
 
-        foreach ($args AS $arg) {
+        foreach ($args as $arg) {
             if (is_string($arg)) {
                 $cmd .= ' '.$arg;
             } elseif (is_array($arg)) {
@@ -56,7 +56,7 @@ class Sencha
 
     public static function loadProperties($file)
     {
-        $properties = array();
+        $properties = [];
         $fp = fopen($file, 'r');
 
         while ($line = fgetss($fp)) {
@@ -64,7 +64,7 @@ class Sencha
             $line = preg_replace('/\s*([^#\n\r]*)\s*(#.*)?/', '$1', $line);
 
             if ($line) {
-                list($key, $value) = explode('=', $line, 2);
+                [$key, $value] = explode('=', $line, 2);
                 $properties[$key] = $value;
             }
         }
@@ -76,22 +76,18 @@ class Sencha
 
     public static function isVersionNewer($oldVersion, $newVersion)
     {
-        $oldVersion = explode('.', $oldVersion);
-        $newVersion = explode('.', $newVersion);
+        $oldVersion = explode('.', (string) $oldVersion);
+        $newVersion = explode('.', (string) $newVersion);
 
         while (count($oldVersion) || count($newVersion)) {
-            $oldVersion[0] = (integer)$oldVersion[0];
-            $newVersion[0] = (integer)$newVersion[0];
-
+            $oldVersion[0] = (int)$oldVersion[0];
+            $newVersion[0] = (int)$newVersion[0];
             if ($newVersion[0] == $oldVersion[0]) {
                 array_shift($oldVersion);
                 array_shift($newVersion);
                 continue;
-            } elseif ($newVersion[0] > $oldVersion[0]) {
-                return true;
-            } else {
-                return false;
             }
+            return $newVersion[0] > $oldVersion[0];
         }
 
         return false;
@@ -122,21 +118,20 @@ class Sencha
 
         if ($Asset) {
             return $assetPath.'?_sha1='.$Asset->SHA1;
-        } else {
-            return $assetPath;
         }
+        return $assetPath;
     }
 
     public static function crawlRequiredPackages($packages, $framework = null, $frameworkVersion = null)
     {
         // cache results
         if (is_string($packages) && $packages) {
-            $packages = array($packages);
+            $packages = [$packages];
         } elseif (!is_array($packages)) {
-            return array();
+            return [];
         }
 
-        foreach ($packages AS $package) {
+        foreach ($packages as $package) {
             $cacheKey = "$package@$framework-$frameworkVersion";
 
             // check cache
@@ -145,12 +140,12 @@ class Sencha
                 continue;
             }
 
-            $packagePackages = array();
-            $packageConfigNode = Site::resolvePath(array('sencha-workspace', 'packages', $package, 'package.json'));
+            $packagePackages = [];
+            $packageConfigNode = Site::resolvePath(['sencha-workspace', 'packages', $package, 'package.json']);
 
             // check framework packages directory
             if (!$packageConfigNode && $framework && $frameworkVersion) {
-                $packageConfigNode = Site::resolvePath(array('sencha-workspace', "$framework-$frameworkVersion", 'packages', $package, 'package.json'));
+                $packageConfigNode = Site::resolvePath(['sencha-workspace', "$framework-$frameworkVersion", 'packages', $package, 'package.json']);
             }
 
             if (!$packageConfigNode) {
@@ -179,17 +174,17 @@ class Sencha
     public static function aggregateClassPathsForPackages($packages, $skipPackageRelative = true)
     {
         if (!is_array($packages)) {
-            return array();
+            return [];
         }
 
-        $classPaths = array();
+        $classPaths = [];
 
-        foreach ($packages AS $packageName) {
+        foreach ($packages as $packageName) {
             $packageBuildConfigNode = Site::resolvePath("sencha-workspace/packages/$packageName/.sencha/package/sencha.cfg");
             if ($packageBuildConfigNode) {
                 $packageBuildConfig = Sencha::loadProperties($packageBuildConfigNode->RealPath);
-                foreach (explode(',', $packageBuildConfig['package.classpath']) AS $classPath) {
-                    if (!$skipPackageRelative || strpos($classPath, '${package.dir}') !== 0) {
+                foreach (explode(',', $packageBuildConfig['package.classpath']) as $classPath) {
+                    if (!$skipPackageRelative || !str_starts_with($classPath, '${package.dir}')) {
                         $classPaths[] = $classPath;
                     }
                 }
@@ -206,23 +201,22 @@ class Sencha
 
     public static function getRequiredPackagesForSourceCode($code)
     {
-        if (preg_match_all('|//\s*@require-package\s*(\S+)|i', $code, $matches)) {
+        if (preg_match_all('|//\s*@require-package\s*(\S+)|i', (string) $code, $matches)) {
             return $matches[1];
-        } else {
-            return array();
         }
+        return [];
     }
 
     public static function getWorkspaceCfg($key = null)
     {
         if (!static::$_workspaceCfg) {
             // get from filesystem
-            $configPath = array('sencha-workspace', '.sencha', 'workspace', 'sencha.cfg');
+            $configPath = ['sencha-workspace', '.sencha', 'workspace', 'sencha.cfg'];
 
             if ($configNode = Site::resolvePath($configPath, true, false)) {
                 static::$_workspaceCfg = Sencha::loadProperties($configNode->RealPath);
             } else {
-                static::$_workspaceCfg = array();
+                static::$_workspaceCfg = [];
             }
         }
 
@@ -231,8 +225,8 @@ class Sencha
 
     public static function cleanJson($json)
     {
-        $json = preg_replace('#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#', '', $json); // comment stripper from http://php.net/manual/en/function.json-decode.php#112735
-        $json = preg_replace('#([^\\\\])\\\\\\.#', '$1\\\\\\.', $json); // replace sencha-included "\." with "\\."
+        $json = preg_replace('#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#', '', (string) $json); // comment stripper from http://php.net/manual/en/function.json-decode.php#112735
+        $json = preg_replace('#([^\\\\])\\\\\\.#', '$1\\\\\\.', (string) $json); // replace sencha-included "\." with "\\."
 
         return $json;
     }

@@ -25,57 +25,57 @@ class Job extends ActiveRecord implements IJob
     public static $pluralNoun = 'connector jobs';
 
     // required for shared-table subclassing support
-    public static $rootClass = __CLASS__;
-    public static $defaultClass = __CLASS__;
-    public static $subClasses = array(__CLASS__);
+    public static $rootClass = self::class;
+    public static $defaultClass = self::class;
+    public static $subClasses = [self::class];
 
-    public static $fields = array(
-        'Title' => array(
+    public static $fields = [
+        'Title' => [
             'default' => null
-        )
-        ,'Handle' => array(
+        ]
+        ,'Handle' => [
             'unique' => true
-        )
+        ]
 
-        ,'Status' => array(
+        ,'Status' => [
             'type' => 'enum'
-            ,'values' => array('Template','Pending','InProgress','Completed','Failed','Abandoned')
+            ,'values' => ['Template','Pending','InProgress','Completed','Failed','Abandoned']
             ,'default' => 'Pending'
-        )
+        ]
 
         ,'Connector'
-        ,'TemplateID' => array(
+        ,'TemplateID' => [
             'type' => 'uint'
             ,'notnull' => false
-        )
+        ]
 
-        ,'Direction' => array(
+        ,'Direction' => [
             'type' => 'enum'
-            ,'values' => array('In','Out','Both')
+            ,'values' => ['In','Out','Both']
             ,'notnull' => false
-        )
+        ]
 
-        ,'Config' => array(
+        ,'Config' => [
             'type' => 'json'
-        )
-        ,'Results' => array(
+        ]
+        ,'Results' => [
             'type' => 'json'
             ,'default' => null
-        )
-    );
+        ]
+    ];
 
-    public static $relationships = array(
-        'Template' => array(
+    public static $relationships = [
+        'Template' => [
             'type' => 'one-one'
-            ,'class' => __CLASS__
-        )
-        ,'TemplatedJobs' => array(
+            ,'class' => self::class
+        ]
+        ,'TemplatedJobs' => [
             'type' => 'one-many'
-            ,'class' => __CLASS__
+            ,'class' => self::class
             ,'foreign' => 'TemplateID'
-            ,'order' => array('ID' => 'DESC')
-        )
-    );
+            ,'order' => ['ID' => 'DESC']
+        ]
+    ];
 
 
     public function save($deep = true)
@@ -105,29 +105,29 @@ class Job extends ActiveRecord implements IJob
         $this->logger = $logger;
     }
 
-    public function logRecordDelta(ActiveRecord $Record, $options = array())
+    public function logRecordDelta(ActiveRecord $Record, $options = [])
     {
-        $ignoreFields = is_array($options['ignoreFields']) ? $options['ignoreFields'] : array();
-        $labelRenderers = is_array($options['labelRenderers']) ? $options['labelRenderers'] : array();
-        $valueRenderers = is_array($options['valueRenderers']) ? $options['valueRenderers'] : array();
+        $ignoreFields = is_array($options['ignoreFields']) ? $options['ignoreFields'] : [];
+        $labelRenderers = is_array($options['labelRenderers']) ? $options['labelRenderers'] : [];
+        $valueRenderers = is_array($options['valueRenderers']) ? $options['valueRenderers'] : [];
         $messageRenderer = is_callable($options['messageRenderer']) ? $options['messageRenderer'] : function ($logEntry) use ($options) {
             $title = $options['title'] ?: $logEntry['record']->getTitle();
             $class = $logEntry['record']->Class;
 
-            if (strpos($title, $class) === false) {
+            if (!str_contains($title, $class)) {
                 $title = "$class \"$title\"";
             }
 
             return $logEntry['action'].' '.$title;
         };
 
-        $logEntry = array(
+        $logEntry = [
             'changes' => new KeyedDiff()
             ,'level' => array_key_exists('level', $options) ? $options['level'] : LogLevel::NOTICE
             ,'record' => &$Record
-        );
+        ];
 
-        foreach ($Record->originalValues AS $field => $from) {
+        foreach ($Record->originalValues as $field => $from) {
             if (in_array($field, $ignoreFields)) {
                 continue;
             }
@@ -146,11 +146,9 @@ class Job extends ActiveRecord implements IJob
                 $from = call_user_func($valueRenderers[$field], $from, $logEntry, $field, 'from');
                 $to = call_user_func($valueRenderers[$field], $to, $logEntry, $field, 'to');
             } elseif ($fieldConfig = $Record->getFieldOptions($field)) {
-                switch ($fieldConfig['type']) {
-                    case 'timestamp':
-                        $from = date('Y-m-d H:i:s', $from);
-                        $to = date('Y-m-d H:i:s', $to);
-                        break;
+                if ($fieldConfig['type'] === 'timestamp') {
+                    $from = date('Y-m-d H:i:s', $from);
+                    $to = date('Y-m-d H:i:s', $to);
                 }
             }
 
@@ -162,7 +160,7 @@ class Job extends ActiveRecord implements IJob
         } elseif ($Record->isDirty && $logEntry['changes']->hasChanges()) {
             $logEntry['action'] = 'update';
         } else {
-            return;
+            return null;
         }
 
         $logEntry['message'] = call_user_func($messageRenderer, $logEntry);
@@ -186,7 +184,7 @@ class Job extends ActiveRecord implements IJob
             'Invalid {recordClass} record: {recordTitle}',
             [
                 'validationErrors' => $Record->validationErrors,
-                'recordClass' => get_class($Record),
+                'recordClass' => $Record::class,
                 'recordTitle' => $title ?: $Record->getTitle()
             ]
         );
@@ -199,7 +197,7 @@ class Job extends ActiveRecord implements IJob
             'Exception({exceptionClass}): {exceptionMessage}',
             [
                 'exception' => $e,
-                'exceptionClass' => get_class($e),
+                'exceptionClass' => $e::class,
                 'exceptionMessage' => $e->getMessage()
             ]
         );
@@ -228,7 +226,7 @@ class Job extends ActiveRecord implements IJob
             return;
         }
 
-        $logDirectory = dirname($logPath);
+        $logDirectory = dirname((string) $logPath);
         if (!is_dir($logDirectory)) {
             mkdir($logDirectory, 0777, true);
         }

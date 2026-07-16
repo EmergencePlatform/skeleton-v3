@@ -5,47 +5,47 @@ class VideoMedia extends Media
     // configurables
     public static $ExtractFrameCommand = 'avconv -ss %2$u -i %1$s -an -vframes 1 -f mjpeg -'; // 1=video path, 2=position
     public static $ExtractFramePosition = 3;
-    public static $encodingProfiles = array(
+    public static $encodingProfiles = [
         // from https://www.virag.si/2012/01/web-video-encoding-tutorial-with-ffmpeg-0-9/
-        'h264-high-480p' => array(
+        'h264-high-480p' => [
             'enabled' => true,
             'extension' => 'mp4',
             'mimeType' => 'video/mp4',
-            'inputOptions' => array(),
+            'inputOptions' => [],
             'videoCodec' => 'h264',
-            'videoOptions' => array(
+            'videoOptions' => [
                 'profile:v' => 'high',
                 'preset' => 'slow',
                 'b:v' => '500k',
                 'maxrate' => '500k',
                 'bufsize' => '1000k',
                 'vf' => 'scale="trunc(oh*a/2)*2:480"' // http://superuser.com/questions/571141/ffmpeg-avconv-force-scaled-output-to-be-divisible-by-2
-            ),
+            ],
             'audioCodec' => 'aac',
-            'audioOptions' => array(
+            'audioOptions' => [
                 'strict' => 'experimental'
-            )
-        ),
+            ]
+        ],
 
         // from http://superuser.com/questions/556463/converting-video-to-webm-with-ffmpeg-avconv
-        'webm-480p' => array(
+        'webm-480p' => [
             'enabled' => true,
             'extension' => 'webm',
             'mimeType' => 'video/webm',
-            'inputOptions' => array(),
+            'inputOptions' => [],
             'videoCodec' => 'libvpx',
-            'videoOptions' => array(
+            'videoOptions' => [
                 'vf' => 'scale=-1:480'
-            ),
+            ],
             'audioCodec' => 'libvorbis'
-        )
-    );
+        ]
+    ];
 
 
     // magic methods
     public static function __classLoaded()
     {
-        $className = get_called_class();
+        $className = static::class;
 
         Media::$mimeHandlers['video/x-flv'] = $className;
         Media::$mimeHandlers['video/mp4'] = $className;
@@ -77,6 +77,7 @@ class VideoMedia extends Media
                         throw new Exception('Unable to find video extension for mime-type: '.$this->MIMEType);
                 }
 
+                // no break
             default:
                 return parent::getValue($name);
         }
@@ -102,7 +103,7 @@ class VideoMedia extends Media
     }
 
     // static methods
-    public static function analyzeFile($filename, $mediaInfo = array())
+    public static function analyzeFile($filename, $mediaInfo = [])
     {
         // examine media with avprobe
         $output = shell_exec("avprobe -of json -show_streams -v quiet $filename");
@@ -112,9 +113,7 @@ class VideoMedia extends Media
         }
 
         // extract video streams
-        $videoStreams = array_filter($output['streams'], function($streamInfo) {
-            return $streamInfo['codec_type'] == 'video';
-        });
+        $videoStreams = array_filter($output['streams'], fn ($streamInfo) => $streamInfo['codec_type'] == 'video');
 
         if (!count($videoStreams)) {
             throw new MediaTypeException('avprobe did not detect any video streams');
@@ -126,7 +125,7 @@ class VideoMedia extends Media
 
         $mediaInfo['width'] = (int)$mediaInfo['videoStream']['width'];
         $mediaInfo['height'] = (int)$mediaInfo['videoStream']['height'];
-        $mediaInfo['duration'] = (double)$mediaInfo['videoStream']['duration'];
+        $mediaInfo['duration'] = (float)$mediaInfo['videoStream']['duration'];
 
         return $mediaInfo;
     }
@@ -147,7 +146,7 @@ class VideoMedia extends Media
 
 
         // fork encoding job with each configured profile
-        foreach (static::$encodingProfiles AS $profileName => $profile) {
+        foreach (static::$encodingProfiles as $profileName => $profile) {
             if (empty($profile['enabled'])) {
                 continue;
             }
@@ -155,16 +154,16 @@ class VideoMedia extends Media
 
             // build paths and create directories if needed
             $outputPath = $this->getFilesystemPath($profileName);
-            if (!is_dir($outputDir = dirname($outputPath))) {
+            if (!is_dir($outputDir = dirname((string) $outputPath))) {
                 mkdir($outputDir, static::$newDirectoryPermissions, true);
             }
 
-            $tmpOutputPath = $outputDir.'/'.'tmp-'.basename($outputPath);
+            $tmpOutputPath = $outputDir.'/'.'tmp-'.basename((string) $outputPath);
             ;
 
 
             // build avconv command
-            $cmd = array('avconv', '-loglevel quiet');
+            $cmd = ['avconv', '-loglevel quiet'];
 
             // -- input options
             if (!empty($profile['inputOptions'])) {
@@ -190,11 +189,11 @@ class VideoMedia extends Media
             // -- normalize smartphone rotation
             $cmd[] = '-metadata:s:v rotate="0"';
 
-            if ($sourceRotation == 90) {
+            if ($sourceRotation === 90) {
                 $cmd[] = '-vf "transpose=1"';
-            } elseif ($sourceRotation == 180) {
+            } elseif ($sourceRotation === 180) {
                 $cmd[] = '-vf "transpose=1,transpose=1"';
-            } elseif ($sourceRotation == 270) {
+            } elseif ($sourceRotation === 270) {
                 $cmd[] = '-vf "transpose=1,transpose=1,transpose=1"';
             }
 
@@ -221,7 +220,7 @@ class VideoMedia extends Media
 
     protected static function _appendAvconvOptions(array &$cmd, array $options)
     {
-        foreach ($options AS $key => $value) {
+        foreach ($options as $key => $value) {
             if (!is_int($key)) {
                 $cmd[] = '-'.$key;
             }

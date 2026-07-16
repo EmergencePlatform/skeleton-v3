@@ -2,10 +2,9 @@
 
 use Emergence\People\IPerson;
 use Emergence\People\Person;
-use Emergence\Interfaces\Image AS IImage;
+use Emergence\Interfaces\Image as IImage;
 
-class ActiveRecord
-    implements IImage
+class ActiveRecord implements IImage
 {
     // configurables
     /**
@@ -51,108 +50,108 @@ class ActiveRecord
      * Defaults values for field definitions
      * @var array
      */
-    public static $fieldDefaults = array(
+    public static $fieldDefaults = [
         'type' => 'string'
-    );
+    ];
 
     /**
      * Field definitions
      * @var array
      */
-    public static $fields = array(
-        'ID' => array(
+    public static $fields = [
+        'ID' => [
             'type' => 'integer'
             ,'autoincrement' => true
             ,'unsigned' => true
             ,'includeInSummary' => true
-        )
-        ,'Class' => array(
+        ]
+        ,'Class' => [
             'type' => 'enum'
             ,'notnull' => true
-            ,'values' => array()
+            ,'values' => []
             ,'description' => 'PHP class responsible for loading/saving this record instance'
-        )
-        ,'Created' => array(
+        ]
+        ,'Created' => [
             'type' => 'timestamp'
             ,'default' => 'CURRENT_TIMESTAMP'
             ,'description' => 'Timestamp capturing when this record was first saved to the database'
-        )
-        ,'CreatorID' => array(
+        ]
+        ,'CreatorID' => [
             'type' => 'integer'
             ,'notnull' => false
             ,'description' => 'ID of person who first saved this record to the database'
-        )
-    );
+        ]
+    ];
 
     /**
      * Index definitions
      * @var array
      */
-    public static $indexes = array();
+    public static $indexes = [];
 
     /*
     * Validation checks
     * @var array
     */
-    public static $validators = array();
+    public static $validators = [];
 
     /**
      * Relationship definitions
      * @var array
      */
-    public static $relationships = array(
-        'Creator' => array(
+    public static $relationships = [
+        'Creator' => [
             'type' => 'one-one'
             ,'class' => Person::class
             ,'local' => 'CreatorID'
-        )
-    );
+        ]
+    ];
 
     /*
     * Dynamic field definitions
     * @var array
     */
-    public static $dynamicFields = array(
+    public static $dynamicFields = [
         'Creator',
-        'validationErrors' => array(
+        'validationErrors' => [
             'getter' => 'getValidationErrors',
             'description' => 'Map of field names to any errors registered in most recent validation'
-        ),
-        'recordTitle' => array(
+        ],
+        'recordTitle' => [
             'getter' => 'getTitle',
             'description' => 'The self-generated title for the record'
-        ),
-        'recordURL' => array(
+        ],
+        'recordURL' => [
             'getter' => 'getURL',
             'description' => 'The self-generated canonical URL the record'
-        ),
-        'availableActions' => array(
+        ],
+        'availableActions' => [
             'getter' => 'getAvailableActions',
             'description' => 'Map of capabilities to whether they are available to the current user'
-        )
-    );
+        ]
+    ];
 
     /*
     * Search Condition definitions
     * @var array
     */
-    public static $searchConditions = array(
-        'ID' => array(
+    public static $searchConditions = [
+        'ID' => [
             'qualifiers' => ['id'],
             'points' => 3,
             'callback' => 'getIdSearchConditions'
-        ),
-        'Class' => array(
+        ],
+        'Class' => [
             'qualifiers' => ['class'],
             'callback' => 'getClassSearchConditions'
-        )
-    );
+        ]
+    ];
 
     /*
     * Virtual fields for sorting
     * @var array
     */
-    public static $sorters = array();
+    public static $sorters = [];
 
     /**
      * True to cache model instances in shared memory
@@ -170,16 +169,16 @@ class ActiveRecord
     public static $thumbnailRelationship = 'PrimaryPhoto';
 
     // support subclassing
-    public static $rootClass = null;
-    public static $defaultClass = null;
-    public static $subClasses = null;
+    public static $rootClass;
+    public static $defaultClass;
+    public static $subClasses;
 
     // protected members
-    protected static $_stackedConfigs = array();
+    protected static $_stackedConfigs = [];
 
     protected $_record;
     protected $_convertedValues;
-    protected $_relatedObjects = array();
+    protected $_relatedObjects = [];
     protected $_isDirty;
     protected $_isPhantom;
     protected $_isValid = true;
@@ -187,8 +186,8 @@ class ActiveRecord
     protected $_isUpdated = false;
     protected $_isDestroyed = false;
     protected $_validator;
-    protected $_validationErrors = array();
-    protected $_originalValues = array();
+    protected $_validationErrors = [];
+    protected $_originalValues = [];
 
 
     // magic methods
@@ -199,27 +198,27 @@ class ActiveRecord
     {
         if (static::$trackModified) {
             if (empty(static::$fields['Modified'])) {
-                static::$fields['Modified'] = array(
+                static::$fields['Modified'] = [
                     'type' => 'timestamp'
                     ,'notnull' => false
                     ,'description' => 'Timestamp capturing when changes to this record were last saved to the database'
-                );
+                ];
             }
 
             if (empty(static::$fields['ModifierID'])) {
-                static::$fields['ModifierID'] = array(
+                static::$fields['ModifierID'] = [
                     'type' => 'uint'
                     ,'notnull' => false
                     ,'description' => 'ID of person who last saved changes to this record to the database'
-                );
+                ];
             }
 
             if (empty(static::$relationships['Modifier'])) {
-                static::$relationships['Modifier'] = array(
+                static::$relationships['Modifier'] = [
                     'type' => 'one-one',
                     'class' => Person::class,
                     'local' => 'ModifierID'
-                );
+                ];
 
                 if (!in_array('Modifier', static::$dynamicFields)) {
                     static::$dynamicFields[] = 'Modifier';
@@ -228,10 +227,10 @@ class ActiveRecord
         }
     }
 
-    public function __construct($record = array(), $isDirty = false, $isPhantom = null)
+    public function __construct($record = [], $isDirty = false, $isPhantom = null)
     {
         $this->_record = static::_convertRecord($record);
-        $this->_isPhantom = isset($isPhantom) ? $isPhantom : empty($record);
+        $this->_isPhantom = $isPhantom ?? empty($record);
         $this->_isDirty = $this->_isPhantom || $isDirty;
 
         // authorize read access
@@ -241,7 +240,7 @@ class ActiveRecord
 
         // set Class
         if (static::_fieldExists('Class') && !$this->Class) {
-            $this->Class = get_class($this);
+            $this->Class = static::class;
         }
     }
 
@@ -252,13 +251,13 @@ class ActiveRecord
 
     protected static function _initStackedConfig($propertyName)
     {
-        $className = get_called_class();
+        $className = static::class;
 
         // merge fields from first ancestor up
         $classes = class_parents($className);
         array_unshift($classes, $className);
 
-        $config = array();
+        $config = [];
         while ($class = array_pop($classes)) {
             $classVars = get_class_vars($class);
             if (!empty($classVars[$propertyName])) {
@@ -286,7 +285,7 @@ class ActiveRecord
     public static function &getStackedConfig($propertyName, $key = null)
     {
         $null = null;
-        $className = get_called_class();
+        $className = static::class;
 
         if (!isset(static::$_stackedConfigs[$className][$propertyName])) {
             static::$_stackedConfigs[$className][$propertyName] = static::_initStackedConfig($propertyName);
@@ -295,19 +294,17 @@ class ActiveRecord
         if ($key) {
             if (array_key_exists($key, static::$_stackedConfigs[$className][$propertyName])) {
                 return static::$_stackedConfigs[$className][$propertyName][$key];
-            } else {
-                return $null;
             }
-        } else {
-            return static::$_stackedConfigs[$className][$propertyName];
+            return $null;
         }
+        return static::$_stackedConfigs[$className][$propertyName];
     }
 
     public static function aggregateStackedConfig($propertyName)
     {
-        $config = array();
+        $config = [];
 
-        foreach (static::getSubClasses() AS $subClass) {
+        foreach (static::getSubClasses() as $subClass) {
             $config = array_merge($config, $subClass::getStackedConfig($propertyName));
         }
 
@@ -362,34 +359,27 @@ class ActiveRecord
                 return $this->_originalValues;
 
             default:
-            {
                 // handle field
                 if (static::_fieldExists($name)) {
                     return $this->_getFieldValue($name);
                 }
                 // handle relationship
-                elseif (static::_relationshipExists($name)) {
+                if (static::_relationshipExists($name)) {
                     return $this->_getRelationshipValue($name);
                 }
                 // default Handle to ID if not caught by fieldExists
-                elseif ($name == 'Handle') {
+                if ($name == 'Handle') {
                     return $this->ID;
                 }
-                // handle a dot-path to related record field
-                elseif (count($path = explode('.', $name)) >= 2 && static::_relationshipExists($path[0])) {
+                // handle field
+                if (count($path = explode('.', (string) $name)) >= 2 && static::_relationshipExists($path[0])) {
                     $related = $this->_getRelationshipValue(array_shift($path));
-
                     while (is_array($related)) {
                         $related = $related[array_shift($path)];
                     }
-
-                    return is_object($related) ? $related->getValue(implode('.',$path)) : $related;
+                    return is_object($related) ? $related->getValue(implode('.', $path)) : $related;
                 }
-                // undefined
-                else {
-                    return null;
-                }
-            }
+                return null;
         }
     }
 
@@ -410,7 +400,7 @@ class ActiveRecord
         return static::fieldExists('Handle') ? $this->Handle : $this->ID;
     }
 
-    public function getURL($suffix = '/', $params = array())
+    public function getURL($suffix = '/', $params = [])
     {
         $url = static::$collectionRoute;
 
@@ -420,9 +410,9 @@ class ActiveRecord
 
         $url .= '/'.$this->getHandle();
 
-        $suffix = ltrim($suffix, '/');
+        $suffix = ltrim((string) $suffix, '/');
 
-        if ($suffix) {
+        if ($suffix !== '' && $suffix !== '0') {
             $url .= '/'.$suffix;
         }
 
@@ -479,14 +469,14 @@ class ActiveRecord
 
     public function getAvailableActions(IPerson $User = null)
     {
-        $User = $User ?: $this->getUserFromEnvironment();
+        $User = $User ?: static::getUserFromEnvironment();
 
-        return array(
+        return [
             'create' => $this->userCanCreateRecord($User),
             'read' => $this->userCanReadRecord($User),
             'update' => $this->userCanUpdateRecord($User),
             'delete' => $this->userCanDeleteRecord($User),
-        );
+        ];
     }
 
     public function userCanCreateRecord(IPerson $User = null)
@@ -514,7 +504,7 @@ class ActiveRecord
         $fieldOptions = static::getStackedConfig('fields', $field);
 
         if (!empty($fieldOptions['accountLevelEnumerate'])) {
-            return ($User = $this->getUserFromEnvironment()) ? $User->hasAccountLevel($fieldOptions['accountLevelEnumerate']) : false;
+            return ($User = static::getUserFromEnvironment()) ? $User->hasAccountLevel($fieldOptions['accountLevelEnumerate']) : false;
         }
 
         return true;
@@ -525,7 +515,7 @@ class ActiveRecord
         $fieldOptions = static::getStackedConfig('dynamicFields', $field);
 
         if (!empty($fieldOptions['accountLevelEnumerate'])) {
-            return ($User = $this->getUserFromEnvironment()) ? $User->hasAccountLevel($fieldOptions['accountLevelEnumerate']) : false;
+            return ($User = static::getUserFromEnvironment()) ? $User->hasAccountLevel($fieldOptions['accountLevelEnumerate']) : false;
         }
 
         return true;
@@ -536,15 +526,15 @@ class ActiveRecord
         $fieldOptions = static::getFieldOptions($field);
 
         if (!empty($fieldOptions['accountLevelWrite'])) {
-            return ($User = $this->getUserFromEnvironment()) ? $User->hasAccountLevel($fieldOptions['accountLevelWrite']) : false;
+            return ($User = static::getUserFromEnvironment()) ? $User->hasAccountLevel($fieldOptions['accountLevelWrite']) : false;
         }
 
         return true;
     }
 
-    public static function create($values = array(), $save = false)
+    public static function create($values = [], $save = false)
     {
-        $className = get_called_class();
+        $className = static::class;
 
         // create class
         $ActiveRecord = new $className();
@@ -564,6 +554,7 @@ class ActiveRecord
         }
 
         unset($this->_relatedObjects[$name]);
+        return null;
     }
 
     public function isA($class)
@@ -574,7 +565,7 @@ class ActiveRecord
 
     public function addValidationErrors($array)
     {
-        foreach ($array AS $field => $errorMessage) {
+        foreach ($array as $field => $errorMessage) {
             $this->addValidationError($field, $errorMessage);
         }
     }
@@ -588,7 +579,7 @@ class ActiveRecord
     public function getValidationError($field)
     {
         // break apart path
-        $crumbs = explode('.', $field);
+        $crumbs = explode('.', (string) $field);
 
         // resolve path recursively
         $cur = &$this->_validationErrors;
@@ -620,7 +611,7 @@ class ActiveRecord
         $this->_isValidating = true;
 
         $this->_isValid = true;
-        $this->_validationErrors = array();
+        $this->_validationErrors = [];
 
         if (!isset($this->_validator)) {
             $this->_validator = new RecordValidator($this->_record);
@@ -629,20 +620,18 @@ class ActiveRecord
         }
 
         // iterate through validators config
-        $validators = static::getStackedConfig('validators');
-        if (count(static::getStackedConfig('validators'))) {
-            foreach (static::getStackedConfig('validators') AS $validator => $options) {
-                $fieldId = !empty($options['id'])
-                    ? $options['id']
+        static::getStackedConfig('validators');
+        if (count(static::getStackedConfig('validators')) > 0) {
+            foreach (static::getStackedConfig('validators') as $validator => $options) {
+                $fieldId = empty($options['id'])
+                    ? (empty($options['field']) ? $validator : $options['field'])
                     : (
-                        !empty($options['field'])
-                        ? $options['field']
-                        : $validator
+                        $options['id']
                     );
 
                 if (isset($options['validator']) && $options['validator'] == 'require-relationship') {
                     if (!$this->_getRelationshipValue($options['field'])) {
-                        $this->_validator->addError($options['field'], !empty($options['errorMessage']) ? $options['errorMessage'] : sprintf(_('Required related %s is missing.'), Inflector::spacifyCaps($fieldId)));
+                        $this->_validator->addError($options['field'], empty($options['errorMessage']) ? sprintf(_('Required related %s is missing.'), Inflector::spacifyCaps($fieldId)) : $options['errorMessage']);
                     }
                 } elseif (isset($options['validator']) && is_callable($options['validator'])) {
                     call_user_func($options['validator'], $this->_validator, $this, $options, $validator);
@@ -655,11 +644,11 @@ class ActiveRecord
                         $isValid &&
                         $this->isFieldDirty($options['field']) &&
                         ($value = $this->getValue($options['field'])) &&
-                        static::getByWhere([$options['field'] => $value, 'ID != ' . ($this->ID?:0)])
+                        static::getByWhere([$options['field'] => $value, 'ID != ' . ($this->ID ?: 0)])
                     ) {
                         $this->_validator->addError(
                             $fieldId,
-                            !empty($options['duplicateMessage']) ? _($options['duplicateMessage']) : sprintf(_('%s matches another existing record.'), Inflector::spacifyCaps($fieldId))
+                            empty($options['duplicateMessage']) ? sprintf(_('%s matches another existing record.'), Inflector::spacifyCaps($fieldId)) : _($options['duplicateMessage'])
                         );
                     }
                 }
@@ -670,7 +659,7 @@ class ActiveRecord
 
         // validate related objects
         if ($deep) {
-            foreach (static::getStackedConfig('relationships') AS $relationship => $options) {
+            foreach (static::getStackedConfig('relationships') as $relationship => $options) {
                 if (empty($this->_relatedObjects[$relationship])) {
                     continue;
                 }
@@ -681,7 +670,7 @@ class ActiveRecord
                         if ($this->_relatedObjects[$relationship]->validate() !== null) {
                             $validationErrors = $this->_relatedObjects[$relationship]->validationErrors;
 
-                            if (count($validationErrors)) {
+                            if (count($validationErrors) > 0) {
                                 $this->_validationErrors[$relationship] = $validationErrors;
                             }
                         }
@@ -689,12 +678,12 @@ class ActiveRecord
                         $this->_isValid = $this->_isValid && $this->_relatedObjects[$relationship]->isValid;
                     }
                 } elseif ($options['type'] == 'one-many') {
-                    foreach ($this->_relatedObjects[$relationship] AS $i => $object) {
+                    foreach ($this->_relatedObjects[$relationship] as $i => $object) {
                         if ($object->isDirty) {
                             if ($object->validate() !== null) {
                                 $validationErrors = $object->validationErrors;
 
-                                if (count($validationErrors)) {
+                                if (count($validationErrors) > 0) {
                                     $this->_validationErrors[$relationship][$i] = $validationErrors;
                                 }
                             }
@@ -703,12 +692,12 @@ class ActiveRecord
                         }
                     }
                 } elseif ($options['type'] == 'context-children') {
-                    foreach ($this->_relatedObjects[$relationship] AS $i => $object) {
+                    foreach ($this->_relatedObjects[$relationship] as $i => $object) {
                         if ($object->isDirty) {
                             if ($object->validate() !== null) {
                                 $validationErrors = $object->validationErrors;
 
-                                if (count($validationErrors)) {
+                                if (count($validationErrors) > 0) {
                                     $this->_validationErrors[$relationship][$i] = $validationErrors;
                                 }
                             }
@@ -743,7 +732,7 @@ class ActiveRecord
         }
 
         // return if no change needed
-        if ($className == get_class($this)) {
+        if ($className == static::class) {
             $ActiveRecord = $this;
         } else {
             $this->_record[static::_cn('Class')] = $className;
@@ -764,7 +753,7 @@ class ActiveRecord
 
     public function setFields($values)
     {
-        foreach ($values AS $field => $value) {
+        foreach ($values as $field => $value) {
             $this->_setFieldValue($field, $value);
         }
     }
@@ -776,12 +765,12 @@ class ActiveRecord
 
     public function getSummary($include = [])
     {
-        $data = array();
+        $data = [];
 
         $summaryFields = array_filter(static::getStackedConfig('summaryFields'));
 
-        if (!empty($summaryFields)) {
-            foreach (array_keys($summaryFields) AS $field) {
+        if ($summaryFields !== []) {
+            foreach (array_keys($summaryFields) as $field) {
                 if (static::_fieldExists($field)) {
                     $data[$field] = $this->_getFieldValue($field);
                 } elseif ($this->userCanEnumerateDynamicField($field)) {
@@ -789,13 +778,13 @@ class ActiveRecord
                 }
             }
         } else {
-            foreach ($this->getClassFields() AS $field => $options) {
+            foreach (static::getClassFields() as $field => $options) {
                 if (!empty($options['includeInSummary'])) {
                     $data[$field] = $this->_getFieldValue($field);
                 }
             }
 
-            foreach (static::getStackedConfig('dynamicFields') AS $field => $options) {
+            foreach (static::getStackedConfig('dynamicFields') as $field => $options) {
                 if (!empty($options['includeInSummary']) && $this->userCanEnumerateDynamicField($field)) {
                     $data[$field] = $this->getDynamicFieldValue($field, $include != '*' && !in_array($field, $include));
                 }
@@ -807,9 +796,9 @@ class ActiveRecord
 
     public function getData()
     {
-        $data = array();
+        $data = [];
 
-        foreach ($this->getClassFields() AS $field => $options) {
+        foreach (static::getClassFields() as $field => $options) {
             if (empty($options['excludeFromData']) && $this->userCanEnumerateField($field)) {
                 $data[$field] = $this->_getFieldValue($field);
             }
@@ -822,7 +811,7 @@ class ActiveRecord
     {
         $data = $this->getData();
 
-        foreach (static::getStackedConfig('dynamicFields') AS $field => $options) {
+        foreach (static::getStackedConfig('dynamicFields') as $field => $options) {
             if ($include != '*' && !in_array($field, $include)) {
                 continue;
             }
@@ -849,7 +838,7 @@ class ActiveRecord
 
     public function dumpData($exit = false)
     {
-        Debug::dump($this->getData(), $exit, get_class($this));
+        Debug::dump($this->getData(), $exit, static::class);
     }
 
     protected $_isSaving = false;
@@ -863,14 +852,14 @@ class ActiveRecord
         $this->_isSaving = true;
 
         // fire event
-        Emergence\EventBus::fireEvent('beforeRecordSave', $this->getRootClass(), array(
+        Emergence\EventBus::fireEvent('beforeRecordSave', static::getRootClass(), [
             'Record' => $this,
             'deep' => $deep
-        ));
+        ]);
 
         // set creator
         if (static::_fieldExists('CreatorID') && !$this->CreatorID) {
-            $Creator = $this->getUserFromEnvironment();
+            $Creator = static::getUserFromEnvironment();
             $this->CreatorID = $Creator ? $Creator->ID : null;
         }
 
@@ -891,7 +880,7 @@ class ActiveRecord
         }
 
         // clear caches
-        foreach ($this->getClassFields() AS $field => $options) {
+        foreach (static::getClassFields() as $field => $options) {
             if (!empty($options['unique']) || !empty($options['primary'])) {
                 $key = sprintf('%s/%s:%s', static::$tableName, $field, $this->getValue($field));
                 DB::clearCachedRecord($key);
@@ -908,31 +897,29 @@ class ActiveRecord
             // authorize create/update access
             if ($this->_isPhantom && !$this->userCanCreateRecord()) {
                 throw new UserUnauthorizedException('create authorization denied');
-            } elseif (!$this->_isPhantom && !$this->userCanUpdateRecord()) {
+            }
+            // authorize create/update access
+            if (!$this->_isPhantom && !$this->userCanUpdateRecord()) {
                 throw new UserUnauthorizedException('update authorization denied');
             }
-
             if (!$this->_isPhantom && static::$trackModified) {
                 $this->Modified = time();
 
-                $Modifier = $this->getUserFromEnvironment();
+                $Modifier = static::getUserFromEnvironment();
                 $this->ModifierID = $Modifier ? $Modifier->ID : null;
             }
-
             // prepare record values
             $recordValues = $this->_prepareRecordValues();
-
             // transform record to set array
             $set = static::_mapValuesToSet($recordValues);
-
             // create new or update existing
             if ($this->_isPhantom) {
                 $insertQuery = DB::prepareQuery(
-                    'INSERT INTO `%s` SET %s'
-                    , array(
+                    'INSERT INTO `%s` SET %s',
+                    [
                         static::$tableName
-                        , join(',', $set)
-                    )
+                        , implode(',', $set)
+                    ]
                 );
 
                 try {
@@ -940,7 +927,7 @@ class ActiveRecord
                         DB::nonQuery($insertQuery);
                     } catch (TableNotFoundException $e) {
                         // auto-create table and try insert again
-                        DB::multiQuery(SQL::getCreateTable(get_called_class()));
+                        DB::multiQuery(SQL::getCreateTable(static::class));
 
                         DB::nonQuery($insertQuery);
                     }
@@ -960,8 +947,8 @@ class ActiveRecord
                         if (!empty($duplicateKeyConfig)) {
                             $keyFields = $duplicateKeyConfig['fields'];
                         } else {
-                            $keyFields = array();
-                            foreach (static::getClassFields() AS $fieldName => $fieldConfig) {
+                            $keyFields = [];
+                            foreach (static::getClassFields() as $fieldName => $fieldConfig) {
                                 if (!empty($fieldConfig['primary'])) {
                                     $keyFields[] = $fieldName;
                                 }
@@ -969,15 +956,15 @@ class ActiveRecord
                         }
 
                         $keyValues = array_intersect_key($recordValues, array_flip($keyFields));
-                        $deltaValues = array_diff_key($recordValues, array_flip(array('Created', 'CreatorID')));
+                        $deltaValues = array_diff_key($recordValues, array_flip(['Created', 'CreatorID']));
 
                         DB::nonQuery(
                             'UPDATE `%s` SET %s WHERE %s',
-                            array(
+                            [
                                 static::$tableName,
-                                join(',', static::_mapValuesToSet($deltaValues)),
-                                join(' AND ', static::_mapConditions($keyValues))
-                            )
+                                implode(',', static::_mapValuesToSet($deltaValues)),
+                                implode(' AND ', static::_mapConditions($keyValues))
+                            ]
                         );
 
                         $this->_record = static::getRecordByWhere($keyValues);
@@ -988,23 +975,21 @@ class ActiveRecord
                         throw $e;
                     }
                 }
-            } elseif (count($set)) {
+            } elseif (count($set) > 0) {
                 DB::nonQuery(
-                    'UPDATE `%s` SET %s WHERE `%s` = %u'
-                    , array(
+                    'UPDATE `%s` SET %s WHERE `%s` = %u',
+                    [
                         static::$tableName
-                        , join(',', $set)
+                        , implode(',', $set)
                         , static::_cn('ID')
                         , $this->ID
-                    )
+                    ]
                 );
 
                 $this->_isUpdated = true;
             }
-
             // clear cache
             static::_invalidateRecordCaches($this->ID);
-
             // update state
             $this->_isDirty = false;
         }
@@ -1017,23 +1002,24 @@ class ActiveRecord
         $this->_isSaving = false;
 
         // fire event
-        Emergence\EventBus::fireEvent('afterRecordSave', $this->getRootClass(), array(
+        Emergence\EventBus::fireEvent('afterRecordSave', static::getRootClass(), [
             'Record' => $this,
             'deep' => $deep,
             'wasDirty' => $wasDirty
-        ));
+        ]);
+        return null;
     }
 
     protected function _preSaveRelationships()
     {
         // save relationship objects
-        foreach (static::getStackedConfig('relationships') AS $relationship => $options) {
+        foreach (static::getStackedConfig('relationships') as $relationship => $options) {
             if (!isset($this->_relatedObjects[$relationship])) {
                 continue;
             }
 
             if ($options['type'] == 'one-many' && $options['local'] == 'ID') {
-                foreach ($this->_relatedObjects[$relationship] AS $related) {
+                foreach ($this->_relatedObjects[$relationship] as $related) {
                     foreach ($related::getStackedConfig('relationships') as $otherRelationship => $otherOptions) {
                         if ($otherOptions['type'] == 'one-one' && $otherOptions['local'] == $options['foreign']) {
                             $related->_setRelationshipValue($otherRelationship, $this);
@@ -1052,7 +1038,7 @@ class ActiveRecord
     protected function _saveRelationships()
     {
         // save relationship objects
-        foreach (static::getStackedConfig('relationships') AS $relationship => $options) {
+        foreach (static::getStackedConfig('relationships') as $relationship => $options) {
             if (!isset($this->_relatedObjects[$relationship])) {
                 continue;
             }
@@ -1062,7 +1048,7 @@ class ActiveRecord
                 $related->save();
 
                 if (!empty($options['link']) && is_array($options['link'])) {
-                    foreach ($options['link'] AS $linkLocal => $linkForeign) {
+                    foreach ($options['link'] as $linkLocal => $linkForeign) {
                         $this->_setFieldValue(is_string($linkLocal) ? $linkLocal : $linkForeign, $this->_relatedObjects[$relationship]->getValue($linkForeign));
                     }
                 } elseif ($options['local'] != 'ID') {
@@ -1070,7 +1056,7 @@ class ActiveRecord
                 }
             } elseif ($options['type'] == 'one-many') {
                 if ($options['local'] != 'ID') {
-                    foreach ($this->_relatedObjects[$relationship] AS $related) {
+                    foreach ($this->_relatedObjects[$relationship] as $related) {
                         if ($related->isPhantom) {
                             $related->_setFieldValue($options['foreign'], $this->_getFieldValue($options['local']));
                         }
@@ -1094,7 +1080,7 @@ class ActiveRecord
     {
         //die('psr');
         // save relationship objects
-        foreach (static::getStackedConfig('relationships') AS $relationship => $options) {
+        foreach (static::getStackedConfig('relationships') as $relationship => $options) {
             if (!isset($this->_relatedObjects[$relationship])) {
                 continue;
             }
@@ -1124,7 +1110,7 @@ class ActiveRecord
 
                 $relatedObjectClass = $options['class'];
                 $relatedObjects = [];
-                foreach ($this->_relatedObjects[$relationship] AS $related) {
+                foreach ($this->_relatedObjects[$relationship] as $related) {
                     $related->setField($options['foreign'], $this->getValue($options['local']));
                     $related->save();
                     $relatedObjects[$related->ID] = $related;
@@ -1187,7 +1173,7 @@ class ActiveRecord
 
                 $relatedObjectClass = $options['linkClass'];
                 $relatedObjects = [];
-                foreach ($this->_relatedObjects[$relationship] AS $related) {
+                foreach ($this->_relatedObjects[$relationship] as $related) {
                     $related->setValue($options['relationshipLocal'], $this);
                     $related->save();
                     $relatedObjects[$related->ID] = $related;
@@ -1227,28 +1213,28 @@ class ActiveRecord
             throw new UserUnauthorizedException('delete authorization denied');
         }
 
-        DB::nonQuery('DELETE FROM `%s` WHERE `%s` = %u', array(
+        DB::nonQuery('DELETE FROM `%s` WHERE `%s` = %u', [
             static::$tableName
             ,static::_cn('ID')
             ,$id
-        ));
+        ]);
 
         static::_invalidateRecordCaches($id);
 
         return DB::affectedRows() > 0;
     }
 
-    public static function getByContextObject(ActiveRecord $Record, $options = array())
+    public static function getByContextObject(ActiveRecord $Record, $options = [])
     {
         return static::getByContext($Record->getRootClass(), $Record->ID, $options);
     }
 
-    public static function getByContext($contextClass, $contextID, $options = array())
+    public static function getByContext($contextClass, $contextID, $options = [])
     {
-        $options = array_merge(array(
-            'conditions' => array()
+        $options = array_merge([
+            'conditions' => []
             ,'order' => false
-        ), $options);
+        ], $options);
 
         $options['conditions']['ContextClass'] = $contextClass;
         $options['conditions']['ContextID'] = $contextID;
@@ -1282,11 +1268,11 @@ class ActiveRecord
     public static function getRecordByField($field, $value)
     {
         $query = 'SELECT * FROM `%s` WHERE `%s` = %s LIMIT 1';
-        $params = array(
+        $params = [
             static::$tableName
             , static::_cn($field)
             , static::quoteValue($value)
-        );
+        ];
 
         try {
             if (static::$useCache) {
@@ -1305,66 +1291,66 @@ class ActiveRecord
             }
 
             return $record;
-        } catch (TableNotFoundException $e) {
+        } catch (TableNotFoundException) {
             return null;
         }
     }
 
-    public static function getByWhere($conditions, $options = array())
+    public static function getByWhere($conditions, $options = [])
     {
         $record = static::getRecordByWhere($conditions, $options);
 
         return static::instantiateRecord($record);
     }
 
-    public static function getRecordByWhere($conditions, $options = array())
+    public static function getRecordByWhere($conditions, $options = [])
     {
         if (!is_array($conditions)) {
-            $conditions = array($conditions);
+            $conditions = [$conditions];
         }
 
-        $options = array_merge(array(
+        $options = array_merge([
             'order' => false
-        ), $options);
+        ], $options);
 
         // initialize conditions and order
         $conditions = static::_mapConditions($conditions);
-        $order = $options['order'] ? static::_mapFieldOrder($options['order']) : array();
+        $order = $options['order'] ? static::_mapFieldOrder($options['order']) : [];
 
         try {
             return DB::oneRecord(
-                'SELECT * FROM `%s` WHERE (%s) %s LIMIT 1'
-                , array(
+                'SELECT * FROM `%s` WHERE (%s) %s LIMIT 1',
+                [
                     static::$tableName
-                    , join(') AND (', $conditions)
-                    , $order ? 'ORDER BY '.join(',', $order) : ''
-                )
+                    , implode(') AND (', $conditions)
+                    , $order ? 'ORDER BY '.implode(',', $order) : ''
+                ]
             );
-        } catch (TableNotFoundException $e) {
+        } catch (TableNotFoundException) {
             return null;
         }
     }
 
-    public static function getByQuery($query, $params = array())
+    public static function getByQuery($query, $params = [])
     {
         return static::instantiateRecord(DB::oneRecord($query, $params));
     }
 
-    public static function getAllByClass($className = false, $options = array())
+    public static function getAllByClass($className = false, $options = [])
     {
-        return static::getAllByField('Class', $className ? $className : get_called_class(), $options);
+        return static::getAllByField('Class', $className ? $className : static::class, $options);
     }
 
-    public static function getAllByContextObject(ActiveRecord $Record, $options = array())
+    public static function getAllByContextObject(ActiveRecord $Record, $options = [])
     {
         return static::getAllByContext($Record->getRootClass(), $Record->ID, $options);
     }
 
-    public static function getAllByContext($contextClass, $contextID, $options = array())
+    public static function getAllByContext($contextClass, $contextID, $options = [])
     {
-        $options = array_merge(array(
-            'conditions' => array()
-        ), $options);
+        $options = array_merge([
+            'conditions' => []
+        ], $options);
 
         $options['conditions']['ContextClass'] = $contextClass;
         $options['conditions']['ContextID'] = $contextID;
@@ -1372,19 +1358,19 @@ class ActiveRecord
         return static::instantiateRecords(static::getAllRecordsByWhere($options['conditions'], $options));
     }
 
-    public static function getAllByField($field, $value, $options = array())
+    public static function getAllByField($field, $value, $options = [])
     {
-        return static::getAllByWhere(array($field => $value), $options);
+        return static::getAllByWhere([$field => $value], $options);
     }
 
-    public static function getAllByWhere($conditions = array(), $options = array())
+    public static function getAllByWhere($conditions = [], $options = [])
     {
         return static::instantiateRecords(static::getAllRecordsByWhere($conditions, $options));
     }
 
-    public static function getAllRecordsByWhere($conditions = array(), $options = array())
+    public static function getAllRecordsByWhere($conditions = [], $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'indexField' => false
             ,'order' => false
             ,'limit' => false
@@ -1393,7 +1379,7 @@ class ActiveRecord
             ,'joinRelated' => false
             ,'extraColumns' => false
             ,'having' => false
-        ), $options);
+        ], $options);
 
 
         // handle joining related tables
@@ -1401,26 +1387,22 @@ class ActiveRecord
         $join = '';
         if ($options['joinRelated']) {
             if (is_string($options['joinRelated'])) {
-                $options['joinRelated'] = array($options['joinRelated']);
+                $options['joinRelated'] = [$options['joinRelated']];
             }
 
             // prefix any conditions
 
-            foreach ($options['joinRelated'] AS $relationship) {
+            foreach ($options['joinRelated'] as $relationship) {
                 if (!$rel = static::getStackedConfig('relationships', $relationship)) {
                     die("joinRelated specifies a relationship that does not exist: $relationship");
                 }
 
                 switch ($rel['type']) {
                     case 'one-one':
-                    {
                         $join .= sprintf(' JOIN `%1$s` AS `%2$s` ON(`%2$s`.`%3$s` = `%4$s`.`%5$s`)', $rel['class']::$tableName, $rel['class']::getTableAlias(), $rel['foreign'], $tableAlias, $rel['local']);
                         break;
-                    }
                     default:
-                    {
                         die("getAllRecordsByWhere does not support relationship type $rel[type]");
-                    }
                 }
             }
         }
@@ -1428,7 +1410,7 @@ class ActiveRecord
         // initialize conditions
         if ($conditions) {
             if (is_string($conditions)) {
-                $conditions = array($conditions);
+                $conditions = [$conditions];
             }
 
             $conditions = static::_mapConditions($conditions);
@@ -1439,7 +1421,7 @@ class ActiveRecord
 
         if (!empty($options['extraColumns'])) {
             if (is_array($options['extraColumns'])) {
-                foreach ($options['extraColumns'] AS $key => $value) {
+                foreach ($options['extraColumns'] as $key => $value) {
                     $query .= ', '.$value.' AS '.$key;
                 }
             } else {
@@ -1450,21 +1432,21 @@ class ActiveRecord
         $query .= ' WHERE (%5$s)';
 
         if (!empty($options['having'])) {
-            $query .= ' HAVING ('.(is_array($options['having']) ? join(') AND (', static::_mapConditions($options['having'])) : $options['having']).')';
+            $query .= ' HAVING ('.(is_array($options['having']) ? implode(') AND (', static::_mapConditions($options['having'])) : $options['having']).')';
         }
 
-        $params = array(
+        $params = [
             $options['calcFoundRows'] ? 'SQL_CALC_FOUND_ROWS' : ''
             , static::$tableName
             , $tableAlias
             , $join
-            , $conditions ? join(') AND (', $conditions) : '1'
-        );
+            , $conditions ? implode(') AND (', $conditions) : '1'
+        ];
 
 
 
         if ($options['order']) {
-            $query .= ' ORDER BY '.join(',', static::_mapFieldOrder($options['order']));
+            $query .= ' ORDER BY '.implode(',', static::_mapFieldOrder($options['order']));
         }
 
         if ($options['limit']) {
@@ -1474,35 +1456,34 @@ class ActiveRecord
         try {
             if ($options['indexField']) {
                 return DB::table(static::_cn($options['indexField']), $query, $params);
-            } else {
-                return DB::allRecords($query, $params);
             }
-        } catch (TableNotFoundException $e) {
-            return array();
+            return DB::allRecords($query, $params);
+        } catch (TableNotFoundException) {
+            return [];
         }
     }
 
-    public static function getAll($options = array())
+    public static function getAll($options = [])
     {
         return static::instantiateRecords(static::getAllRecords($options));
     }
 
-    public static function getAllRecords($options = array())
+    public static function getAllRecords($options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'indexField' => false
             ,'order' => false
             ,'limit' => false
             ,'offset' => 0
-        ), $options);
+        ], $options);
 
         $query = 'SELECT * FROM `%s`';
-        $params = array(
+        $params = [
             static::$tableName
-        );
+        ];
 
         if ($options['order']) {
-            $query .= ' ORDER BY '.join(',', static::_mapFieldOrder($options['order']));
+            $query .= ' ORDER BY '.implode(',', static::_mapFieldOrder($options['order']));
         }
 
         if ($options['limit']) {
@@ -1512,49 +1493,48 @@ class ActiveRecord
         try {
             if ($options['indexField']) {
                 return DB::table(static::_cn($options['indexField']), $query, $params);
-            } else {
-                return DB::allRecords($query, $params);
             }
-        } catch (TableNotFoundException $e) {
-            return array();
+            return DB::allRecords($query, $params);
+        } catch (TableNotFoundException) {
+            return [];
         }
     }
 
-    public static function getAllByQuery($query, $params = array())
+    public static function getAllByQuery($query, $params = [])
     {
         try {
             return static::instantiateRecords(DB::allRecords($query, $params));
-        } catch (TableNotFoundException $e) {
-            return array();
+        } catch (TableNotFoundException) {
+            return [];
         }
     }
 
-    public static function getTableByQuery($keyField, $query, $params = array())
+    public static function getTableByQuery($keyField, $query, $params = [])
     {
         try {
             return static::instantiateRecords(DB::table($keyField, $query, $params));
-        } catch (TableNotFoundException $e) {
-            return array();
+        } catch (TableNotFoundException) {
+            return [];
         }
     }
 
-    public static function getCount($conditions = array())
+    public static function getCount($conditions = [])
     {
         // initialize conditions
         if ($conditions) {
             if (is_string($conditions)) {
-                $conditions = array($conditions);
+                $conditions = [$conditions];
             }
 
             $conditions = static::_mapConditions($conditions);
         }
 
         try {
-            return intval(DB::oneValue('SELECT COUNT(*) FROM `%s` WHERE (%s)', array(
+            return intval(DB::oneValue('SELECT COUNT(*) FROM `%s` WHERE (%s)', [
                 static::$tableName
-                ,$conditions ? join(') AND (', $conditions) : '1'
-            )));
-        } catch (TableNotFoundException $e) {
+                ,$conditions ? implode(') AND (', $conditions) : '1'
+            ]));
+        } catch (TableNotFoundException) {
             return 0;
         }
     }
@@ -1568,7 +1548,7 @@ class ActiveRecord
 
     public static function instantiateRecords($records, $skipUnauthorized = true)
     {
-        foreach ($records AS &$record) {
+        foreach ($records as &$record) {
             $className = static::_getRecordClass($record);
 
             try {
@@ -1587,14 +1567,14 @@ class ActiveRecord
 
     public static function getSqlSearchConditions($qualifier, $term)
     {
-        $sqlSearchConditions = array(
-            'conditions' => array()
+        $sqlSearchConditions = [
+            'conditions' => []
             ,'points' => 1
-            ,'joins' => array()
+            ,'joins' => []
             ,'qualifierFound' => false
-        );
+        ];
 
-        foreach (static::aggregateStackedConfig('searchConditions') AS $k => $condition) {
+        foreach (static::aggregateStackedConfig('searchConditions') as $condition) {
             if (!in_array($qualifier, $condition['qualifiers'])) {
                 continue;
             }
@@ -1619,8 +1599,8 @@ class ActiveRecord
                     .')';
             }
 
-            $callback = !empty($condition['callback']) ? $condition['callback'] : false;
-            $sqlCondition = !empty($condition['sql']) ? sprintf($condition['sql'], DB::escape($term)) : false;
+            $callback = empty($condition['callback']) ? false : $condition['callback'];
+            $sqlCondition = empty($condition['sql']) ? false : sprintf($condition['sql'], DB::escape($term));
 
             if ($callback && !$sqlCondition) {
                 if (is_string($callback)) {
@@ -1631,11 +1611,11 @@ class ActiveRecord
             }
 
             if ($sqlCondition) {
-                $sqlSearchConditions['conditions'][] = array(
+                $sqlSearchConditions['conditions'][] = [
                     'condition' => is_array($sqlCondition) ? implode(' AND ', static::mapConditions($sqlCondition)) : $sqlCondition
                     ,'points' => $condition['points']
                     ,'qualifier' => $qualifier
-                );
+                ];
             }
         }
 
@@ -1643,19 +1623,20 @@ class ActiveRecord
     }
 
     // protected methods
-    protected static function getIdSearchConditions($ids) {
-        $ids = array_filter(array_map('intval', explode(',', $ids)));
+    protected static function getIdSearchConditions($ids)
+    {
+        $ids = array_filter(array_map(intval(...), explode(',', (string) $ids)));
 
         if (count($ids)) {
             return sprintf('`%s`.ID IN (%s)', static::getTableAlias(), implode(', ', $ids));
-        } else {
-            return '0';
         }
+        return '0';
     }
 
-    protected static function getClassSearchConditions($class) {
-        foreach (static::getSubclasses() AS $subClass) {
-            if (stripos($subClass, $class) !== false) {
+    protected static function getClassSearchConditions($class)
+    {
+        foreach (static::getSubclasses() as $subClass) {
+            if (stripos($subClass, (string) $class) !== false) {
                 return ['Class' => $subClass];
             }
         }
@@ -1670,16 +1651,16 @@ class ActiveRecord
      */
     protected static function _initFields($config)
     {
-        $fields = array();
+        $fields = [];
 
         // apply defaults to relationship definitions
-        foreach ($config AS $field => $options) {
+        foreach ($config as $field => $options) {
             if (!$options) {
                 continue;
             }
 
             if (is_string($field)) {
-                $fields[$field] = static::_initField($field, is_array($options) ? $options : array('type' => $options));
+                $fields[$field] = static::_initField($field, is_array($options) ? $options : ['type' => $options]);
             } elseif (is_string($options)) {
                 $field = $options;
                 $fields[$field] = static::_initField($field);
@@ -1689,9 +1670,9 @@ class ActiveRecord
         return $fields;
     }
 
-    protected static function _initField($field, $options = array())
+    protected static function _initField($field, $options = [])
     {
-        $options = array_merge(array(
+        $options = array_merge([
             'type' => null
             ,'length' => null
             ,'primary' => null
@@ -1701,7 +1682,7 @@ class ActiveRecord
             ,'unsigned' => null
             ,'default' => null
             ,'values' => null
-        ), static::$fieldDefaults, array('columnName' => $field), $options);
+        ], static::$fieldDefaults, ['columnName' => $field], $options);
 
         if ($field == 'Class') {
             // apply Class enum values
@@ -1717,7 +1698,7 @@ class ActiveRecord
         }
 
         if (empty($options['label'])) {
-            $rootClass = static::getRootClass() ?: get_called_class();
+            $rootClass = static::getRootClass() ?: static::class;
             $options['label'] = Inflector::labelIdentifier($field == 'ID' ? $rootClass::$singularNoun.' ID' : $field);
         }
 
@@ -1746,7 +1727,7 @@ class ActiveRecord
     protected static function _initRelationships($relationships)
     {
         // apply defaults to relationship definitions
-        foreach ($relationships AS $relationship => &$options) {
+        foreach ($relationships as $relationship => &$options) {
             $options = static::_initRelationship($relationship, $options);
         }
 
@@ -1756,8 +1737,8 @@ class ActiveRecord
     public static function getDefaultForeignRelationshipName()
     {
         $className = static::getRootClass();
-        $slashPosition = strrpos($className, '\\');
-        return $slashPosition === false ? $className : substr($className, $slashPosition + 1);
+        $slashPosition = strrpos((string) $className, '\\');
+        return $slashPosition === false ? $className : substr((string) $className, $slashPosition + 1);
     }
 
     public static function getDefaultForeignIdentifierColumnName()
@@ -1767,14 +1748,11 @@ class ActiveRecord
 
     protected static function _initRelationship($relationship, $options)
     {
-        // sanity checks
-        $className = get_called_class();
-
         if (is_string($options)) {
-            $options = array(
+            $options = [
                 'type' => 'one-one'
                 ,'class' => $options
-            );
+            ];
         }
 
         if (!is_string($relationship) || !is_array($options)) {
@@ -1791,7 +1769,7 @@ class ActiveRecord
         if ($options['type'] == 'one-one') {
             if (!empty($options['link'])) {
                 if (is_string($options['link'])) {
-                    $options['link'] = array($options['link']);
+                    $options['link'] = [$options['link']];
                 }
             } else {
                 if (empty($options['local'])) {
@@ -1804,7 +1782,7 @@ class ActiveRecord
             }
 
             if (!isset($options['conditions'])) {
-                $options['conditions'] = array();
+                $options['conditions'] = [];
             }
 
             if (!isset($options['order'])) {
@@ -1824,9 +1802,9 @@ class ActiveRecord
             }
 
             if (!isset($options['conditions'])) {
-                $options['conditions'] = array();
+                $options['conditions'] = [];
             } elseif (is_string($options['conditions'])) {
-                $options['conditions'] = array($options['conditions']);
+                $options['conditions'] = [$options['conditions']];
             }
 
             if (!isset($options['order'])) {
@@ -1846,7 +1824,7 @@ class ActiveRecord
             }
 
             if (!isset($options['conditions'])) {
-                $options['conditions'] = array();
+                $options['conditions'] = [];
             }
 
             if (!isset($options['order'])) {
@@ -1866,11 +1844,11 @@ class ActiveRecord
             }
 
             if (!isset($options['conditions'])) {
-                $options['conditions'] = array();
+                $options['conditions'] = [];
             }
 
             if (!isset($options['order'])) {
-                $options['order'] = array('ID' => 'DESC');
+                $options['order'] = ['ID' => 'DESC'];
             }
         } elseif ($options['type'] == 'context-parent') {
             if (empty($options['local'])) {
@@ -1930,7 +1908,7 @@ class ActiveRecord
             }
 
             if (!isset($options['conditions'])) {
-                $options['conditions'] = array();
+                $options['conditions'] = [];
             }
 
             if (!isset($options['order'])) {
@@ -1943,16 +1921,16 @@ class ActiveRecord
 
     protected static function _initDynamicFields($config)
     {
-        $dynamicFields = array();
+        $dynamicFields = [];
 
         // apply defaults to relationship definitions
-        foreach ($config AS $field => $options) {
+        foreach ($config as $field => $options) {
             if (!$options) {
                 continue;
             }
 
             if (is_string($field)) {
-                $dynamicFields[$field] = static::_initDynamicField($field, is_array($options) ? $options : array('relationship' => $options));
+                $dynamicFields[$field] = static::_initDynamicField($field, is_array($options) ? $options : ['relationship' => $options]);
             } elseif (is_string($options)) {
                 $field = $options;
                 $dynamicFields[$field] = static::_initDynamicField($field);
@@ -1962,7 +1940,7 @@ class ActiveRecord
         return $dynamicFields;
     }
 
-    protected static function _initDynamicField($field, $options = array())
+    protected static function _initDynamicField($field, $options = [])
     {
         if (empty($options['label'])) {
             $options['label'] = Inflector::labelIdentifier($field);
@@ -1997,8 +1975,8 @@ class ActiveRecord
 
         if ($stringsOnly && !is_string($value)) {
             if (is_array($value)) {
-                $strings = array();
-                foreach ($value AS $key => $attr) {
+                $strings = [];
+                foreach ($value as $key => $attr) {
                     $strings[] = is_string($key) ? "$key=$attr" : $attr;
                 }
                 $value = implode(',', $strings);
@@ -2012,16 +1990,16 @@ class ActiveRecord
 
     protected static function _initValidators($config)
     {
-        $validators = array();
+        $validators = [];
 
         // apply defaults to relationship definitions
-        foreach ($config AS $validator => $options) {
+        foreach ($config as $validator => $options) {
             if (!$options) {
                 continue;
             }
 
             if (is_string($validator)) {
-                $validators[$validator] = static::_initValidator($validator, is_array($options) ? $options : array('validator' => $options));
+                $validators[$validator] = static::_initValidator($validator, is_array($options) ? $options : ['validator' => $options]);
             } elseif (is_string($options)) {
                 $validator = $options;
                 $validators[$validator] = static::_initValidator($validator);
@@ -2031,7 +2009,7 @@ class ActiveRecord
         return $validators;
     }
 
-    protected static function _initValidator($validator, $options = array())
+    protected static function _initValidator($validator, $options = [])
     {
         if (empty($options['field']) && (empty($options['validator']) || !is_callable($options['validator']))) {
             $options['field'] = $validator;
@@ -2052,7 +2030,7 @@ class ActiveRecord
             return $record['Class'];
         }
 
-        return get_called_class();
+        return static::class;
     }
 
     protected static function _fieldExists($field)
@@ -2090,9 +2068,8 @@ class ActiveRecord
 
         if ($optionKey) {
             return $fieldOptions[$optionKey];
-        } else {
-            return $fieldOptions;
         }
+        return $fieldOptions;
     }
 
     /**
@@ -2103,7 +2080,7 @@ class ActiveRecord
     public static function getColumnName($field)
     {
         if (!static::_fieldExists($field)) {
-            throw new Exception('getColumnName called on nonexisting column: '.get_called_class().'->'.$field);
+            throw new Exception('getColumnName called on nonexisting column: '.static::class.'->'.$field);
         }
 
         return static::getFieldOptions($field, 'columnName');
@@ -2136,7 +2113,6 @@ class ActiveRecord
             switch ($fieldOptions['type']) {
                 case 'datetime':
                 case 'timestamp':
-                {
                     if (!isset($this->_convertedValues[$field])) {
                         if ($fieldOptions['type'] == 'timestamp') {
                             static $timestampSuffix;
@@ -2150,62 +2126,40 @@ class ActiveRecord
 
                             $value .= $timestampSuffix;
                         }
-
-                        if ($value && $value != '0000-00-00 00:00:00') {
-                            $this->_convertedValues[$field] = strtotime($value);
-                        } else {
-                            $this->_convertedValues[$field] = null;
-                        }
+                        $this->_convertedValues[$field] = $value && $value != '0000-00-00 00:00:00' ? strtotime((string) $value) : null;
                     }
-
                     return $this->_convertedValues[$field];
-                }
                 case 'json':
-                {
                     if (!isset($this->_convertedValues[$field])) {
                         $this->_convertedValues[$field] = is_string($value) ? json_decode($value, true) : $value;
                     }
-
                     return $this->_convertedValues[$field];
-                }
                 case 'serialized':
-                {
                     if (!isset($this->_convertedValues[$field])) {
                         $this->_convertedValues[$field] = is_string($value) ? unserialize($value) : $value;
                     }
-
                     return $this->_convertedValues[$field];
-                }
                 case 'set':
                 case 'list':
-                {
                     if (!isset($this->_convertedValues[$field])) {
                         $delim = empty($fieldOptions['delimiter']) ? ',' : $fieldOptions['delimiter'];
                         $this->_convertedValues[$field] = array_filter(preg_split('/\s*'.$delim.'\s*/', $value));
                     }
-
                     return $this->_convertedValues[$field];
-                }
 
                 case 'boolean':
-                {
                     if (!isset($this->_convertedValues[$field])) {
-                        $this->_convertedValues[$field] = (boolean)$value;
+                        $this->_convertedValues[$field] = (bool)$value;
                     }
-
                     return $this->_convertedValues[$field];
-                }
 
                 case 'float':
                 case 'double':
                 case 'decimal':
-                {
                     if (!isset($this->_convertedValues[$field])) {
                         $this->_convertedValues[$field] = (float)$value;
                     }
-
                     return $this->_convertedValues[$field];
-                }
 
                 case 'year':
                 case 'int':
@@ -2215,18 +2169,13 @@ class ActiveRecord
                 case 'smallint':
                 case 'mediumint':
                 case 'bigint':
-                {
                     if (!isset($this->_convertedValues[$field])) {
-                        $this->_convertedValues[$field] = (integer)$value;
+                        $this->_convertedValues[$field] = (int)$value;
                     }
-
                     return $this->_convertedValues[$field];
-                }
 
                 default:
-                {
                     return $value;
-                }
             }
         } elseif (
             $useDefault
@@ -2242,13 +2191,9 @@ class ActiveRecord
             switch ($fieldOptions['type']) {
                 case 'set':
                 case 'list':
-                {
-                    return array();
-                }
+                    return [];
                 default:
-                {
                     return null;
-                }
             }
         }
     }
@@ -2262,7 +2207,7 @@ class ActiveRecord
     protected function _setFieldValue($field, $value)
     {
         // ignore overwriting meta fields
-        if (in_array($field, array('Created','CreatorID')) && $this->_getFieldValue($field, false)) {
+        if (in_array($field, ['Created','CreatorID']) && $this->_getFieldValue($field, false)) {
             return false;
         }
 
@@ -2270,9 +2215,8 @@ class ActiveRecord
             // set relationship
             if (static::_relationshipExists($field)) {
                 return $this->_setRelationshipValue($field, $value);
-            } else {
-                return false;
             }
+            return false;
         }
 
         if (!$this->userCanWriteField($field)) {
@@ -2293,59 +2237,46 @@ class ActiveRecord
             case 'enum':
             case 'clob':
             case 'string':
-            {
-                if (empty($fieldOptions['notnull']) && !empty($fieldOptions['blankisnull']) && ($value === '' || $value === NULL)) {
+                if (empty($fieldOptions['notnull']) && !empty($fieldOptions['blankisnull']) && ($value === '' || $value === null)) {
                     $value = null;
                     break;
                 }
-
                 // normalize encoding to ASCII
                 $value = @mb_convert_encoding($value, 'UTF-8', 'auto');
-
                 // remove any remaining non-printable characters
                 //$value = preg_replace('/[^[:print:][:space:]]/', '', $value);
-
                 break;
-            }
 
             case 'boolean':
-            {
-                $this->_convertedValues[$field] = (boolean)$value;
-
+                $this->_convertedValues[$field] = (bool)$value;
                 $value = $this->_convertedValues[$field] ? '1' : '0';
-            }
 
+                // no break
             case 'float':
             case 'double':
             case 'decimal':
-            {
                 if (is_string($value)) {
-                    $value = preg_replace('/(.)-/', '$1', preg_replace('/[^-\d.]/','', $value));
+                    $value = preg_replace('/(.)-/', '$1', (string) preg_replace('/[^\-\d.]/', '', $value));
                 }
-
                 if (!$fieldOptions['notnull'] && ($value === '' || $value === null)) {
-                    $this->_convertedValues[$field] = $value = NULL;
+                    $this->_convertedValues[$field] = $value = null;
                 } else {
                     $value = (float)$value;
                     $this->_convertedValues[$field] = $value;
 
                     if ($fieldOptions['type'] == 'decimal') {
-                        list ($precision, $decimals) = explode(',', $fieldOptions['length']);
+                        [$precision, $decimals] = explode(',', $fieldOptions['length']);
                         $value = number_format($value, $decimals, '.', '');
                     } else {
                         $value = (string)$value;
                     }
                 }
-
                 break;
-            }
 
             case 'json':
-            {
                 $this->_convertedValues[$field] = $value;
                 $value = json_encode($value);
                 break;
-            }
 
             case 'year':
             case 'int':
@@ -2355,21 +2286,17 @@ class ActiveRecord
             case 'smallint':
             case 'mediumint':
             case 'bigint':
-            {
                 if (!$fieldOptions['notnull'] && ($value === '' || $value === null)) {
-                    $this->_convertedValues[$field] = $value = NULL;
+                    $this->_convertedValues[$field] = $value = null;
                 } else {
-                    $value = (integer)$value;
+                    $value = (int)$value;
                     $this->_convertedValues[$field] = $value;
                     $value = (string)$value;
                 }
-
                 break;
-            }
 
             case 'datetime':
             case 'timestamp':
-            {
                 if (!$value) {
                     $value = null;
                 } elseif (is_numeric($value)) {
@@ -2401,14 +2328,10 @@ class ActiveRecord
                     // trim any extra crap, or leave as-is if it doesn't fit the pattern
                     $value = preg_replace('/^(\d{4})\D?(\d{2})\D?(\d{2})T?(\d{2})\D?(\d{2})\D?(\d{2})/', '$1-$2-$3 $4:$5:$6', $value);
                 }
-
                 unset($this->_convertedValues[$field]);
-
                 break;
-            }
 
             case 'date':
-            {
                 if (is_numeric($value)) {
                     $value = date('Y-m-d', $value);
                 } elseif (is_string($value)) {
@@ -2417,36 +2340,30 @@ class ActiveRecord
                 } elseif (is_array($value) && count(array_filter($value))) {
                     // collapse array date to string
                     $value = sprintf(
-                        '%04u-%02u-%02u'
-                        ,is_numeric($value['yyyy']) ? $value['yyyy'] : 0
-                        ,is_numeric($value['mm']) ? $value['mm'] : 0
-                        ,is_numeric($value['dd']) ? $value['dd'] : 0
+                        '%04u-%02u-%02u',
+                        is_numeric($value['yyyy']) ? $value['yyyy'] : 0,
+                        is_numeric($value['mm']) ? $value['mm'] : 0,
+                        is_numeric($value['dd']) ? $value['dd'] : 0
                     );
                 } else {
                     $value = null;
                 }
                 break;
-            }
 
-            // these types are converted to strings from another PHP type on save
+                // these types are converted to strings from another PHP type on save
             case 'serialized':
-            {
                 $this->_convertedValues[$field] = $value;
                 $value = serialize($value);
                 break;
-            }
             case 'set':
             case 'list':
-            {
                 if (!is_array($value)) {
                     $delim = empty($fieldOptions['delimiter']) ? ',' : $fieldOptions['delimiter'];
-                    $value = array_filter(preg_split('/\s*'.$delim.'\s*/', $value));
+                    $value = array_filter(preg_split('/\s*'.$delim.'\s*/', (string) $value));
                 }
-
                 $this->_convertedValues[$field] = $value;
                 $forceDirty = true;
                 break;
-            }
 
         }
 
@@ -2465,7 +2382,7 @@ class ActiveRecord
 
             // unset invalidated relationships
             if (!empty($fieldOptions['relationships'])) {
-                foreach ($fieldOptions['relationships'] AS $relationship => $isCached) {
+                foreach ($fieldOptions['relationships'] as $relationship => $isCached) {
                     if ($isCached) {
                         unset($this->_relatedObjects[$relationship]);
                     }
@@ -2494,17 +2411,17 @@ class ActiveRecord
                     $conditions = is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'];
 
                     if (is_callable($rel['link'])) {
-                        $conditions = array_merge($conditions, call_user_func($rel['link'], $this, $rel) ?: array());
+                        $conditions = array_merge($conditions, call_user_func($rel['link'], $this, $rel) ?: []);
                     } else {
-                        foreach ($rel['link'] AS $linkLocal => $linkForeign) {
+                        foreach ($rel['link'] as $linkLocal => $linkForeign) {
                             $conditions[$linkForeign] = $this->_getFieldValue(is_string($linkLocal) ? $linkLocal : $linkForeign);
                         }
                     }
 
-                    if (count($conditions)) {
-                        $this->_relatedObjects[$relationship] = $rel['class']::getByWhere($conditions, array(
+                    if (count($conditions) > 0) {
+                        $this->_relatedObjects[$relationship] = $rel['class']::getByWhere($conditions, [
                             'order' => $rel['order']
-                        ));
+                        ]);
                     } else {
                         $this->_relatedObjects[$relationship] = null;
                     }
@@ -2514,9 +2431,9 @@ class ActiveRecord
                     if (!empty($conditions) || !empty($rel['order'])) {
                         $conditions[$rel['foreign']] = $value;
 
-                        $this->_relatedObjects[$relationship] = $rel['class']::getByWhere($conditions, array(
+                        $this->_relatedObjects[$relationship] = $rel['class']::getByWhere($conditions, [
                             'order' => $rel['order']
-                        ));
+                        ]);
                     } else {
                         // use cachable single-field lookup
                         $this->_relatedObjects[$relationship] = $rel['class']::getByField($rel['foreign'], $value);
@@ -2534,16 +2451,16 @@ class ActiveRecord
 
                 $this->_relatedObjects[$relationship] = $rel['class']::getAllByWhere(
                     array_merge(
-                        is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions']
-                        ,array(
+                        is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'],
+                        [
                             $rel['foreign'] => $this->_getFieldValue($rel['local'])
-                        )
-                    )
-                    , array(
+                        ]
+                    ),
+                    [
                         'indexField' => $rel['indexField']
                         ,'order' => $rel['order']
                         ,'conditions' => $rel['conditions']
-                    )
+                    ]
                 );
 
 
@@ -2554,32 +2471,32 @@ class ActiveRecord
                     $rel['indexField'] = false;
                 }
 
-                $conditions = array_merge(is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'], array(
+                $conditions = array_merge(is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'], [
                     'ContextClass' => $rel['contextClass']
                     ,'ContextID' => $this->_getFieldValue($rel['local'])
-                ));
+                ]);
 
                 $this->_relatedObjects[$relationship] = $rel['class']::getAllByWhere(
-                    $conditions
-                    , array(
+                    $conditions,
+                    [
                         'indexField' => $rel['indexField']
                         ,'order' => $rel['order']
-                    )
+                    ]
                 );
 
                 // hook relationship for invalidation
                 static::_linkFieldToRelationship($rel['local'], $relationship);
             } elseif ($rel['type'] == 'context-child') {
-                $conditions = array_merge(is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'], array(
+                $conditions = array_merge(is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'], [
                     'ContextClass' => $rel['contextClass']
                     ,'ContextID' => $this->_getFieldValue($rel['local'])
-                ));
+                ]);
 
                 $this->_relatedObjects[$relationship] = $rel['class']::getByWhere(
-                    $conditions
-                    , array(
+                    $conditions,
+                    [
                         'order' => $rel['order']
-                    )
+                    ]
                 );
             } elseif ($rel['type'] == 'context-parent') {
                 $className = $this->_getFieldValue($rel['classField']);
@@ -2605,16 +2522,16 @@ class ActiveRecord
                 $conditions = is_callable($rel['conditions']) ? call_user_func($rel['conditions'], $this, $relationship, $rel) : $rel['conditions'];
 
                 $query = 'SELECT Related.* FROM `%s` Link JOIN `%s` Related ON (Related.`%s` = Link.%s) WHERE Link.`%s` = %u AND %s %s';
-                $params = array(
+                $params = [
                     $rel['linkClass']::$tableName
                     ,$rel['class']::$tableName
                     ,$rel['foreign']
                     ,$rel['linkForeign']
                     ,$rel['linkLocal']
                     ,$this->_getFieldValue($rel['local'])
-                    ,$conditions ? join(' AND ', $conditions) : '1'
-                    ,empty($rel['order']) ? '' : ' ORDER BY ' . join(',', static::_mapFieldOrder($rel['order']))
-                );
+                    ,$conditions ? implode(' AND ', $conditions) : '1'
+                    ,empty($rel['order']) ? '' : ' ORDER BY ' . implode(',', static::_mapFieldOrder($rel['order']))
+                ];
 
                 if ($rel['indexField']) {
                     $this->_relatedObjects[$relationship] = $rel['class']::getTableByQuery($rel['class']::_cn($rel['indexField']), $query, $params);
@@ -2636,19 +2553,19 @@ class ActiveRecord
         $rel = static::getStackedConfig('relationships', $relationship);
 
         if ($rel['type'] ==  'one-one') {
-            if ($value !== null && !is_a($value, __CLASS__)) {
+            if ($value !== null && !is_a($value, self::class)) {
                 return false;
             }
 
             if ($rel['local'] != 'ID') {
-                $this->_setFieldValue($rel['local'], $value ? $value->getValue($rel['foreign']) : null);
+                $this->_setFieldValue($rel['local'], $value instanceof \ActiveRecord ? $value->getValue($rel['foreign']) : null);
             }
         } elseif ($rel['type'] ==  'context-parent') {
-            if ($value !== null && !is_a($value, __CLASS__)) {
+            if ($value !== null && !is_a($value, self::class)) {
                 return false;
             }
 
-            if (empty($value)) {
+            if (!$value instanceof \ActiveRecord) {
                 // set Class and ID
                 $this->_setFieldValue($rel['classField'], null);
                 $this->_setFieldValue($rel['local'], null);
@@ -2658,13 +2575,15 @@ class ActiveRecord
                 $this->_setFieldValue($rel['local'], $value->_getFieldValue($rel['foreign']));
             }
         } elseif ($rel['type'] == 'one-many' && is_array($value)) {
-            $set = array();
+            $set = [];
 
-            foreach ($value AS $related) {
-                if (!$related || !is_a($related, __CLASS__)) {
+            foreach ($value as $related) {
+                if (!$related) {
                     continue;
                 }
-
+                if (!is_a($related, self::class)) {
+                    continue;
+                }
                 $related->_setFieldValue($rel['foreign'], $this->_getFieldValue($rel['local']));
                 $set[] = $related;
             }
@@ -2673,26 +2592,24 @@ class ActiveRecord
             $value = $set;
             $this->_isDirty = true;
         } elseif ($rel['type'] ==  'handle') {
-            if ($value !== null && !is_a($value, __CLASS__)) {
+            if ($value !== null && !is_a($value, self::class)) {
                 return false;
             }
 
-            $this->_setFieldValue($rel['local'], $value ? $value->Handle : null);
+            $this->_setFieldValue($rel['local'], $value instanceof \ActiveRecord ? $value->Handle : null);
         } elseif ($rel['type'] == 'context-children') {
             $set = [];
 
             if (!is_array($value)) {
-                if (!empty($value)) {
-                    $value = [$value];
-                } else {
-                    $value = [];
-                }
+                $value = empty($value) ? [] : [$value];
             }
             foreach ($value as $related) {
-                if (!$related || !is_a($related, __CLASS__)) {
+                if (!$related) {
                     continue;
                 }
-
+                if (!is_a($related, self::class)) {
+                    continue;
+                }
                 $related->Context = $this;
                 $set[] = $related;
             }
@@ -2704,18 +2621,16 @@ class ActiveRecord
             $set = [];
 
             if (!is_array($value)) {
-                if (!empty($value)) {
-                    $value = [$value];
-                } else {
-                    $value = [];
-                }
+                $value = empty($value) ? [] : [$value];
             }
 
             foreach ($value as $related) {
-                if (empty($related) || !is_a($related, __CLASS__)) {
+                if (empty($related)) {
                     continue;
                 }
-
+                if (!is_a($related, self::class)) {
+                    continue;
+                }
                 if ($related->isA($rel['class'])) {
                     if ($existing = $rel['linkClass']::getByWhere([$rel['linkLocal'] => $this->getValue($rel['local']), $rel['linkForeign'] => $related->getValue($rel['foreign'])])) {
                         $set[] = $existing;
@@ -2738,6 +2653,7 @@ class ActiveRecord
 
         $this->_relatedObjects[$relationship] = $value;
         $this->_isDirty = true;
+        return null;
     }
 
     public function appendRelated($relationship, $values)
@@ -2749,14 +2665,16 @@ class ActiveRecord
         }
 
         if (!is_array($values)) {
-            $values = array($values);
+            $values = [$values];
         }
 
-        foreach ($values AS $relatedObject) {
-            if (!$relatedObject || !is_a($relatedObject, __CLASS__)) {
+        foreach ($values as $relatedObject) {
+            if (!$relatedObject) {
                 continue;
             }
-
+            if (!is_a($relatedObject, self::class)) {
+                continue;
+            }
             $relatedObject->_setFieldValue($rel['foreign'], $this->_getFieldValue($rel['local']));
             $this->_relatedObjects[$relationship][] = $relatedObject;
             $this->_isDirty = true;
@@ -2765,9 +2683,9 @@ class ActiveRecord
 
     protected function _prepareRecordValues()
     {
-        $record = array();
+        $record = [];
 
-        foreach (static::getStackedConfig('fields') AS $field => $options) {
+        foreach (static::getStackedConfig('fields') as $field => $options) {
             $columnName = static::_cn($field);
 
             if (array_key_exists($columnName, $this->_record)) {
@@ -2814,9 +2732,9 @@ class ActiveRecord
 
     protected static function _mapValuesToSet($recordValues)
     {
-        $set = array();
+        $set = [];
 
-        foreach ($recordValues AS $field => $value) {
+        foreach ($recordValues as $field => $value) {
             $fieldConfig = static::getFieldOptions($field);
 
             if ($value === null) {
@@ -2824,7 +2742,7 @@ class ActiveRecord
             } elseif ($fieldConfig['type'] == 'timestamp' && $value == 'CURRENT_TIMESTAMP') {
                 $set[] = sprintf('`%s` = CURRENT_TIMESTAMP', $fieldConfig['columnName']);
             } elseif ($fieldConfig['type'] == 'set' && is_array($value)) {
-                $set[] = sprintf('`%s` = %s', $fieldConfig['columnName'], static::quoteValue(join(',', $value)));
+                $set[] = sprintf('`%s` = %s', $fieldConfig['columnName'], static::quoteValue(implode(',', $value)));
             } elseif ($fieldConfig['type'] == 'boolean') {
                 $set[] = sprintf('`%s` = %u', $fieldConfig['columnName'], $value ? 1 : 0);
             } else {
@@ -2843,14 +2761,14 @@ class ActiveRecord
     protected static function _mapFieldOrder($order)
     {
         if (is_string($order)) {
-            return array($order);
-        } elseif (is_array($order)) {
-            $r = array();
-
-            foreach ($order AS $key => $value) {
+            return [$order];
+        }
+        if (is_array($order)) {
+            $r = [];
+            foreach ($order as $key => $value) {
                 if (is_string($key)) {
                     $columnName = static::_cn($key);
-                    $direction = strtoupper($value)=='DESC' ? 'DESC' : 'ASC';
+                    $direction = strtoupper((string) $value) === 'DESC' ? 'DESC' : 'ASC';
                 } else {
                     $columnName = static::_cn($value);
                     $direction = 'ASC';
@@ -2858,9 +2776,9 @@ class ActiveRecord
 
                 $r[] = sprintf('`%s` %s', $columnName, $direction);
             }
-
             return $r;
         }
+        return null;
     }
 
     public static function mapConditions($conditions, $useTableAliases = false)
@@ -2870,7 +2788,7 @@ class ActiveRecord
 
     protected static function _mapConditions($conditions, $useTableAliases = false)
     {
-        foreach ($conditions AS $field => &$condition) {
+        foreach ($conditions as $field => &$condition) {
             if (is_string($field)) {
                 $fieldOptions = static::getFieldOptions($field);
                 $columnName = '`'.static::_cn($field, $useTableAliases).'`';
@@ -2896,9 +2814,9 @@ class ActiveRecord
                     } else {
                         $isArray = isset($condition['values']) && is_array($condition['values']);
 
-                        $operator = !empty($condition['operator'])
-                            ? $condition['operator']
-                            : ($isArray ? 'IN' : '=');
+                        $operator = empty($condition['operator'])
+                            ? ($isArray ? 'IN' : '=')
+                            : ($condition['operator']);
 
                         if ($isArray && $operator != 'IN' && $operator != 'NOT IN') {
                             throw new Exception('operator not compatible with array of values');
@@ -2927,10 +2845,12 @@ class ActiveRecord
     {
         if (is_bool($value)) {
             return $value ? 'TRUE' : 'FALSE';
-        } elseif (is_int($value) || is_float($value)) {
+        }
+        if (is_int($value) || is_float($value)) {
             return $value;
-        } elseif (is_array($value)) {
-            return '('.implode(',', array_map([__CLASS__, 'quoteValue'], $value)).')';
+        }
+        if (is_array($value)) {
+            return '('.implode(',', array_map(self::quoteValue(...), $value)).')';
         }
 
         return '"'.DB::escape($value).'"';
@@ -2942,14 +2862,14 @@ class ActiveRecord
         return ($count == 1) ? static::$singularNoun : static::$pluralNoun;
     }
 
-    public static function getRootClass($boundingParentClass = __CLASS__)
+    public static function getRootClass($boundingParentClass = self::class)
     {
         if (static::$rootClass) {
             return static::$rootClass;
         }
 
         // detect root class by crawling up the inheritence tree until an ActiveRecord parent is found
-        $class = get_called_class();
+        $class = static::class;
         while ($parentClass = get_parent_class($class)) {
             if ($parentClass == $boundingParentClass) {
                 return $class;
@@ -2974,11 +2894,11 @@ class ActiveRecord
             return static::$subClasses;
         }
 
-        return array_unique(array(static::getRootClass(), get_called_class()));
+        return array_unique([static::getRootClass(), static::class]);
     }
 
     // @deprecated
-    public static function getStaticRootClass($boundingParentClass = __CLASS__)
+    public static function getStaticRootClass($boundingParentClass = self::class)
     {
         return static::getRootClass($boundingParentClass);
     }
@@ -3017,7 +2937,7 @@ class ActiveRecord
         $cacheMap = Cache::fetch($cacheMapKey);
 
         if (is_array($cacheMap)) {
-            foreach ($cacheMap AS $cacheKey) {
+            foreach ($cacheMap as $cacheKey) {
                 Cache::delete($cacheKey);
             }
             Cache::delete($cacheMapKey);
@@ -3034,7 +2954,7 @@ class ActiveRecord
                 $cacheMap[] = $cacheKey;
             }
         } else {
-            $cacheMap = array($cacheKey);
+            $cacheMap = [$cacheKey];
         }
 
         Cache::store($cacheMapKey, $cacheMap);
@@ -3047,7 +2967,7 @@ class ActiveRecord
 
     protected static function getUserFromEnvironment()
     {
-        if (!empty($_SESSION) && !empty($_SESSION['User'])) {
+        if ($_SESSION !== [] && !empty($_SESSION['User'])) {
             return $_SESSION['User'];
         }
 
@@ -3081,8 +3001,8 @@ class ActiveRecord
 
         if ($stringsOnly && !is_string($value)) {
             if (is_array($value)) {
-                $strings = array();
-                foreach ($value AS $key => $attr) {
+                $strings = [];
+                foreach ($value as $key => $attr) {
                     $strings[] = is_string($key) ? "$key=$attr" : $attr;
                 }
                 $value = implode(',', $strings);
@@ -3117,7 +3037,7 @@ class ActiveRecord
 
         if ($mysqlStaticTimezoneOffset === null) {
             $mysqlStaticTimezoneOffset = static::getDatabaseTimezone();
-            if (!preg_match('/^-?\d+:\d+$/', $mysqlStaticTimezoneOffset)) {
+            if (!preg_match('/^-?\d+:\d+$/', (string) $mysqlStaticTimezoneOffset)) {
                 $mysqlStaticTimezoneOffset = false;
             }
         }

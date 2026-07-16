@@ -7,4 +7,4 @@ if (empty($_COMMAND['ARGS'])) {
 $key = $_COMMAND['ARGS'];
 Cache::delete("flags/{$key}");
 
-$_COMMAND['LOGGER']->info("Deleted flags/{key}", compact('key'));
+$_COMMAND['LOGGER']->info("Deleted flags/{key}", ['key' => $key]);

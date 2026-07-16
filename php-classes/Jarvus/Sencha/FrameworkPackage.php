@@ -16,7 +16,7 @@ class FrameworkPackage extends Package
     // factories
     public static function load($name, Framework $framework = null)
     {
-        if (!$framework) {
+        if (!$framework instanceof \Jarvus\Sencha\Framework) {
             return null;
         }
 
@@ -47,13 +47,12 @@ class FrameworkPackage extends Package
     {
         if ($this->source == 'disk') {
             return @file_get_contents($this->path.'/'.$path) ?: null;
-        } elseif ($this->source == 'vfs') {
+        }
+        if ($this->source == 'vfs') {
             $node = Site::resolvePath($this->path.'/'.$path);
-
             if (!$node) {
                 return null;
             }
-
             return @file_get_contents($node->RealPath) ?: null;
         }
 
@@ -64,13 +63,12 @@ class FrameworkPackage extends Package
     {
         if ($this->source == 'disk') {
             return @fopen($this->path.'/'.$path, 'r') ?: null;
-        } elseif ($this->source == 'vfs') {
+        }
+        if ($this->source == 'vfs') {
             $node = Site::resolvePath($this->path.'/'.$path);
-
             if (!$node) {
                 return null;
             }
-
             return $node->get();
         }
 
@@ -80,9 +78,10 @@ class FrameworkPackage extends Package
     public function writeToDisk($path)
     {
         if ($this->source == 'disk') {
-            exec('cp -R '.escapeshellarg($this->path).' '.escapeshellarg($path));
+            exec('cp -R '.escapeshellarg((string) $this->path).' '.escapeshellarg((string) $path));
             return true;
-        } elseif ($this->source == 'vfs') {
+        }
+        if ($this->source == 'vfs') {
             Emergence_FS::cacheTree($this->path);
             Emergence_FS::exportTree($this->path, $path);
             return true;
@@ -126,11 +125,11 @@ class FrameworkPackage extends Package
     {
         $packages = [];
 
-        foreach (['packages', 'modern', 'classic'] AS $packagesCollection) {
+        foreach (['packages', 'modern', 'classic'] as $packagesCollection) {
             $packagesSubpath = "$packagesPath/$packagesCollection";
             $packageNodes = Emergence_FS::getAggregateChildren($packagesSubpath);
 
-            foreach ($packageNodes AS $packageDir => $packageNode) {
+            foreach ($packageNodes as $packageDir => $packageNode) {
                 $packagePath = "$packagesSubpath/$packageDir";
                 $packageJsonNode = Site::resolvePath("$packagePath/package.json");
 
@@ -160,10 +159,10 @@ class FrameworkPackage extends Package
     {
         $packages = [];
 
-        foreach (['packages', 'modern', 'classic'] AS $packagesCollection) {
+        foreach (['packages', 'modern', 'classic'] as $packagesCollection) {
             $packagesSubpath = "$packagesPath/$packagesCollection";
 
-            foreach (glob("$packagesSubpath/*") AS $packagePath) {
+            foreach (glob("$packagesSubpath/*") as $packagePath) {
                 $packageDir = basename($packagePath);
                 $packageJsonPath = "$packagePath/package.json";
 

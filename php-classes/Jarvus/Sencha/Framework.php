@@ -4,7 +4,6 @@ namespace Jarvus\Sencha;
 
 use Site;
 use Emergence_FS;
-
 use Emergence\Site\Storage;
 
 class Framework
@@ -83,7 +82,7 @@ class Framework
         $config = array_merge(static::getDefaultConfig($name, $version), $config);
 
         if (empty($config['class'])) {
-            $config['class'] = get_called_class();
+            $config['class'] = static::class;
         }
 
         return new $config['class']($name, $version, $config);
@@ -239,19 +238,19 @@ class Framework
             return false;
         }
 
-        $archiveDir = dirname($archivePath);
+        $archiveDir = dirname((string) $archivePath);
 
         if (!is_dir($archiveDir)) {
             mkdir($archiveDir, 0777, true);
         }
 
         exec(
-            sprintf('wget %s -O %s', escapeshellarg($downloadUrl), escapeshellarg($archivePath)),
+            sprintf('wget %s -O %s', escapeshellarg((string) $downloadUrl), escapeshellarg((string) $archivePath)),
             $downloadOutput,
             $downloadStatus
         );
 
-        if ($downloadStatus != 0 || !file_exists($archivePath)) {
+        if ($downloadStatus !== 0 || !file_exists($archivePath)) {
             @unlink($archivePath);
             throw new \Exception("Failed to download framework from $downloadUrl, wget status=$downloadStatus");
         }
@@ -264,16 +263,16 @@ class Framework
         $tmpPath = Emergence_FS::getTmpDir();
 
         // determine archive's root directory
-        $archiveRootDirectory = trim(exec('unzip -l '.escapeshellarg($archivePath).' -x \'*/**\' | grep \'/\' | awk \'{print $4}\''), " \t\n\r/");
+        $archiveRootDirectory = trim(exec('unzip -l '.escapeshellarg((string) $archivePath).' -x \'*/**\' | grep \'/\' | awk \'{print $4}\''), " \t\n\r/");
 
-        if (!$archiveRootDirectory) {
+        if ($archiveRootDirectory === '' || $archiveRootDirectory === '0') {
             throw new \Exception('Failed to determine roor directory for framework archive');
         }
 
         // extract minimum files
         $extractPaths = $this->getExtractPaths();
 
-        foreach ($extractPaths AS $extractPath => $extractConfig) {
+        foreach ($extractPaths as $extractPath => $extractConfig) {
             if (is_string($extractConfig)) {
                 $extractPath = $extractConfig;
             }
@@ -284,36 +283,34 @@ class Framework
 
             $extractPath = $archiveRootDirectory.'/'.$extractPath;
 
-            $unzipCommand = 'unzip '.escapeshellarg($archivePath).' '.escapeshellarg($extractPath);
+            $unzipCommand = 'unzip '.escapeshellarg((string) $archivePath).' '.escapeshellarg($extractPath);
 
             if (!empty($extractConfig['exclude'])) {
                 $unzipCommand .= ' '.
                     implode(
                         ' ',
                         array_map(
-                            function($excludePath) use ($archiveRootDirectory) {
-                                return '-x '.escapeshellarg($archiveRootDirectory.'/'.$excludePath);
-                            },
+                            fn ($excludePath) => '-x '.escapeshellarg($archiveRootDirectory.'/'.$excludePath),
                             is_string($extractConfig['exclude']) ? [$extractConfig['exclude']] : $extractConfig['exclude']
                         )
                     );
             }
 
-            $unzipCommand .= ' -d '.escapeshellarg($tmpPath);
+            $unzipCommand .= ' -d '.escapeshellarg((string) $tmpPath);
 
             exec($unzipCommand);
         }
 
         rename($tmpPath.'/'.$archiveRootDirectory, $outputPath);
         rmdir($tmpPath);
-        exec('chmod -R =Xr '.escapeshellarg($outputPath));
+        exec('chmod -R =Xr '.escapeshellarg((string) $outputPath));
 
         return true;
     }
 
     public function writeToDisk($path)
     {
-        exec('cp -R '.escapeshellarg($this->getPhysicalPath()).' '.escapeshellarg($path));
+        exec('cp -R '.escapeshellarg((string) $this->getPhysicalPath()).' '.escapeshellarg((string) $path));
         return true;
     }
 

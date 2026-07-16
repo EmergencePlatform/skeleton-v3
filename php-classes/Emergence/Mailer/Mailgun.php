@@ -25,7 +25,7 @@ class Mailgun extends AbstractMailer
     {
         $ch = curl_init('https://api.mailgun.net/v3/'.static::$domain.'/messages');
 
-        curl_setopt($ch, CURLOPT_USERPWD, 'api:'.static::$apiKey); 
+        curl_setopt($ch, CURLOPT_USERPWD, 'api:'.static::$apiKey);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -37,14 +37,12 @@ class Mailgun extends AbstractMailer
 
         if ($httpStatus == 200) {
             return json_decode($result, true);
-        } else {
-            \Emergence\Logger::general_error('Mailgun Delivery Error', [
-                'exceptionClass' => static::class,
-                'exceptionMessage' => $result,
-                'exceptionCode' => $httpStatus
-            ]);
-
-            return false;
         }
+        \Emergence\Logger::general_error('Mailgun Delivery Error', [
+            'exceptionClass' => static::class,
+            'exceptionMessage' => $result,
+            'exceptionCode' => $httpStatus
+        ]);
+        return false;
     }
 }

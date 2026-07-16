@@ -34,75 +34,60 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
     {
         switch ($action ?: $action = static::shiftPath()) {
             case 'save':
-            {
                 return static::handleMultiSaveRequest();
-            }
 
             case 'destroy':
-            {
                 return static::handleMultiDestroyRequest();
-            }
 
             case 'create':
-            {
                 return static::handleCreateRequest();
-            }
 
             case '*fields':
-            {
                 return static::handleFieldsRequest();
-            }
 
             case '':
             case false:
-            {
-                if (count(static::getPath())) {
+                if (count(static::getPath()) > 0) {
                     // throw an error for URLs like /collection//foo
                     return static::throwInvalidRequestError();
                 }
-
                 return static::handleBrowseRequest();
-            }
 
             default:
-            {
                 try {
-                    $Record = static::getRecordByHandle(urldecode($action));
-                } catch (UserUnauthorizedException $e) {
+                    $Record = static::getRecordByHandle(urldecode((string) $action));
+                } catch (UserUnauthorizedException) {
                     return static::throwUnauthorizedError();
                 }
-
                 if ($Record) {
                     if (!static::checkReadAccess($Record)) {
                         return static::throwUnauthorizedError();
                     }
 
                     return static::handleRecordRequest($Record);
-                } else {
-                    return static::throwRecordNotFoundError($action);
                 }
-            }
+                return static::throwRecordNotFoundError($action);
         }
     }
 
     public static function getRecordByHandle($handle)
     {
         $className = static::$recordClass;
-
-        if (ctype_digit($handle) || is_int($handle)) {
+        if (ctype_digit((string) $handle) || is_int($handle)) {
             return $className::getByID($handle);
-        } elseif (method_exists($className, 'getByHandle')) {
-            return $className::getByHandle($handle);
-        } else {
-            return null;
         }
+
+        if (method_exists($className, 'getByHandle')) {
+            return $className::getByHandle($handle);
+        }
+        return null;
     }
 
     public static function handleQueryRequest($query, array $conditions = [], array $options = [], $responseId = null, array $responseData = [], $mode = 'AND')
     {
         $className = static::$recordClass;
         $tableAlias = $className::getTableAlias();
-        $terms = preg_split('/\s+/', $query);
+        $terms = preg_split('/\s+/', (string) $query);
 
         $options = array_merge([
             'limit' =>  !empty($_REQUEST['limit']) && is_numeric($_REQUEST['limit']) ? $_REQUEST['limit'] : static::$browseLimitDefault
@@ -114,7 +99,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         $having = [];
         $matchers = [];
 
-        foreach ($terms AS $term) {
+        foreach ($terms as $term) {
             $n = 0;
             $qualifier = 'any';
             $split = explode(':', $term, 2);
@@ -123,12 +108,12 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 continue;
             }
 
-            if (count($split) == 2) {
+            if (count($split) === 2) {
                 $qualifier = strtolower($split[0]);
                 $term = $split[1];
             }
 
-            if ($qualifier == 'mode' && $term=='or') {
+            if ($qualifier === 'mode' && $term == 'or') {
                 $mode = 'OR';
                 continue;
             }
@@ -136,7 +121,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
             $sqlSearchConditions = $className::getSqlSearchConditions($qualifier, $term);
 
-            if (count($sqlSearchConditions['conditions']) == 0 && !$sqlSearchConditions['qualifierFound']) {
+            if (count($sqlSearchConditions['conditions']) === 0 && !$sqlSearchConditions['qualifierFound']) {
                 return static::throwError('Unknown search qualifier: '.$qualifier);
             }
 
@@ -147,16 +132,14 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
             }
         }
 
-        if (empty($matchers)) {
+        if ($matchers === []) {
             return static::throwError('Query was empty');
         }
 
         if ($mode == 'OR') {
             // OR mode, object can match any term and results are sorted by score
 
-            $select[] = join('+', array_map(function($c) {
-                return sprintf('IF(%s, %u, 0)', $c['condition'], $c['points']);
-            }, $matchers)).' AS searchScore';
+            $select[] = implode('+', array_map(fn ($c) => sprintf('IF(%s, %u, 0)', $c['condition'], $c['points']), $matchers)).' AS searchScore';
 
             $having[] = 'searchScore > 1';
 
@@ -164,18 +147,18 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 $options['order'] = ['searchScore DESC'];
             }
         } else {
-            // AND mode, all terms must match 
+            // AND mode, all terms must match
 
             // group by qualifier
             $qualifierConditions = [];
-            foreach ($matchers AS $matcher) {
+            foreach ($matchers as $matcher) {
                 $qualifierConditions[$matcher['qualifier']][] = $matcher['condition'];
                 //$conditions[] = $matcher['condition'];
             }
 
             // compile conditions
-            foreach ($qualifierConditions AS $newConditions) {
-                $conditions[] = '( ('.join(') OR (', $newConditions).') )';
+            foreach ($qualifierConditions as $newConditions) {
+                $conditions[] = '( ('.implode(') OR (', $newConditions).') )';
             }
 
             if (static::$browseOrder) {
@@ -184,21 +167,21 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         }
 
         return static::respond(
-            isset($responseId) ? $responseId : static::getTemplateName($className::$pluralNoun)
-            ,array_merge($responseData, [
+            $responseId ?? static::getTemplateName($className::$pluralNoun),
+            array_merge($responseData, [
                 'success' => true
                 ,'data' => $className::getAllByQuery(
-                    'SELECT DISTINCT %s %s FROM `%s` %s %s WHERE (%s) %s %s %s'
-                    ,[
+                    'SELECT DISTINCT %s %s FROM `%s` %s %s WHERE (%s) %s %s %s',
+                    [
                         static::$browseCalcFoundRows ? 'SQL_CALC_FOUND_ROWS' : ''
-                        ,join(',',$select)
+                        ,implode(',', $select)
                         ,$className::$tableName
                         ,$tableAlias
-                        ,!empty($joins) ? implode(' ', $joins) : ''
-                        ,$conditions ? join(') AND (',$className::mapConditions($conditions)) : '1'
-                        ,count($having) ? 'HAVING ('.join(') AND (', $having).')' : ''
-                        ,count($options['order']) ? 'ORDER BY '.join(',', $options['order']) : ''
-                        ,$options['limit'] ? sprintf('LIMIT %u,%u',$options['offset'],$options['limit']) : ''
+                        ,implode(' ', $joins)
+                        ,$conditions !== [] ? implode(') AND (', $className::mapConditions($conditions)) : '1'
+                        ,count($having) ? 'HAVING ('.implode(') AND (', $having).')' : ''
+                        ,count($options['order']) > 0 ? 'ORDER BY '.implode(',', $options['order']) : ''
+                        ,$options['limit'] ? sprintf('LIMIT %u,%u', $options['offset'], $options['limit']) : ''
                     ]
                 )
                 ,'query' => $query
@@ -226,8 +209,8 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
             $conditions = array_merge(static::$browseConditions, $conditions);
         }
 
-        $limit = isset($_REQUEST['limit']) && ctype_digit($_REQUEST['limit']) ? (integer)$_REQUEST['limit'] : static::$browseLimitDefault;
-        $offset = isset($_REQUEST['offset']) && ctype_digit($_REQUEST['offset']) ? (integer)$_REQUEST['offset'] : false;
+        $limit = isset($_REQUEST['limit']) && ctype_digit($_REQUEST['limit']) ? (int)$_REQUEST['limit'] : static::$browseLimitDefault;
+        $offset = isset($_REQUEST['offset']) && ctype_digit($_REQUEST['offset']) ? (int)$_REQUEST['offset'] : false;
 
         if (!empty($_REQUEST['sort'])) {
             $dir = (empty($_REQUEST['dir']) || $_REQUEST['dir'] == 'ASC') ? 'ASC' : 'DESC';
@@ -268,14 +251,17 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
             $relatedTables = is_array($_GET['relatedTable']) ? $_GET['relatedTable'] : explode(',', $_GET['relatedTable']);
 
             $related = [];
-            foreach ($results AS $result) {
-                foreach ($relatedTables AS $relName) {
+            foreach ($results as $result) {
+                foreach ($relatedTables as $relName) {
                     if (!$result::relationshipExists($relName)) {
                         continue;
                     }
 
                     $relConfig = $result::getStackedConfig('relationships', $relName);
-                    if (!$relConfig || $relConfig['type'] != 'one-one') {
+                    if (!$relConfig) {
+                        continue;
+                    }
+                    if ($relConfig['type'] != 'one-one') {
                         continue;
                     }
 
@@ -296,8 +282,8 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
         // generate response
         return static::respond(
-            isset($responseId) ? $responseId : static::getTemplateName($className::$pluralNoun)
-            ,array_merge($responseData, [
+            $responseId ?? static::getTemplateName($className::$pluralNoun),
+            array_merge($responseData, [
                 'success' => true
                 ,'data' => $results
                 ,'conditions' => $conditions
@@ -314,34 +300,23 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         switch ($action ?: $action = static::shiftPath()) {
             case '':
             case false:
-            {
                 $className = static::$recordClass;
-
                 return static::respond(static::getTemplateName($className::$singularNoun), [
                     'success' => true
                     ,'data' => $Record
                 ]);
-            }
 
             case 'comment':
-            {
                 return static::handleCommentRequest($Record);
-            }
 
             case 'edit':
-            {
                 return static::handleEditRequest($Record);
-            }
 
             case 'delete':
-            {
                 return static::handleDeleteRequest($Record);
-            }
 
             default:
-            {
                 return static::onRecordRequestNotHandled($Record, $action);
-            }
         }
     }
 
@@ -354,7 +329,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
     public static function handleMultiSaveRequest()
     {
-        if (0===strpos($_SERVER['CONTENT_TYPE'],'application/json')) {
+        if (str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
             $_REQUEST = JSON::getRequestData();
         }
 
@@ -367,23 +342,19 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         $failed = [];
         $message = null;
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             // get record
             if (empty($datum['ID']) || !is_numeric($datum['ID']) || $datum['ID'] <= 0) {
                 $subClasses = $className::getStaticSubClasses();
-
                 if (!empty($datum['Class']) && in_array($datum['Class'], $subClasses)) {
                     $defaultClass = $datum['Class'];
                 } else {
                     $defaultClass = $className::getStaticDefaultClass();
                 }
-
                 $Record = new $defaultClass();
                 static::onRecordCreated($Record, $datum);
-            } else {
-                if (!$Record = $className::getByID($datum['ID'])) {
-                    return static::throwRecordNotFoundError($datum['ID']);
-                }
+            } elseif (!$Record = $className::getByID($datum['ID'])) {
+                return static::throwRecordNotFoundError($datum['ID']);
             }
 
             // check write access
@@ -407,7 +378,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 static::onBeforeRecordSaved($Record, $datum);
 
                 $Record->save();
-                $results[] = (!$Record::fieldExists('Class') || get_class($Record) == $Record->Class) ? $Record : $Record->changeClass();
+                $results[] = (!$Record::fieldExists('Class') || $Record::class == $Record->Class) ? $Record : $Record->changeClass();
 
                 // call template function
                 static::onRecordSaved($Record, $datum);
@@ -434,7 +405,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
     public static function handleMultiDestroyRequest()
     {
-        if (0===strpos($_SERVER['CONTENT_TYPE'],'application/json')) {
+        if (str_starts_with($_SERVER['CONTENT_TYPE'], 'application/json')) {
             $_REQUEST = JSON::getRequestData();
         }
 
@@ -446,7 +417,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
         $results = [];
         $failed = [];
 
-        foreach ($_REQUEST['data'] AS $datum) {
+        foreach ($_REQUEST['data'] as $datum) {
             // get record
             if (is_numeric($datum)) {
                 $recordID = $datum;
@@ -494,10 +465,10 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
     public static function handleCreateRequest(ActiveRecordInterface $Record = null)
     {
         // save static class
-        static::$calledClass = get_called_class();
+        static::$calledClass = static::class;
         $className = static::$recordClass;
 
-        if (!$Record) {
+        if (!$Record instanceof \Emergence\ActiveRecord\ActiveRecordInterface) {
             $subClasses = $className::getStaticSubClasses();
 
             if (!empty($_REQUEST['Class']) && in_array($_REQUEST['Class'], $subClasses)) {
@@ -604,9 +575,8 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
                 'success' => true
                 ,'data' => $Comment
             ]);
-        } else {
-            return static::throwInvalidRequestError();
         }
+        return static::throwInvalidRequestError();
     }
 
     public static function handleFieldsRequest()
@@ -621,7 +591,7 @@ abstract class RequestHandler extends \Emergence\RequestHandler\AbstractRequestH
 
     protected static function getTemplateName($noun)
     {
-        return preg_replace_callback('/\s+([a-zA-Z])/', function($matches) { return strtoupper($matches[1]); }, $noun);
+        return preg_replace_callback('/\s+([a-zA-Z])/', fn ($matches) => strtoupper($matches[1]), (string) $noun);
     }
 
     public static function respondJson($responseId, array $responseData = [])

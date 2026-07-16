@@ -3,7 +3,6 @@
 namespace Emergence\WebApps;
 
 use Exception;
-
 use Site;
 use Cache;
 use JSON;
@@ -23,17 +22,15 @@ class SenchaApp extends App
 
     public static function load($name)
     {
-        $cacheKey = "sencha-app/{$name}";
-
         // if (!$manifest = Cache::fetch($cacheKey)) {
-            // TODO: create cache clear event
-            $manifestNode = Site::resolvePath([static::$buildsRoot, $name, 'app.json']);
+        // TODO: create cache clear event
+        $manifestNode = Site::resolvePath([static::$buildsRoot, $name, 'app.json']);
 
-            if (!$manifestNode) {
-                return null;
-            }
+        if (!$manifestNode) {
+            return null;
+        }
 
-            $manifest = json_decode(file_get_contents($manifestNode->RealPath), true);
+        $manifest = json_decode(file_get_contents($manifestNode->RealPath), true);
 
         //     Cache::store($cacheKey, $manifest);
         // }
@@ -70,9 +67,9 @@ class SenchaApp extends App
         }
 
         if ($path[0] && $path[0][0] == '~') {
-            $pluginName = substr(array_shift($path), 1);
+            $pluginName = substr((string) array_shift($path), 1);
 
-            if (!in_array($pluginName, $this->getPlugins())) {
+            if (!in_array($pluginName, static::getPlugins())) {
                 throw new Exception('no plugin registered under name: '.$pluginName);
             }
 
@@ -85,7 +82,7 @@ class SenchaApp extends App
 
     public function buildCssMarkup()
     {
-        $baseUrl = $this->getUrl();
+        $this->getUrl();
 
         $html = [];
 
@@ -138,12 +135,12 @@ class SenchaApp extends App
         $html[] = '</script>';
 
         // load plugins
-        foreach ($this->getPlugins() as $packageName) {
+        foreach (static::getPlugins() as $packageName) {
             $html[] = '<script type="text/javascript" src="'.$this->getAssetUrl("~${packageName}/{$packageName}.js").'"></script>';
 
             try {
                 $html[] = '<link rel="stylesheet" type="text/css" href="'.$this->getAssetUrl("~${packageName}/resources/{$packageName}-all.css").'">';
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // that's ok, not every plugin has CSS
             }
         }

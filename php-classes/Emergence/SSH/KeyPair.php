@@ -5,7 +5,6 @@ namespace Emergence\SSH;
 use Site;
 use Exception;
 
-
 class KeyPair
 {
     protected $privateKey;
@@ -31,8 +30,8 @@ class KeyPair
     public function getFingerprint()
     {
         if (!$this->fingerprint) {
-            $rawKey = explode(' ', $this->publicKey, 3)[1];
-            $this->fingerprint = join(':', str_split(md5(base64_decode($rawKey)), 2));
+            $rawKey = explode(' ', (string) $this->publicKey, 3)[1];
+            $this->fingerprint = implode(':', str_split(md5(base64_decode($rawKey)), 2));
         }
 
         return $this->fingerprint;
@@ -51,7 +50,7 @@ class KeyPair
 
         $command = sprintf(
             'ssh-keygen -q -t rsa -N "" -C %s -f %s; echo $?',
-            escapeshellarg($comment),
+            escapeshellarg((string) $comment),
             escapeshellarg($keyTmpPath)
         );
 

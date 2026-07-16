@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
+  <file src="php-classes/ActiveRecord.class.php">
+    <TaintedUnserialize>
+      <code><![CDATA[$value]]></code>
+    </TaintedUnserialize>
+  </file>
+  <file src="php-classes/AudioMedia.class.php">
+    <TaintedShell>
+      <code><![CDATA[$cmd]]></code>
+    </TaintedShell>
+  </file>
+  <file src="php-classes/Benchmark.class.php">
+    <TaintedHtml>
+      <code><![CDATA[$label]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="php-classes/Emergence/ActiveRecord/RequestHandler.php">
+    <TaintedCallable>
+      <code><![CDATA[$defaultClass]]></code>
+      <code><![CDATA[$defaultClass]]></code>
+    </TaintedCallable>
+  </file>
+  <file src="php-classes/Emergence/Locale.php">
+    <TaintedFile>
+      <code><![CDATA[$messagesPath]]></code>
+      <code><![CDATA[$poPath]]></code>
+    </TaintedFile>
+    <TaintedShell>
+      <code><![CDATA["msgfmt -o \"$messagesPath/site-$node->SHA1.mo\" -v \"$poPath\""]]></code>
+    </TaintedShell>
+  </file>
+  <file src="php-classes/Emergence/RequestHandler/AbstractRequestHandler.php">
+    <TaintedCookie>
+      <code><![CDATA[$_REQUEST['downloadToken']]]></code>
+      <code><![CDATA[$_REQUEST['downloadToken']]]></code>
+    </TaintedCookie>
+  </file>
+  <file src="php-classes/Emergence/SearchStringParser.php">
+    <TaintedHtml>
+      <code><![CDATA[$string]]></code>
+      <code><![CDATA[$string]]></code>
+      <code><![CDATA[$this->qualifier]]></code>
+      <code><![CDATA[$this->string]]></code>
+      <code><![CDATA[$this->term]]></code>
+      <code><![CDATA[$this->terms[count($this->terms) - 1]]]></code>
+      <code><![CDATA[json_encode($this->string[$this->cursor])]]></code>
+      <code><![CDATA[print_r($this->terms[count($this->terms) - 1], true)]]></code>
+      <code><![CDATA[var_export($string, true)]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="php-classes/Emergence/SiteAdmin/MigrationsRequestHandler.php">
+    <TaintedHtml>
+      <code><![CDATA[$e->getTraceAsString()]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="php-classes/JSON.class.php">
+    <TaintedHtml>
+      <code><![CDATA[$text]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA[$text]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="php-classes/MinifiedRequestHandler.class.php">
+    <TaintedHeader>
+      <code><![CDATA['ETag: '.$hash]]></code>
+    </TaintedHeader>
+  </file>
+  <file src="php-classes/PersonSession.class.php">
+    <TaintedCallable>
+      <code><![CDATA[$this->_options['Authenticator']]]></code>
+    </TaintedCallable>
+  </file>
+  <file src="php-classes/RecordsRequestHandler.class.php">
+    <TaintedCallable>
+      <code><![CDATA[$defaultClass]]></code>
+      <code><![CDATA[$defaultClass]]></code>
+    </TaintedCallable>
+  </file>
+  <file src="php-classes/RequestHandler.class.php">
+    <TaintedCookie>
+      <code><![CDATA[$_REQUEST['downloadToken']]]></code>
+      <code><![CDATA[$_REQUEST['downloadToken']]]></code>
+    </TaintedCookie>
+  </file>
+  <file src="php-classes/Sencha_RequestHandler.class.php">
+    <TaintedHtml>
+      <code><![CDATA["\n# $_GET[platform]:\n"]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA["\n# $_GET[platform]:\n"]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="php-classes/VideoMedia.class.php">
+    <TaintedShell>
+      <code><![CDATA[$cmd]]></code>
+    </TaintedShell>
+  </file>
+  <file src="site-root/phpunit/browse.php">
+    <TaintedHtml>
+      <code><![CDATA["<li>$testNode->Handle <form action='/phpunit/run?suite=$_GET[suite]&test=$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run Test'></form></li>"]]></code>
+      <code><![CDATA["<li><a href='?suite=$_GET[suite]/$testNode->Handle'>$testNode->Handle</a> <form action='/phpunit/run?suite=$_GET[suite]/$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run All Tests'></form></li>"]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA["<li>$testNode->Handle <form action='/phpunit/run?suite=$_GET[suite]&test=$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run Test'></form></li>"]]></code>
+      <code><![CDATA["<li><a href='?suite=$_GET[suite]/$testNode->Handle'>$testNode->Handle</a> <form action='/phpunit/run?suite=$_GET[suite]/$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run All Tests'></form></li>"]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="site-root/phpunit/run.php">
+    <TaintedShell>
+      <code><![CDATA["$cmd 2>&1"]]></code>
+    </TaintedShell>
+  </file>
+</files>

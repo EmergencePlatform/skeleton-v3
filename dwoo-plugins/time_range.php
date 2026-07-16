@@ -21,7 +21,7 @@ function Dwoo_Plugin_time_range(Dwoo_Core $dwoo, $start, $end, $showDate = false
 
     $string .= $startHour;
 
-    if ($startMinute && $startMinute != '00') {
+    if ($startMinute && $startMinute !== '00') {
         $string .= ':'.$startMinute;
     }
 
@@ -40,7 +40,7 @@ function Dwoo_Plugin_time_range(Dwoo_Core $dwoo, $start, $end, $showDate = false
 
         $string .= $endHour;
 
-        if ($endMinute && $endMinute != '00') {
+        if ($endMinute && $endMinute !== '00') {
             $string .= ':'.$endMinute;
         }
 

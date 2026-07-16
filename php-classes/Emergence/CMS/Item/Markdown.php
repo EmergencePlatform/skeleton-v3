@@ -9,8 +9,8 @@ class Markdown extends AbstractItem
         return
             '<div class="content-item content-markdown" data-itemId="'.$this->ID.'">'
             .\Michelf\SmartyPantsTypographer::defaultTransform(
-                    \Michelf\MarkdownExtra::defaultTransform($this->Data)
-                )
+                \Michelf\MarkdownExtra::defaultTransform($this->Data)
+            )
             .'</div>';
     }
 }

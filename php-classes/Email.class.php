@@ -31,14 +31,14 @@ class Email
         if ($from) {
             $headers .= "From: $from".PHP_EOL;
 
-            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', $from);
+            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', (string) $from);
             $sendmailParams .= sprintf(' -f%1$s -F%1$s', $fromAddress);
         }
 
         $headers .= 'MIME-Version: 1.0'.PHP_EOL;
         $headers .= 'Content-Type: text/html; charset=utf-8'.PHP_EOL;
 
-        return @mail($to, $subject, $body, $headers, $sendmailParams);
+        return @mail((string) $to, (string) $subject, (string) $body, $headers, $sendmailParams);
     }
 
     public static function sendWithAttachments($to, $subject, $body, $attachments, $from = false, $headers = '', $sendmailParams = '-t -i')
@@ -58,7 +58,7 @@ class Email
         if ($from) {
             $headers .= "From: $from".PHP_EOL;
 
-            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', $from);
+            $fromAddress = preg_replace('/^[^<]*<([^>]+)>?$/', '$1', (string) $from);
             $sendmailParams .= sprintf(' -f%1$s -F%1$s', $fromAddress);
         }
 
@@ -68,7 +68,7 @@ class Email
         $headers .= 'Content-Type: multipart/mixed; boundary="'.$mimeBoundary.'"'.PHP_EOL;
 
         // plain text version
-        $data = strip_tags($body).PHP_EOL.PHP_EOL;
+        $data = strip_tags((string) $body).PHP_EOL.PHP_EOL;
         $data .= '--'.$mimeBoundary.PHP_EOL;
 
         // html version
@@ -78,8 +78,8 @@ class Email
         $data .= '--'.$mimeBoundary.PHP_EOL;
 
         // attachments
-        foreach ($attachments AS $filename => $contents) {
-            $cleanFilename = str_replace('"','',$filename);
+        foreach ($attachments as $filename => $contents) {
+            $cleanFilename = str_replace('"', '', $filename);
             $mimeType = File::getMIMETypeFromContents($contents);
             $data .= "Content-Type: $mimeType; name=\"$cleanFilename\"".PHP_EOL;
             $data .= "Content-Disposition: attachment; filename=\"$cleanFilename\"".PHP_EOL;
@@ -88,7 +88,7 @@ class Email
             $data .= '--'.$mimeBoundary.PHP_EOL;
         }
 
-        return @mail($to, $subject, $data, $headers, $sendmailParams);
+        return @mail((string) $to, (string) $subject, $data, $headers, $sendmailParams);
     }
 
     public static function removeReplyQuote($messageBody)
@@ -108,33 +108,33 @@ class Email
          * 			  Regex Specific to this  ^^^^^^^^^^
         */
 
-        $re1='(On)';    # Word 1
-        $re2='( )';    # Any Single Character 1
-        $re3='((?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Tues|Thur|Thurs|Sun|Mon|Tue|Wed|Thu|Fri|Sat))';    # Day Of Week 1
-        $re4='(,)';    # Any Single Character 2
-        $re5='( )';    # Any Single Character 3
-        $re6='((?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))';    # Month 1
-        $re7='( )';    # Any Single Character 4
-        $re8='((?:(?:[0-2]?\\d{1})|(?:[3][0,1]{1})))(?![\\d])';    # Day 1
-        $re9='(,)';    # Any Single Character 5
-        $re10='( )';    # Any Single Character 6
-        $re11='((?:(?:[1]{1}\\d{1}\\d{1}\\d{1})|(?:[2]{1}\\d{3})))(?![\\d])';    # Year 1
-        $re12='( )';    # Any Single Character 7
-        $re13='(at)';    # Word 2
-        $re14='( )';    # Any Single Character 8
-        $re15='((?:(?:[0-1][0-9])|(?:[2][0-3])|(?:[0-9])):(?:[0-5][0-9])(?::[0-5][0-9])?(?:\\s?(?:am|AM|pm|PM))?)';    # HourMinuteSec 1
-        $re16='(,)';    # Any Single Character 9
-        $re17='( )';    # Any Single Character 10
-        $re18='(YouGee)';    # Word 3
-        $re19='(\\.)';    # Any Single Character 11
-        $re20='(com)';    # Word 4
-        $re21='( )';    # Any Single Character 12
-        $re22='(<)';    # Any Single Character 13
-        $re23='([\\w-+]+(?:\\.[\\w-+]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})';    # Email Address 1
-        $re24='(>)';    # Any Single Character 14
-        $re25='( )';    # Any Single Character 15
-        $re26='(wrote)';    # Word 5
-        $re27='(:)';    # Any Single Character 16
+        $re1 = '(On)';    # Word 1
+        $re2 = '( )';    # Any Single Character 1
+        $re3 = '((?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Tues|Thur|Thurs|Sun|Mon|Tue|Wed|Thu|Fri|Sat))';    # Day Of Week 1
+        $re4 = '(,)';    # Any Single Character 2
+        $re5 = '( )';    # Any Single Character 3
+        $re6 = '((?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))';    # Month 1
+        $re7 = '( )';    # Any Single Character 4
+        $re8 = '((?:(?:[0-2]?\\d{1})|(?:[3][0,1]{1})))(?![\\d])';    # Day 1
+        $re9 = '(,)';    # Any Single Character 5
+        $re10 = '( )';    # Any Single Character 6
+        $re11 = '((?:(?:[1]{1}\\d{1}\\d{1}\\d{1})|(?:[2]{1}\\d{3})))(?![\\d])';    # Year 1
+        $re12 = '( )';    # Any Single Character 7
+        $re13 = '(at)';    # Word 2
+        $re14 = '( )';    # Any Single Character 8
+        $re15 = '((?:(?:[0-1]\d)|(?:[2][0-3])|(?:\d)):(?:[0-5]\d)(?::[0-5]\d)?(?:\s?(?:am|AM|pm|PM))?)';    # HourMinuteSec 1
+        $re16 = '(,)';    # Any Single Character 9
+        $re17 = '( )';    # Any Single Character 10
+        $re18 = '(YouGee)';    # Word 3
+        $re19 = '(\\.)';    # Any Single Character 11
+        $re20 = '(com)';    # Word 4
+        $re21 = '( )';    # Any Single Character 12
+        $re22 = '(<)';    # Any Single Character 13
+        $re23 = '([\\w\-+]+(?:\\.[\\w\-+]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})';    # Email Address 1
+        $re24 = '(>)';    # Any Single Character 14
+        $re25 = '( )';    # Any Single Character 15
+        $re26 = '(wrote)';    # Word 5
+        $re27 = '(:)';    # Any Single Character 16
 
         $GmailRegex = "/".$re1.$re2.$re3.$re4.$re5.$re6.$re7.$re8.$re9.$re10.$re11.$re12.$re13.$re14.$re15.$re16.$re17.$re18.$re19.$re20.$re21.$re22.$re23.$re24.$re25.$re26.$re27."/is";
 
@@ -142,21 +142,21 @@ class Email
         $delimiter = '***THROW AWAY BELOW***';
 
         // clients' check
-        if ($messageBody != preg_replace($GmailRegex, $delimiter ,$messageBody)) {
+        if ($messageBody != preg_replace($GmailRegex, $delimiter, (string) $messageBody)) {
             // Gmail check
-            $messageBody = preg_replace($GmailRegex, $delimiter ,$messageBody);
-            $endPos = strpos($messageBody, $delimiter);
-            $messageBody = substr($messageBody, 0, $endPos);
+            $messageBody = preg_replace($GmailRegex, $delimiter, (string) $messageBody);
+            $endPos = strpos((string) $messageBody, $delimiter);
+            $messageBody = substr((string) $messageBody, 0, $endPos);
         } elseif (strpos($body, '-----Original Message-----')) {
             // AOL check
-            $startPos = strpos($messageBody, '-----Original Message-----');
-            $messageBody = substr($messageBody, 0, $startPos);
+            $startPos = strpos((string) $messageBody, '-----Original Message-----');
+            $messageBody = substr((string) $messageBody, 0, $startPos);
         }
-/*      elseif
-        {
-            // add more email client checks
-        }
-*/
+        /*      elseif
+                {
+                    // add more email client checks
+                }
+        */
 
         return $messageBody;
     }

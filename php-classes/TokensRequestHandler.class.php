@@ -33,16 +33,16 @@ class TokensRequestHandler extends RequestHandler
             } catch (Exception $e) {
                 $error = $e->getMessage();
 
-                if (!$error) {
+                if ($error === '' || $error === '0') {
                     throw $e;
                 }
             }
         }
 
         $tokenClass = $Token->Class;
-        return static::respond($tokenClass::$formTemplate, array(
+        return static::respond($tokenClass::$formTemplate, [
             'Token' => $Token
-            ,'error' => isset($error) ? $error : false
-        ));
+            ,'error' => $error ?? false
+        ]);
     }
 }
