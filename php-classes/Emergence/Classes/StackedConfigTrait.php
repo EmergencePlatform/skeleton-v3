@@ -16,7 +16,12 @@ trait StackedConfigTrait
 
         $config = [];
         while ($class = array_pop($classes)) {
-            $classVars = get_class_vars($class);
+            // as of PHP 8.1, get_class_vars() returns the *declared default*
+            // of a static property instead of its current value (5.6–8.0
+            // returned the live value), which hid every runtime mutation made
+            // by __classLoaded()/config layers; read live statics via
+            // reflection instead
+            $classVars = (new \ReflectionClass($class))->getStaticProperties() + get_class_vars($class);
             if (!empty($classVars[$propertyName])) {
                 $config = array_merge($config, $classVars[$propertyName]);
             }
