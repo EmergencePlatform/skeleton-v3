@@ -3,7 +3,7 @@
 class PDFMedia extends Media
 {
     // configurables
-    public static $extractPageCommand = 'convert \'%1$s[%2$u]\' JPEG:- 2>/dev/null'; // 1=pdf path, 2=page
+    public static $extractPageCommand = 'convert %1$s JPEG:- 2>/dev/null'; // 1=pre-escaped "pdfpath[page]" shell argument
     public static $extractPageIndex = 0;
 
 
@@ -48,12 +48,12 @@ class PDFMedia extends Media
     // public methods
     public function getImage(array $options = [])
     {
-        foreach (['FilesystemPath', 'BlankPath'] as $pathAttribute) {
-            if (!$sourcePath = $this->$pathAttribute) {
+        foreach ([$this->getLocalPath(), $this->BlankPath] as $sourcePath) {
+            if (!$sourcePath) {
                 continue;
             }
 
-            $cmd = sprintf(static::$extractPageCommand, $sourcePath, static::$extractPageIndex);
+            $cmd = sprintf(static::$extractPageCommand, escapeshellarg(sprintf('%s[%u]', $sourcePath, static::$extractPageIndex)));
 
             if ($imageData = shell_exec($cmd)) {
                 return imagecreatefromstring($imageData);
@@ -66,7 +66,7 @@ class PDFMedia extends Media
     // static methods
     public static function analyzeFile($filename, $mediaInfo = [])
     {
-        $cmd = sprintf(static::$extractPageCommand, $filename, static::$extractPageIndex);
+        $cmd = sprintf(static::$extractPageCommand, escapeshellarg(sprintf('%s[%u]', $filename, static::$extractPageIndex)));
         $pageIm = @imagecreatefromstring(shell_exec($cmd));
 
         if (!$pageIm) {

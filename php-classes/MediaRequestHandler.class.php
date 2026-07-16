@@ -222,7 +222,7 @@ class MediaRequestHandler extends RecordsRequestHandler
         }
 
         if (!$Media) {
-            static::throwNotFoundError('Media ID #%u was not found', $media_id);
+            static::throwNotFoundError('Media ID #%u was not found', $mediaID);
         }
 
         if (!static::checkReadAccess($Media)) {
@@ -259,19 +259,37 @@ class MediaRequestHandler extends RecordsRequestHandler
 
             // initialize response
             set_time_limit(0);
-            $filePath = $Media->getFilesystemPath($variant);
-            $fp = fopen($filePath, 'rb');
-            $size = filesize($filePath);
-            $length = $filesize;
+            $fs = Media::getFilesystem();
+            $filePath = $Media->getStoragePath($variant);
+
+            try {
+                $size = $fs->getSize($filePath);
+                $fp = $fs->readStream($filePath);
+            } catch (\League\Flysystem\FileNotFoundException) {
+                return static::throwNotFoundError('Media file could not be loaded');
+            }
+
+            if ($fp === false || $size === false) {
+                return static::throwNotFoundError('Media file could not be loaded');
+            }
+
+            $length = $size;
             $start = 0;
             $end = $size - 1;
 
+            // range requests need a seekable stream (local storage); remote
+            // storage streams degrade to full-content responses
+            $seekable = stream_get_meta_data($fp)['seekable'];
+
             header('Content-Type: '.$Media->getMIMEType($variant));
             header('ETag: media-'.$Media->ID.'-'.$variant);
-            header('Accept-Ranges: bytes');
+
+            if ($seekable) {
+                header('Accept-Ranges: bytes');
+            }
 
             // interpret range requests
-            if (!empty($_SERVER['HTTP_RANGE'])) {
+            if (!empty($_SERVER['HTTP_RANGE']) && $seekable) {
                 $chunkStart = $start;
                 $chunkEnd = $end;
 
@@ -382,11 +400,25 @@ class MediaRequestHandler extends RecordsRequestHandler
             $filename .= '.'.$Media->Extension;
         }
 
+        $fs = Media::getFilesystem();
+        $storagePath = $Media->getStoragePath();
+
+        try {
+            $size = $fs->getSize($storagePath);
+            $stream = $fs->readStream($storagePath);
+        } catch (\League\Flysystem\FileNotFoundException) {
+            return static::throwNotFoundError('Media file could not be loaded');
+        }
+
+        if ($stream === false) {
+            return static::throwNotFoundError('Media file could not be loaded');
+        }
+
         header('Content-Type: '.$Media->MIMEType);
         header('Content-Disposition: attachment; filename="'.str_replace('"', '', $filename).'"');
-        header('Content-Length: '.filesize($Media->FilesystemPath));
+        header('Content-Length: '.$size);
 
-        readfile($Media->FilesystemPath);
+        fpassthru($stream);
         exit();
     }
 
@@ -516,14 +548,27 @@ class MediaRequestHandler extends RecordsRequestHandler
 
 
         // fetch thumbnail
-        $thumbPath = $Media->getThumbnail($maxWidth, $maxHeight, $fillColor, $cropped);
+        $thumbPath = $Media->ensureThumbnail($maxWidth, $maxHeight, $fillColor, $cropped);
 
 
         // dump it out
+        $fs = Media::getFilesystem();
+
+        try {
+            $size = $fs->getSize($thumbPath);
+            $stream = $fs->readStream($thumbPath);
+        } catch (\League\Flysystem\FileNotFoundException) {
+            return static::throwNotFoundError('Thumbnail could not be loaded');
+        }
+
+        if ($stream === false) {
+            return static::throwNotFoundError('Thumbnail could not be loaded');
+        }
+
         header("ETag: media-$Media->ID-$maxWidth-$maxHeight-$fillColor-$cropped");
         header("Content-Type: $Media->ThumbnailMIMEType");
-        header('Content-Length: '.filesize($thumbPath));
-        readfile($thumbPath);
+        header('Content-Length: '.$size);
+        fpassthru($stream);
         exit();
     }
 
