@@ -97,19 +97,4 @@
       <code><![CDATA[$cmd]]></code>
     </TaintedShell>
   </file>
-  <file src="site-root/phpunit/browse.php">
-    <TaintedHtml>
-      <code><![CDATA["<li>$testNode->Handle <form action='/phpunit/run?suite=$_GET[suite]&test=$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run Test'></form></li>"]]></code>
-      <code><![CDATA["<li><a href='?suite=$_GET[suite]/$testNode->Handle'>$testNode->Handle</a> <form action='/phpunit/run?suite=$_GET[suite]/$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run All Tests'></form></li>"]]></code>
-    </TaintedHtml>
-    <TaintedTextWithQuotes>
-      <code><![CDATA["<li>$testNode->Handle <form action='/phpunit/run?suite=$_GET[suite]&test=$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run Test'></form></li>"]]></code>
-      <code><![CDATA["<li><a href='?suite=$_GET[suite]/$testNode->Handle'>$testNode->Handle</a> <form action='/phpunit/run?suite=$_GET[suite]/$testNode->Handle' method='POST' style='display:inline'><input type='submit' value='Run All Tests'></form></li>"]]></code>
-    </TaintedTextWithQuotes>
-  </file>
-  <file src="site-root/phpunit/run.php">
-    <TaintedShell>
-      <code><![CDATA["$cmd 2>&1"]]></code>
-    </TaintedShell>
-  </file>
 </files>
