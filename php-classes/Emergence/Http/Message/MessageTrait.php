@@ -21,12 +21,12 @@ trait MessageTrait
     /** @var StreamInterface */
     private $stream;
 
-    public function getProtocolVersion()
+    public function getProtocolVersion(): string
     {
         return $this->protocol;
     }
 
-    public function withProtocolVersion($version)
+    public function withProtocolVersion($version): static
     {
         if ($this->protocol === $version) {
             return $this;
@@ -37,17 +37,17 @@ trait MessageTrait
         return $new;
     }
 
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
 
-    public function hasHeader($header)
+    public function hasHeader($header): bool
     {
         return isset($this->headerNames[strtolower((string) $header)]);
     }
 
-    public function getHeader($header)
+    public function getHeader($header): array
     {
         $header = strtolower((string) $header);
 
@@ -60,12 +60,12 @@ trait MessageTrait
         return $this->headers[$header];
     }
 
-    public function getHeaderLine($header)
+    public function getHeaderLine($header): string
     {
         return implode(', ', $this->getHeader($header));
     }
 
-    public function withHeader($header, $value)
+    public function withHeader($header, $value): static
     {
         if (!is_array($value)) {
             $value = [$value];
@@ -84,7 +84,7 @@ trait MessageTrait
         return $new;
     }
 
-    public function withAddedHeader($header, $value)
+    public function withAddedHeader($header, $value): static
     {
         if (!is_array($value)) {
             $value = [$value];
@@ -105,7 +105,7 @@ trait MessageTrait
         return $new;
     }
 
-    public function withoutHeader($header)
+    public function withoutHeader($header): static
     {
         $normalized = strtolower((string) $header);
 
@@ -121,7 +121,7 @@ trait MessageTrait
         return $new;
     }
 
-    public function getBody()
+    public function getBody(): StreamInterface
     {
         if (!$this->stream) {
             $stream = fopen('php://temp', 'r+');
@@ -131,7 +131,7 @@ trait MessageTrait
         return $this->stream;
     }
 
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): static
     {
         if ($body === $this->stream) {
             return $this;
