@@ -1,6 +1,6 @@
 --- a/src/XML/saml/Attribute.php
 +++ b/src/XML/saml/Attribute.php
-@@ -55,16 +55,24 @@
+@@ -55,16 +55,26 @@
          Assert::maxCount($attributeValue, C::UNBOUNDED_LIMIT);
          Assert::allIsInstanceOf($attributeValue, AttributeValue::class, 'Invalid AttributeValue.');
  
@@ -19,7 +19,9 @@
 +                Assert::validNCName($name);
 +            }
 +        } catch (\Exception $e) {
-+            trigger_error(sprintf(
++            // error_log, NOT trigger_error: host frameworks routinely promote
++            // notices to exceptions, which would defeat the tolerance
++            error_log(sprintf(
 +                "Attribute name `%s` does not match its declared format `%s` (tolerated)",
                  $name,
 -                sprintf("Attribute name `%s` does not match its declared format `%s`", $name, $nameFormat),
@@ -30,7 +32,7 @@
 -                sprintf("Attribute name `%s` does not match its declared format `%s`", $name, $nameFormat),
 -            );
 +                $nameFormat ?? ''
-+            ), E_USER_NOTICE);
++            ));
          }
  
          $this->setAttributesNS($namespacedAttribute);
