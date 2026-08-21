@@ -17,7 +17,8 @@
     "require": {
         "php": "^8.1",
         "emergence/php-core": "dev-develop",
-        "simplesamlphp/saml2": "^5.0"
+        "simplesamlphp/saml2": "^5.0",
+        "cweagans/composer-patches": "^1.7"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -38,7 +39,15 @@
     },
     "config": {
         "allow-plugins": {
-            "simplesamlphp/composer-xmlprovider-installer": true
+            "simplesamlphp/composer-xmlprovider-installer": true,
+            "cweagans/composer-patches": true
+        }
+    },
+    "extra": {
+        "patches": {
+            "simplesamlphp/saml2": {
+                "Tolerate attribute names violating declared NameFormat (district CAS ships Name=role as attrname-format:uri)": "composer-patches/saml2-tolerate-invalid-attribute-nameformat.patch"
+            }
         }
     }
 }

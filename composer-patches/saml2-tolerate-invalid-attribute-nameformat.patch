@@ -1,0 +1,36 @@
+--- a/src/XML/saml/Attribute.php
++++ b/src/XML/saml/Attribute.php
+@@ -55,16 +55,24 @@
+         Assert::maxCount($attributeValue, C::UNBOUNDED_LIMIT);
+         Assert::allIsInstanceOf($attributeValue, AttributeValue::class, 'Invalid AttributeValue.');
+ 
+-        if ($nameFormat === C::NAMEFORMAT_URI) {
+-            Assert::validURI(
++        // PATCHED (emergence): tolerate names that violate their declared
++        // NameFormat instead of rejecting the whole message — some IdPs
++        // (observed: PhilaSD CAS/Shibboleth, Name="role" declared
++        // attrname-format:uri) ship non-conformant attribute names, and a
++        // relying party that consumes no attributes at all still failed
++        // hard here. The spec violation is the IdP's; log and continue.
++        try {
++            if ($nameFormat === C::NAMEFORMAT_URI) {
++                Assert::validURI($name);
++            } elseif ($nameFormat === C::NAMEFORMAT_BASIC) {
++                Assert::validNCName($name);
++            }
++        } catch (\Exception $e) {
++            trigger_error(sprintf(
++                "Attribute name `%s` does not match its declared format `%s` (tolerated)",
+                 $name,
+-                sprintf("Attribute name `%s` does not match its declared format `%s`", $name, $nameFormat),
+-            );
+-        } elseif ($nameFormat === C::NAMEFORMAT_BASIC) {
+-            Assert::validNCName(
+-                $name,
+-                sprintf("Attribute name `%s` does not match its declared format `%s`", $name, $nameFormat),
+-            );
++                $nameFormat ?? ''
++            ), E_USER_NOTICE);
+         }
+ 
+         $this->setAttributesNS($namespacedAttribute);
