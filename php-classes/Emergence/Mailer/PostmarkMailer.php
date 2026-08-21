@@ -6,10 +6,57 @@ class PostmarkMailer extends AbstractMailer
 {
     public static $apiKey = '';
 
+    // Domains this Postmark server may send From. When non-empty, a From
+    // address outside the list is rewritten to the site default sender
+    // (keeping the original display name) and the original address joins
+    // ReplyTo — Postmark hard-rejects unverified sender domains, which
+    // otherwise silently kills mail authored by accounts on external
+    // domains (e.g. district addresses).
+    public static $verifiedFromDomains = [];
+
     public static function send($to, $subject, $body, $from = false, $options = [])
     {
         if (!$from) {
             $from = static::getDefaultFrom();
+        }
+
+        // callers in the Email::send tradition pass raw header lines as
+        // numeric-keyed $options entries; translate them into API fields
+        // (Postmark ignores unknown numeric members, so these were dropped)
+        $headers = isset($options['Headers']) && is_array($options['Headers']) ? $options['Headers'] : [];
+        foreach ($options as $key => $value) {
+            if (!is_int($key) || !is_string($value) || strpos($value, ':') === false) {
+                continue;
+            }
+            unset($options[$key]);
+            list($name, $content) = array_map('trim', explode(':', $value, 2));
+
+            if (strcasecmp($name, 'Reply-To') === 0) {
+                $options['ReplyTo'] = empty($options['ReplyTo']) ? $content : $options['ReplyTo'].', '.$content;
+            } else {
+                $headers[] = ['Name' => $name, 'Value' => $content];
+            }
+        }
+        if (count($headers)) {
+            $options['Headers'] = $headers;
+        }
+
+        if (count(static::$verifiedFromDomains)) {
+            $fromAddress = preg_match('/<([^>]+)>/', $from, $matches) ? $matches[1] : trim($from);
+            $fromDomain = strtolower((string)substr(strrchr($fromAddress, '@'), 1));
+
+            if (!in_array($fromDomain, array_map('strtolower', static::$verifiedFromDomains))) {
+                if (empty($options['ReplyTo'])) {
+                    $options['ReplyTo'] = $from;
+                } elseif (stripos($options['ReplyTo'], $fromAddress) === false) {
+                    $options['ReplyTo'] .= ', '.$from;
+                }
+
+                $fromName = preg_match('/^\s*"?([^"<]+?)"?\s*</', $from, $matches) ? trim($matches[1]) : $fromAddress;
+                $defaultFrom = static::getDefaultFrom();
+                $defaultAddress = preg_match('/<([^>]+)>/', $defaultFrom, $matches) ? $matches[1] : trim($defaultFrom);
+                $from = sprintf('"%s" <%s>', addslashes($fromName), $defaultAddress);
+            }
         }
 
         return static::apiPost(array_merge($options, [
@@ -30,8 +77,6 @@ class PostmarkMailer extends AbstractMailer
             ,'X-Postmark-Server-Token: '.static::$apiKey
         ]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
         if ($data) {
             curl_setopt($ch, CURLOPT_POST, true);
@@ -40,13 +85,12 @@ class PostmarkMailer extends AbstractMailer
 
         $result = curl_exec($ch);
         $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        #		die("<hr>result: $result, status: $httpStatus<hr>");
 
         if ($httpStatus == 200) {
             return json_decode($result, true);
         }
         \Emergence\Logger::general_error('PostmarkMailer Delivery Error', [
-            'exceptionClass' => \PostmarkMailer::class,
+            'exceptionClass' => static::class,
             'exceptionMessage' => $result,
             'exceptionCode' => $httpStatus
         ]);
