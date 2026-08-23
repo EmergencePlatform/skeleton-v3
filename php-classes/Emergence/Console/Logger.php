@@ -18,7 +18,7 @@ class Logger extends \Psr\Log\AbstractLogger
         'emergency' => ['white', 'bg_red', 'bold']
     ];
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         static $c = null;
 
