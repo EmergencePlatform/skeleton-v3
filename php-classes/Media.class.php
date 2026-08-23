@@ -536,7 +536,7 @@ class Media extends ActiveRecord
     {
         // handle recieving a field array from $_FILES
         if (is_array($uploadedFile)) {
-            if (isset($uploadedFile['error']) && $uploadedFile['error'] != ERR_UPLOAD_OK) {
+            if (isset($uploadedFile['error']) && $uploadedFile['error'] != UPLOAD_ERR_OK) {
                 return null;
             }
 
