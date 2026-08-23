@@ -64,7 +64,7 @@ class PersonSession extends Session
     {
         //Update last login
         db_n(sprintf(
-            'UPDATE %s SET last_login = CURRENT_TIMESTAMP WHERE %s = %u',
+            'UPDATE `%s` SET last_login = CURRENT_TIMESTAMP WHERE `%s` = %u',
             USER_TABLE,
             UID_COLUMN,
             $this->UserData[UID_COLUMN]
