@@ -39,7 +39,7 @@ class Logger extends \Psr\Log\AbstractLogger
     }
 
     // handle logging
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         \Debug::log([
             'level' => $level

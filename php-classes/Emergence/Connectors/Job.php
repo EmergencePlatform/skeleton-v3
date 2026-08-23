@@ -237,23 +237,24 @@ class Job extends ActiveRecord implements IJob
         }
     }
 
-    public function log($level, $message, array $context = [])
+    // untyped params + explicit void return stay compatible with BOTH psr/log
+    // majors in the composition (php-classes Psr v1 via holomapping, vendor v3
+    // via composer): params may widen v3's string|Stringable, and void
+    // narrows v1's open return — same signature php-core's Logger uses.
+    public function log($level, $message, array $context = []): void
     {
         if ($this->logger) {
-            return $this->logger->log($level, $message, $context);
+            $this->logger->log($level, $message, $context);
+            return;
         }
-
-        $entry = [
-            'time' => date('Y-m-d H:i:s'),
-            'message' => $message,
-            'context' => $context,
-            'level' => $level
-        ];
 
         if (!$this->muteLog) {
-            $this->logEntries[] = $entry;
+            $this->logEntries[] = [
+                'time' => date('Y-m-d H:i:s'),
+                'message' => $message,
+                'context' => $context,
+                'level' => $level
+            ];
         }
-
-        return $entry;
     }
 }
