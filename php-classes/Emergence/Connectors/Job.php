@@ -237,10 +237,11 @@ class Job extends ActiveRecord implements IJob
         }
     }
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         if ($this->logger) {
-            return $this->logger->log($level, $message, $context);
+            $this->logger->log($level, $message, $context);
+            return;
         }
 
         $entry = [
@@ -253,7 +254,5 @@ class Job extends ActiveRecord implements IJob
         if (!$this->muteLog) {
             $this->logEntries[] = $entry;
         }
-
-        return $entry;
     }
 }
