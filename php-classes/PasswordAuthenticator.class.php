@@ -126,98 +126,64 @@ class PasswordAuthenticator extends Authenticator
         return $User;
     }
 
-    protected static function throttleTableReady()
-    {
-        static $ready = false;
-
-        if (!$ready) {
-            \DB::nonQuery(
-                'CREATE TABLE IF NOT EXISTS `login_attempts` ('
-                . '`ID` int unsigned NOT NULL AUTO_INCREMENT,'
-                . '`Username` varchar(255) NOT NULL,'
-                . '`IP` int unsigned NULL,'
-                . '`Created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,'
-                . 'PRIMARY KEY (`ID`),'
-                . 'KEY `username_created` (`Username`,`Created`),'
-                . 'KEY `ip_created` (`IP`,`Created`),'
-                . 'KEY `created` (`Created`)'
-                . ') ENGINE=InnoDB'
-            );
-            $ready = true;
-        }
-
-        return true;
-    }
-
-    // returns the number of seconds the caller should wait (0 = not throttled)
+    // returns the number of seconds the caller should wait (0 = not throttled).
+    // getCount is TableNotFound-safe (returns 0), so the very first check
+    // before the table exists reads as "no failures" — the table is created
+    // on demand by the first recorded failure (ActiveRecord create-on-error).
     protected static function checkThrottle($username)
     {
-        static::throttleTableReady();
-
         $window = (int)static::$throttleWindowSeconds;
         if ($window <= 0) {
             return 0;
         }
 
-        $ip = \Emergence\Site\Client::getAddress();
-        $ipLong = $ip ? sprintf('%u', ip2long($ip)) : null;
-
-        // evaluate each dimension separately so one over-limit key locks
-        $blocked = false;
+        $recentInWindow = sprintf('Created > (NOW() - INTERVAL %u SECOND)', $window);
 
         if (static::$throttleMaxUserFailures > 0) {
-            $userFailures = (int)\DB::oneValue(
-                'SELECT COUNT(*) FROM `login_attempts`'
-                . ' WHERE Username = "%s" AND Created > (NOW() - INTERVAL %u SECOND)',
-                [\DB::escape($username), $window]
-            );
+            $userFailures = \Emergence\People\LoginAttempt::getCount([
+                'Username' => $username,
+                $recentInWindow,
+            ]);
             if ($userFailures >= static::$throttleMaxUserFailures) {
-                $blocked = true;
+                return $window;
             }
         }
 
-        if (!$blocked && static::$throttleMaxIpFailures > 0 && $ipLong !== null) {
-            $ipFailures = (int)\DB::oneValue(
-                'SELECT COUNT(*) FROM `login_attempts`'
-                . ' WHERE IP = %s AND Created > (NOW() - INTERVAL %u SECOND)',
-                [$ipLong, $window]
-            );
+        if (static::$throttleMaxIpFailures > 0 && ($ipLong = static::clientIpLong()) !== null) {
+            $ipFailures = \Emergence\People\LoginAttempt::getCount([
+                'IP' => $ipLong,
+                $recentInWindow,
+            ]);
             if ($ipFailures >= static::$throttleMaxIpFailures) {
-                $blocked = true;
+                return $window;
             }
         }
 
-        return $blocked ? $window : 0;
+        return 0;
     }
 
     protected static function recordFailedAttempt($username)
     {
-        static::throttleTableReady();
-
-        $ip = \Emergence\Site\Client::getAddress();
-        $ipLong = $ip ? sprintf('%u', ip2long($ip)) : null;
-
-        \DB::nonQuery(
-            'INSERT INTO `login_attempts` (Username, IP) VALUES ("%s", %s)',
-            [\DB::escape($username), $ipLong === null ? 'NULL' : $ipLong]
-        );
-
-        // opportunistic cleanup of rows past the window (keeps the table small
-        // without a scheduled job); cheap and indexed on Created
-        \DB::nonQuery(
-            'DELETE FROM `login_attempts` WHERE Created < (NOW() - INTERVAL %u SECOND)',
-            [(int)static::$throttleWindowSeconds]
-        );
+        // create-with-save; ActiveRecord creates login_attempts on first
+        // insert if it does not yet exist (TableNotFound -> getCreateTable)
+        \Emergence\People\LoginAttempt::create([
+            'Username' => $username,
+            'IP' => static::clientIpLong(),
+        ], true);
     }
 
     protected static function clearFailedAttempts($username)
     {
-        static::throttleTableReady();
+        foreach (\Emergence\People\LoginAttempt::getAllByField('Username', $username) as $attempt) {
+            $attempt->destroy();
+        }
+    }
 
-        \DB::nonQuery(
-            'DELETE FROM `login_attempts` WHERE Username = "%s"',
-            [\DB::escape($username)]
-        );
+    protected static function clientIpLong()
+    {
+        $ip = \Emergence\Site\Client::getAddress();
+
+        return $ip ? sprintf('%u', ip2long($ip)) : null;
     }
 
 
