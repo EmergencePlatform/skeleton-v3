@@ -1,0 +1,12 @@
+{
+  "name": "skeleton-v3-devtools",
+  "version": "1.0.0",
+  "description": "Development tooling for skeleton-v3 (Cypress e2e workspace)",
+  "devDependencies": {
+    "cypress": "^9.6.0",
+    "cypress-plugin-tab": "^1.0.5"
+  },
+  "scripts": {
+    "cypress:open": "cypress open"
+  }
+}
