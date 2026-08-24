@@ -134,8 +134,13 @@ class Session extends ActiveRecord
 
         // return found or create new session
         if ($create) {
-            // create session
-            return static::create($sessionData, true);
+            // create an UNSAVED session: anonymous guests (crawlers included)
+            // get a valid in-memory session object so nothing null-fatals, but
+            // no DB row (or cookie) is written until the session actually
+            // persists — i.e. on authentication. Historically every anonymous
+            // request wrote a row, and with GC unmaintained the table grew
+            // without bound (a legacy e-commerce cart-holding relic).
+            return static::create($sessionData, false);
         }
 
         // no session available
@@ -191,6 +196,20 @@ class Session extends ActiveRecord
 
             header($cookie);
         }
+    }
+
+    public function changeClass($className = false, $fieldValues = false, $autoSave = true)
+    {
+        $Record = parent::changeClass($className, $fieldValues, $autoSave);
+
+        // an anonymous session is created unsaved (see getFromRequest); when it
+        // becomes an authenticated UserSession it must persist so the login
+        // sticks — parent::changeClass skips saving a phantom.
+        if ($autoSave && $Record->isPhantom && $Record instanceof UserSession && $Record->PersonID) {
+            $Record->save();
+        }
+
+        return $Record;
     }
 
     public function terminate()
