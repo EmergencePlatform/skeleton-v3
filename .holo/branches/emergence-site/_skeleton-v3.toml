@@ -9,5 +9,7 @@ files = [
     # exclude CI and developer assets
     "!.github/",
     "!.vscode/",
+    "!cypress/",
+    "!docker/",
 ]
 after = "*"
