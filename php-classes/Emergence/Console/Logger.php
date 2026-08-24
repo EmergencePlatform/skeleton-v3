@@ -22,16 +22,24 @@ class Logger extends \Psr\Log\AbstractLogger
     {
         static $c = null;
 
+        // colors.php is an optional console nicety; degrade to plain output
+        // when it isn't installed (e.g. composed runtimes without the
+        // legacy vendored lib)
         if ($c === null) {
-            $c = new Color();
-            $c->setTheme(static::$theme);
-            $c->setForceStyle(true);
+            $c = class_exists(Color::class) ? new Color() : false;
+
+            if ($c) {
+                $c->setTheme(static::$theme);
+                $c->setForceStyle(true);
+            }
         }
 
         $message = EmergenceLogger::interpolate($message, $context);
         $message = str_replace(PHP_EOL, '⏎', $message);
 
-        echo $c($level.': '.$message)->apply($level).PHP_EOL;
+        echo $c
+            ? $c($level.': '.$message)->apply($level).PHP_EOL
+            : $level.': '.$message.PHP_EOL;
         flush();
     }
 }
