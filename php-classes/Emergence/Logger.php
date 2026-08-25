@@ -65,7 +65,7 @@ class Logger extends \Psr\Log\AbstractLogger
                 '<dl>'
                     .'<dt>Timestamp</dt><dd>'.date('Y-m-d H:i:s').'</dd>'
                     .'<dt>Level</dt><dd>'.$level.'</dd>'
-                    .'<dt>Message</dt><dd>'.htmlspecialchars($message).'</dd>'
+                    .'<dt>Message</dt><dd>'.htmlspecialchars((string) $message).'</dd>'
                     .'<dt>Context</dt><dd><pre>'.htmlspecialchars(print_r($context, true)).'</pre></dd>'
                     .'<dt>Context</dt><dd><pre>'.htmlspecialchars(implode("\n", static::buildBacktraceLines())).'</pre></dd>'
             );
@@ -94,7 +94,7 @@ class Logger extends \Psr\Log\AbstractLogger
             if (!empty($frame['file']) && str_starts_with($frame['file'], \Site::$rootPath.'/data/')) {
                 $fileNode = \SiteFile::getByID(basename($frame['file']));
 
-                if ($fileNode) {
+                if ($fileNode instanceof \SiteFile) {
                     $frame['file'] = 'emergence:'.$fileNode->FullPath;
                 }
             }

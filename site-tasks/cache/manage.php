@@ -44,11 +44,11 @@ return [
         }
 
 
-        $prefixLength = strlen((string) Cache::getKeyPrefix());
+        $prefixLength = strlen(Cache::getKeyPrefix());
         $entries = [];
 
         foreach (Cache::getIterator('/.*/') as $key => $entry) {
-            $key = substr((string) $key, $prefixLength);
+            $key = substr($key, $prefixLength);
             $entries[$key] = $getEntryData($entry);
         }
 

@@ -67,11 +67,11 @@ final class UriResolver
             return $base;
         }
 
-        if ($rel->getScheme() != '') {
+        if ($rel->getScheme() !== '') {
             return $rel->withPath(self::removeDotSegments($rel->getPath()));
         }
 
-        if ($rel->getAuthority() != '') {
+        if ($rel->getAuthority() !== '') {
             $targetAuthority = $rel->getAuthority();
             $targetPath = self::removeDotSegments($rel->getPath());
             $targetQuery = $rel->getQuery();
@@ -79,11 +79,11 @@ final class UriResolver
             $targetAuthority = $base->getAuthority();
             if ($rel->getPath() === '') {
                 $targetPath = $base->getPath();
-                $targetQuery = $rel->getQuery() != '' ? $rel->getQuery() : $base->getQuery();
+                $targetQuery = $rel->getQuery() !== '' ? $rel->getQuery() : $base->getQuery();
             } else {
                 if ($rel->getPath()[0] === '/') {
                     $targetPath = $rel->getPath();
-                } elseif ($targetAuthority != '' && $base->getPath() === '') {
+                } elseif ($targetAuthority !== '' && $base->getPath() === '') {
                     $targetPath = '/' . $rel->getPath();
                 } else {
                     $lastSlashPos = strrpos($base->getPath(), '/');
@@ -200,7 +200,7 @@ final class UriResolver
         if (str_contains(explode('/', $relativePath, 2)[0], ':')) {
             $relativePath = "./$relativePath";
         } elseif ('/' === $relativePath[0]) {
-            if ($base->getAuthority() != '' && $base->getPath() === '') {
+            if ($base->getAuthority() !== '' && $base->getPath() === '') {
                 // In this case an extra slash is added by resolve() automatically. So we must not add one here.
                 $relativePath = ".$relativePath";
             } else {
