@@ -307,7 +307,7 @@ class MigrationsRequestHandler extends \RequestHandler
     protected static function upgradeMigrationsTable()
     {
         if (!static::columnExists('_e_migrations', 'Output')) {
-            return DB::nonQuery('ALTER TABLE `_e_migrations` ADD COLUMN `Output` TEXT NULL DEFAULT NULL AFTER Status');
+            DB::nonQuery('ALTER TABLE `_e_migrations` ADD COLUMN `Output` TEXT NULL DEFAULT NULL AFTER Status');
         }
     }
 
@@ -389,7 +389,7 @@ class MigrationsRequestHandler extends \RequestHandler
 
         printf("Adding value '%s' to enum column `%s`.`%s`\n", $escapedValue, $tableName, $columnName);
 
-        return DB::nonQuery(
+        DB::nonQuery(
             'ALTER TABLE `%1$s` CHANGE `%2$s` `%2$s` %3$s',
             [
                 $tableName,
@@ -432,7 +432,7 @@ class MigrationsRequestHandler extends \RequestHandler
 
         printf("Removing value '%s' from enum column `%s`.`%s`\n", $escapedValue, $tableName, $columnName);
 
-        return DB::nonQuery(
+        DB::nonQuery(
             'ALTER TABLE `%1$s` CHANGE `%2$s` `%2$s` %3$s',
             [
                 $tableName,
@@ -489,7 +489,7 @@ class MigrationsRequestHandler extends \RequestHandler
     {
         printf("Adding column `%s`.`%s`\n", $tableName, $columnName);
 
-        return DB::nonQuery(
+        DB::nonQuery(
             'ALTER TABLE `%s` ADD COLUMN `%s` %s %s',
             [
                 $tableName,
@@ -508,7 +508,7 @@ class MigrationsRequestHandler extends \RequestHandler
 
         printf("Adding index `%s`.`%s`\n", $tableName, $indexName);
 
-        return DB::nonQuery(
+        DB::nonQuery(
             'ALTER TABLE `%s` ADD INDEX `%s` %s (`%s`)',
             [
                 $tableName,
@@ -523,7 +523,7 @@ class MigrationsRequestHandler extends \RequestHandler
     {
         printf("Dropping column `%s`.`%s`\n", $tableName, $columnName);
 
-        return DB::nonQuery(
+        DB::nonQuery(
             'ALTER TABLE `%s` DROP COLUMN `%s`',
             [
                 $tableName,

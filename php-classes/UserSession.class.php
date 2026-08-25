@@ -3,6 +3,9 @@
 use Emergence\People\Person;
 use Emergence\People\User;
 
+/**
+ * @property int|null $PersonID
+ */
 class UserSession extends Session
 {
     // ActiveRecord configuration

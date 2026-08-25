@@ -20,7 +20,7 @@ return [
             $key = urldecode((string) $key);
             $entry = Cache::getIterator('/^'.preg_quote($key, '/').'$/')->current();
 
-            if (!$entry) {
+            if (in_array($entry, [false, null, []], true)) {
                 return static::throwNotFoundError('cache entry not found');
             }
 

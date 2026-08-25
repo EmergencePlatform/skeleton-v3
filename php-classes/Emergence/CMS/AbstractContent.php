@@ -8,6 +8,18 @@ use Emergence\People\Person;
 use HandleBehavior;
 use JSON;
 
+/**
+ * Declared ActiveRecord fields served by __get (see static::$fields plus
+ * ActiveRecord's universal fields and VersionedRecord's RevisionID);
+ * timestamp fields hold a unix timestamp or a SQL datetime string.
+ *
+ * @property int|null $ID
+ * @property string|null $Status
+ * @property string|int|null $Published
+ * @property string|int|null $Created
+ * @property string|int|null $Modified
+ * @property int|null $RevisionID
+ */
 abstract class AbstractContent extends \VersionedRecord
 {
     // ActiveRecord configuration
@@ -198,8 +210,9 @@ abstract class AbstractContent extends \VersionedRecord
             $this->Author = $_SESSION['User'];
         }
 
-        // set published
-        if (!$this->Published && $this->Status == 'Published') {
+        // set published (unless already set — same falsy set the previous
+        // `!$this->Published` check treated as unset)
+        if (in_array($this->Published, [null, '', 0, '0'], true) && $this->Status == 'Published') {
             $this->Published = time();
         }
 

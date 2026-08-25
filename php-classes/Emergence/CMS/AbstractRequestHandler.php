@@ -246,12 +246,14 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
     public static function handleRecordRequest(\ActiveRecord $Record, $action = false)
     {
         $peeked = static::peekPath();
+        $Session = $GLOBALS['Session'] ?? null;
 
         if (
             ($peeked === false || $peeked === '')
             && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
-            && empty($GLOBALS['Session']->PersonID)
-            && ($Record->Status ?? null) === 'Published'
+            && (!$Session instanceof \UserSession || (int)$Session->PersonID === 0)
+            && $Record instanceof AbstractContent
+            && $Record->Status === 'Published'
         ) {
             static::respondConditionalCaching($Record);
         }
@@ -259,18 +261,28 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
         return parent::handleRecordRequest($Record, $action);
     }
 
-    protected static function respondConditionalCaching(\ActiveRecord $Record)
+    protected static function respondConditionalCaching(AbstractContent $Record)
     {
-        $modified = $Record->Modified ?: $Record->Created;
-        $modifiedTs = $modified ? (is_numeric($modified) ? (int)$modified : strtotime((string)$modified)) : null;
+        $modified = $Record->Modified ?? $Record->Created;
+
+        $modifiedTs = null;
+        if ($modified !== null) {
+            $modifiedTs = is_numeric($modified) ? (int)$modified : strtotime((string)$modified);
+            if ($modifiedTs === false) {
+                $modifiedTs = null;
+            }
+        }
 
         // RevisionID bumps on every edit, so it alone detects content change;
         // fold class + ID so IDs can't collide across content types.
-        $etag = sprintf('W/"%s-%u-%s"', $Record->getRootClass(), $Record->ID, $Record->RevisionID ?: ($modifiedTs ?: '0'));
+        $revision = $Record->RevisionID !== null && $Record->RevisionID !== 0
+            ? $Record->RevisionID
+            : ($modifiedTs !== null && $modifiedTs !== 0 ? $modifiedTs : '0');
+        $etag = sprintf('W/"%s-%u-%s"', $Record::getRootClass(), $Record->ID, $revision);
 
         header('Cache-Control: public, must-revalidate');
         header('ETag: '.$etag);
-        if ($modifiedTs) {
+        if ($modifiedTs !== null) {
             header('Last-Modified: '.gmdate('D, d M Y H:i:s', $modifiedTs).' GMT');
         }
 
@@ -279,7 +291,7 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
 
         $notModified =
             ($ifNoneMatch !== '' && $ifNoneMatch === $etag)
-            || ($ifNoneMatch === '' && $modifiedTs && $ifModifiedSince !== '' && ($since = strtotime($ifModifiedSince)) !== false && $since >= $modifiedTs);
+            || ($ifNoneMatch === '' && $modifiedTs !== null && $ifModifiedSince !== '' && ($since = strtotime($ifModifiedSince)) !== false && $since >= $modifiedTs);
 
         if ($notModified) {
             header('HTTP/1.1 304 Not Modified');

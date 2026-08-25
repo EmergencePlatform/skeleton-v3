@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * PHPStan stub for the emergence/php-core src-compat SiteFile shim, whose
+ * "properties" are all served by __get() — see its switch for the source of
+ * each type below. Members it doesn't handle fall through to null.
+ *
+ * @property-read string $ID
+ * @property-read string $Class
+ * @property-read string $Handle
+ * @property-read string $FullPath
+ * @property-read string $Type
+ * @property-read string $MIMEType
+ * @property-read int $Size
+ * @property-read string $SHA1
+ * @property-read string $Status
+ * @property-read int $Timestamp
+ * @property-read string $AuthorID
+ * @property-read string $Author
+ * @property-read string $AncestorID
+ * @property-read string $CollectionID
+ * @property-read SiteCollection|null $Collection
+ * @property-read string $RealPath
+ */
+class SiteFile
+{
+}

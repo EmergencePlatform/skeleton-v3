@@ -41,7 +41,7 @@ class ProfileRequestHandler extends RequestHandler
     {
         $GLOBALS['Session']->requireAuthentication();
 
-        return Site::redirect($GLOBALS['Session']->Person->getURL());
+        Site::redirect($GLOBALS['Session']->Person->getURL());
     }
 
     public static function handleEditRequest()

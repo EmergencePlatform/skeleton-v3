@@ -17,3 +17,8 @@ parameters:
         - data-exporters
         - dwoo-plugins
     treatPhpDocTypesAsCertain: false
+    # the src-compat SiteFile/SiteCollection shims serve every "property"
+    # through __get(); stubs declare what that magic actually returns
+    stubFiles:
+        - phpstan-stubs/SiteFile.stub
+        - phpstan-stubs/SiteCollection.stub

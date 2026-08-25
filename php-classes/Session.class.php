@@ -205,7 +205,7 @@ class Session extends ActiveRecord
         // an anonymous session is created unsaved (see getFromRequest); when it
         // becomes an authenticated UserSession it must persist so the login
         // sticks — parent::changeClass skips saving a phantom.
-        if ($autoSave && $Record->isPhantom && $Record instanceof UserSession && $Record->PersonID) {
+        if ($autoSave && $Record->isPhantom && $Record instanceof UserSession && (int)$Record->PersonID !== 0) {
             $Record->save();
         }
 
