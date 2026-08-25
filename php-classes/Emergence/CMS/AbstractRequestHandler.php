@@ -236,4 +236,55 @@ abstract class AbstractRequestHandler extends \RecordsRequestHandler
     #
     #        return $responseData;
     #    }
+
+    // Conditional-request caching for the PUBLIC single-record view: emit
+    // Last-Modified + ETag and short-circuit to 304 Not Modified for anonymous
+    // readers of published content, so a search engine's periodic re-crawl of
+    // the corpus is header-only (no render, no DB). Authenticated viewers and
+    // any sub-action (edit/comment/delete) are never cached — content differs
+    // by viewer. See specs/behaviors/search-indexing.md.
+    public static function handleRecordRequest(\ActiveRecord $Record, $action = false)
+    {
+        $peeked = static::peekPath();
+
+        if (
+            ($peeked === false || $peeked === '')
+            && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
+            && empty($GLOBALS['Session']->PersonID)
+            && ($Record->Status ?? null) === 'Published'
+        ) {
+            static::respondConditionalCaching($Record);
+        }
+
+        return parent::handleRecordRequest($Record, $action);
+    }
+
+    protected static function respondConditionalCaching(\ActiveRecord $Record)
+    {
+        $modified = $Record->Modified ?: $Record->Created;
+        $modifiedTs = $modified ? (is_numeric($modified) ? (int)$modified : strtotime((string)$modified)) : null;
+
+        // RevisionID bumps on every edit, so it alone detects content change;
+        // fold class + ID so IDs can't collide across content types.
+        $etag = sprintf('W/"%s-%u-%s"', $Record->getRootClass(), $Record->ID, $Record->RevisionID ?: ($modifiedTs ?: '0'));
+
+        header('Cache-Control: public, must-revalidate');
+        header('ETag: '.$etag);
+        if ($modifiedTs) {
+            header('Last-Modified: '.gmdate('D, d M Y H:i:s', $modifiedTs).' GMT');
+        }
+
+        $ifNoneMatch = trim($_SERVER['HTTP_IF_NONE_MATCH'] ?? '');
+        $ifModifiedSince = trim($_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '');
+
+        $notModified =
+            ($ifNoneMatch !== '' && $ifNoneMatch === $etag)
+            || ($ifNoneMatch === '' && $modifiedTs && $ifModifiedSince !== '' && ($since = strtotime($ifModifiedSince)) !== false && $since >= $modifiedTs);
+
+        if ($notModified) {
+            header('HTTP/1.1 304 Not Modified');
+            exit();
+        }
+    }
+
 }
