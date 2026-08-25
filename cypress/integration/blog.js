@@ -21,15 +21,15 @@ describe('Blogging', () => {
         cy.contains('.x-menu-item-text[id^=menucheckitem-]', 'Publish on save')
             .click();
 
+        // replace value via {selectall} rather than .clear() — clear() races
+        // the ExtJS field's value sync and the typed text can get appended
         cy.get('input[id^=datefield-]')
             .click()
-            .clear()
-            .type('01/02/2030');
+            .type('{selectall}01/02/2030');
 
         cy.get('input[id^=timefield-]')
             .click()
-            .clear()
-            .type('4:05 pm{enter}');
+            .type('{selectall}4:05 pm{enter}');
 
         cy.get('.x-component.emergence-cms-preview time[data-ref="timeEl"]')
             .should('contain', 'Wednesday, January 2, 2030 at 4:05 pm')
@@ -114,10 +114,10 @@ describe('Blogging', () => {
         cy.contains('.x-menu-item-text[id^=menuitem-]', '1/2/2030 4:05 pm')
             .click();
 
+        // {selectall} instead of .clear() — see 'Create post'
         cy.get('input[id^=timefield-]')
             .click()
-            .clear()
-            .type('6:07 pm{enter}');
+            .type('{selectall}6:07 pm{enter}');
 
         cy.get('.x-component.emergence-cms-preview time[data-ref="timeEl"]')
             .should('contain', 'Wednesday, January 2, 2030 at 6:07 pm')
