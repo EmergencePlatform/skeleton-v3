@@ -31,11 +31,17 @@ class PostmarkMailer extends AbstractMailer
         // (Postmark ignores unknown numeric members, so these were dropped)
         $headers = isset($options['Headers']) && is_array($options['Headers']) ? $options['Headers'] : [];
         foreach ($options as $key => $value) {
-            if (!is_int($key) || !is_string($value) || strpos($value, ':') === false) {
+            if (!is_int($key)) {
+                continue;
+            }
+            if (!is_string($value)) {
+                continue;
+            }
+            if (!str_contains($value, ':')) {
                 continue;
             }
             unset($options[$key]);
-            list($name, $content) = array_map('trim', explode(':', $value, 2));
+            [$name, $content] = array_map(trim(...), explode(':', $value, 2));
 
             if (strcasecmp($name, 'Reply-To') === 0) {
                 $options['ReplyTo'] = empty($options['ReplyTo']) ? $content : $options['ReplyTo'].', '.$content;
@@ -47,20 +53,20 @@ class PostmarkMailer extends AbstractMailer
             $options['Headers'] = $headers;
         }
 
-        if (count(static::$verifiedFromDomains)) {
-            $fromAddress = preg_match('/<([^>]+)>/', $from, $matches) ? $matches[1] : trim($from);
-            $fromDomain = strtolower((string)substr(strrchr($fromAddress, '@'), 1));
+        if (count(static::$verifiedFromDomains) > 0) {
+            $fromAddress = preg_match('/<([^>]+)>/', (string) $from, $matches) ? $matches[1] : trim((string) $from);
+            $fromDomain = strtolower(substr(strrchr($fromAddress, '@'), 1));
 
-            if (!in_array($fromDomain, array_map('strtolower', static::$verifiedFromDomains))) {
+            if (!in_array($fromDomain, array_map(strtolower(...), static::$verifiedFromDomains))) {
                 if (empty($options['ReplyTo'])) {
                     $options['ReplyTo'] = $from;
                 } elseif (stripos($options['ReplyTo'], $fromAddress) === false) {
                     $options['ReplyTo'] .= ', '.$from;
                 }
 
-                $fromName = preg_match('/^\s*"?([^"<]+?)"?\s*</', $from, $matches) ? trim($matches[1]) : $fromAddress;
+                $fromName = preg_match('/^\s*"?([^"<]+?)"?\s*</', (string) $from, $matches) ? trim($matches[1]) : $fromAddress;
                 $defaultFrom = static::getDefaultFrom();
-                $defaultAddress = preg_match('/<([^>]+)>/', $defaultFrom, $matches) ? $matches[1] : trim($defaultFrom);
+                $defaultAddress = preg_match('/<([^>]+)>/', (string) $defaultFrom, $matches) ? $matches[1] : trim((string) $defaultFrom);
                 $from = sprintf('"%s" <%s>', addslashes($fromName), $defaultAddress);
             }
         }

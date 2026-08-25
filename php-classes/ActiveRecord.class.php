@@ -946,7 +946,7 @@ class ActiveRecord implements IImage
                         static::$updateOnDuplicateKey &&
                         ($duplicateKeyName = $e->getDuplicateKey()) &&
                         (
-                            ($duplicateKeyName == 'PRIMARY') ||
+                            ($duplicateKeyName === 'PRIMARY') ||
                             ($duplicateKeyConfig = static::getStackedConfig('indexes', $duplicateKeyName))
                         )
                     ) {

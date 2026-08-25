@@ -621,7 +621,7 @@ class Media extends ActiveRecord
         $mimeType = File::getMIMEType($filename);
 
         // dig deeper if only generic mimetype returned
-        if ($mimeType == 'application/octet-stream') {
+        if ($mimeType === 'application/octet-stream') {
             // prefer kernel method if available
             if (is_callable([File::class, 'getFileInfoResource'])) {
                 $finfo = File::getFileInfoResource(FILEINFO_NONE);

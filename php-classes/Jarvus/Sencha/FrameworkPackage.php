@@ -129,7 +129,7 @@ class FrameworkPackage extends Package
             $packagesSubpath = "$packagesPath/$packagesCollection";
             $packageNodes = Emergence_FS::getAggregateChildren($packagesSubpath);
 
-            foreach ($packageNodes as $packageDir => $packageNode) {
+            foreach (array_keys($packageNodes) as $packageDir) {
                 $packagePath = "$packagesSubpath/$packageDir";
                 $packageJsonNode = Site::resolvePath("$packagePath/package.json");
 

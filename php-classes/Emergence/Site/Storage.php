@@ -107,7 +107,7 @@ class Storage
             // build from declared config via emergence/php-core's factory
             // when available (class_exists keeps this a soft dependency so
             // sites without a declared config never need the factory)
-            $factoryClass = 'Emergence\\Storage\\FilesystemFactory';
+            $factoryClass = \Emergence\Storage\FilesystemFactory::class;
 
             if ($config !== null && class_exists($factoryClass)) {
                 static::$filesystems[$bucketId] = call_user_func(

@@ -112,7 +112,7 @@ class WorkspacePackage extends Package
 
             $packageNodes = Emergence_FS::getAggregateChildren('sencha-workspace/packages');
 
-            foreach ($packageNodes as $packageDir => $packageNode) {
+            foreach (array_keys($packageNodes) as $packageDir) {
                 $packagePath = "sencha-workspace/packages/$packageDir";
                 $packageJsonNode = Site::resolvePath("$packagePath/package.json");
 

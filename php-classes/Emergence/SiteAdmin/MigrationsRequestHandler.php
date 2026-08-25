@@ -268,7 +268,7 @@ class MigrationsRequestHandler extends \RequestHandler
 
         // append sequence to each node
         $migrations = [];
-        foreach (Emergence_FS::getTreeFiles('php-migrations') as $migrationPath => $migrationNodeData) {
+        foreach (array_keys(Emergence_FS::getTreeFiles('php-migrations')) as $migrationPath) {
             $migrationKey = preg_replace('#^php-migrations/(.*)\.php$#i', '$1', (string) $migrationPath);
             $migrationRecord = $migrationRecords[$migrationKey] ?? null;
             $migrations[$migrationKey] = static::getMigrationData($migrationKey, $migrationRecord);
