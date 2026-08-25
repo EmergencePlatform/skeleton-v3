@@ -16,6 +16,12 @@ class PostmarkMailer extends AbstractMailer
 
     public static function send($to, $subject, $body, $from = false, $options = [])
     {
+        // callers in the Email::send tradition pass recipient lists as arrays
+        // (see PHPMailer::send); Postmark's To is a comma-separated string
+        if (is_array($to)) {
+            $to = implode(', ', $to);
+        }
+
         if (!$from) {
             $from = static::getDefaultFrom();
         }
