@@ -44,12 +44,14 @@ class PostmarkMailer extends AbstractMailer
             [$name, $content] = array_map(trim(...), explode(':', $value, 2));
 
             if (strcasecmp($name, 'Reply-To') === 0) {
-                $options['ReplyTo'] = empty($options['ReplyTo']) ? $content : $options['ReplyTo'].', '.$content;
+                $options['ReplyTo'] = isset($options['ReplyTo']) && $options['ReplyTo'] !== ''
+                    ? $options['ReplyTo'].', '.$content
+                    : $content;
             } else {
                 $headers[] = ['Name' => $name, 'Value' => $content];
             }
         }
-        if (count($headers)) {
+        if (count($headers) > 0) {
             $options['Headers'] = $headers;
         }
 
@@ -57,8 +59,8 @@ class PostmarkMailer extends AbstractMailer
             $fromAddress = preg_match('/<([^>]+)>/', (string) $from, $matches) ? $matches[1] : trim((string) $from);
             $fromDomain = strtolower(substr(strrchr($fromAddress, '@'), 1));
 
-            if (!in_array($fromDomain, array_map(strtolower(...), static::$verifiedFromDomains))) {
-                if (empty($options['ReplyTo'])) {
+            if (!in_array($fromDomain, array_map(strtolower(...), static::$verifiedFromDomains), true)) {
+                if (!isset($options['ReplyTo']) || $options['ReplyTo'] === '') {
                     $options['ReplyTo'] = $from;
                 } elseif (stripos($options['ReplyTo'], $fromAddress) === false) {
                     $options['ReplyTo'] .= ', '.$from;

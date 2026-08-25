@@ -28,7 +28,8 @@ class SitemapRequestHandler extends \RequestHandler
         // a known content-class segment => that class's chunk; anything else
         // (bare /sitemap, trailing slash, or a stray path) => the index
         if (isset(static::$contentClasses[$segment])) {
-            $chunk = max(1, (int)(static::shiftPath() ?: 1));
+            $chunkSegment = static::shiftPath();
+            $chunk = max(1, is_string($chunkSegment) ? (int)$chunkSegment : 1);
             return static::respondChunk($segment, static::$contentClasses[$segment], $chunk);
         }
 
@@ -39,7 +40,9 @@ class SitemapRequestHandler extends \RequestHandler
     {
         // SITE_PRIMARY_HOSTNAME is authoritative; getConfig('primary_hostname')
         // derives from HTTP_HOST on the current runtime (see knowledgebase #28)
-        return 'https://'.(getenv('SITE_PRIMARY_HOSTNAME') ?: \Site::getConfig('primary_hostname'));
+        $primaryHostname = getenv('SITE_PRIMARY_HOSTNAME');
+
+        return 'https://'.($primaryHostname !== false && $primaryHostname !== '' ? $primaryHostname : \Site::getConfig('primary_hostname'));
     }
 
     protected static function publishedCount($class)
@@ -84,7 +87,7 @@ class SitemapRequestHandler extends \RequestHandler
 
         foreach ($rows as $row) {
             echo '  <url><loc>', htmlspecialchars($base.$route.'/'.$row['Handle'], ENT_XML1), '</loc>';
-            if (!empty($row['Modified'])) {
+            if (isset($row['Modified']) && $row['Modified'] !== '') {
                 echo '<lastmod>', gmdate('Y-m-d\TH:i:s\Z', strtotime((string)$row['Modified'])), '</lastmod>';
             }
             echo '</url>', "\n";

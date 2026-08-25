@@ -453,7 +453,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 71
+			count: 70
 			path: php-classes/ActiveRecord.class.php
 
 		-
@@ -1006,18 +1006,6 @@ parameters:
 			message: '#^Access to an undefined property Emergence\\CMS\\AbstractContent\:\:\$Items\.$#'
 			identifier: property.notFound
 			count: 1
-			path: php-classes/Emergence/CMS/AbstractContent.php
-
-		-
-			message: '#^Access to an undefined property Emergence\\CMS\\AbstractContent\:\:\$Published\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/Emergence/CMS/AbstractContent.php
-
-		-
-			message: '#^Access to an undefined property Emergence\\CMS\\AbstractContent\:\:\$Status\.$#'
-			identifier: property.notFound
-			count: 2
 			path: php-classes/Emergence/CMS/AbstractContent.php
 
 		-
@@ -1669,18 +1657,6 @@ parameters:
 			path: php-classes/Emergence/Connectors/Job.php
 
 		-
-			message: '#^Method Emergence\\Connectors\\Job\:\:log\(\) with return type void returns array\<string, mixed\> but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: php-classes/Emergence/Connectors/Job.php
-
-		-
-			message: '#^Method Emergence\\Connectors\\Job\:\:log\(\) with return type void returns mixed but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: php-classes/Emergence/Connectors/Job.php
-
-		-
 			message: '#^Result of method Emergence\\Connectors\\Job\:\:log\(\) \(void\) is used\.$#'
 			identifier: method.void
 			count: 2
@@ -1697,24 +1673,6 @@ parameters:
 			identifier: trait.unused
 			count: 1
 			path: php-classes/Emergence/Connectors/LaunchableTrait.php
-
-		-
-			message: '#^Call to method setForceStyle\(\) on an unknown class Colors\\Color\.$#'
-			identifier: class.notFound
-			count: 1
-			path: php-classes/Emergence/Console/Logger.php
-
-		-
-			message: '#^Call to method setTheme\(\) on an unknown class Colors\\Color\.$#'
-			identifier: class.notFound
-			count: 1
-			path: php-classes/Emergence/Console/Logger.php
-
-		-
-			message: '#^Instantiated class Colors\\Color not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: php-classes/Emergence/Console/Logger.php
 
 		-
 			message: '#^Access to an undefined static property static\(Emergence\\Database\\AbstractConnectionSingleton\)\:\:\$connectionClass\.$#'
@@ -1919,12 +1877,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: php-classes/Emergence/Git/HttpBackend.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$RealPath\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/Emergence/Git/Source.php
 
 		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
@@ -2155,12 +2107,6 @@ parameters:
 			path: php-classes/Emergence/Http/Message/Uri.php
 
 		-
-			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
-			identifier: notEqual.notAllowed
-			count: 5
-			path: php-classes/Emergence/Http/Message/UriResolver.php
-
-		-
 			message: '#^Variable \$segment might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -2263,20 +2209,8 @@ parameters:
 			path: php-classes/Emergence/Mailer/PostmarkMailer.php
 
 		-
-			message: '#^Class PostmarkMailer not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: php-classes/Emergence/Mailer/PostmarkMailer.php
-
-		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 1
-			path: php-classes/Emergence/Mailer/PostmarkMailer.php
-
-		-
-			message: '#^Parameter \#3 \$value of function curl_setopt expects 0\|2, false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: php-classes/Emergence/Mailer/PostmarkMailer.php
 
@@ -2953,24 +2887,6 @@ parameters:
 			path: php-classes/Emergence/SiteAdmin/TasksRequestHandler.php
 
 		-
-			message: '#^Access to an undefined property SiteFile\:\:\$Handle\.$#'
-			identifier: property.notFound
-			count: 2
-			path: php-classes/Emergence/Util/Data.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$RealPath\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/Emergence/Util/Data.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$Type\.$#'
-			identifier: property.notFound
-			count: 2
-			path: php-classes/Emergence/Util/Data.php
-
-		-
 			message: '#^Call to static method parse\(\) on an unknown class Symfony\\Component\\Yaml\\Yaml\.$#'
 			identifier: class.notFound
 			count: 2
@@ -3280,12 +3196,6 @@ parameters:
 			path: php-classes/HandleBehavior.class.php
 
 		-
-			message: '#^Call to static method toAscii\(\) on an unknown class Patchwork\\Utf8\.$#'
-			identifier: class.notFound
-			count: 1
-			path: php-classes/HandleBehavior.class.php
-
-		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
 			count: 1
@@ -3500,12 +3410,6 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: php-classes/Jarvus/Sencha/FrameworkPackage.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$RealPath\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/Jarvus/Sencha/Package.php
 
 		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
@@ -3780,7 +3684,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 5
+			count: 4
 			path: php-classes/Media.class.php
 
 		-
@@ -3920,24 +3824,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: php-classes/MediaRequestHandler.class.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$ID\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/MinifiedRequestHandler.class.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$SHA1\.$#'
-			identifier: property.notFound
-			count: 1
-			path: php-classes/MinifiedRequestHandler.class.php
-
-		-
-			message: '#^Access to an undefined property SiteFile\:\:\$Type\.$#'
-			identifier: property.notFound
-			count: 2
-			path: php-classes/MinifiedRequestHandler.class.php
 
 		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'

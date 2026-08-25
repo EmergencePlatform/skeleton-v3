@@ -944,7 +944,8 @@ class ActiveRecord implements IImage
                 } catch (DuplicateKeyException $e) {
                     if (
                         static::$updateOnDuplicateKey &&
-                        ($duplicateKeyName = $e->getDuplicateKey()) &&
+                        ($duplicateKeyName = $e->getDuplicateKey()) !== null &&
+                        $duplicateKeyName !== '' &&
                         (
                             ($duplicateKeyName === 'PRIMARY') ||
                             ($duplicateKeyConfig = static::getStackedConfig('indexes', $duplicateKeyName))

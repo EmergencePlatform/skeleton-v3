@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * PHPStan stub for the emergence/php-core src-compat SiteCollection shim,
+ * whose "properties" are all served by __get() — see its switch for the
+ * source of each type below. The null-typed members are file-only names
+ * that code commonly reads off SiteCollection|SiteFile unions (directory
+ * listings); SiteCollection's __get falls through to null for them.
+ *
+ * @property-read string $ID
+ * @property-read string $Class
+ * @property-read string $Handle
+ * @property-read string $FullPath
+ * @property-read string $Status
+ * @property-read string $Site
+ * @property-read string $ParentID
+ * @property-read SiteCollection|null $Parent
+ * @property-read null $Type
+ * @property-read null $MIMEType
+ * @property-read null $Size
+ * @property-read null $SHA1
+ * @property-read null $Timestamp
+ * @property-read null $RealPath
+ */
+class SiteCollection
+{
+}

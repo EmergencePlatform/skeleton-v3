@@ -31,6 +31,7 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
 
       - name: Install dependencies
+        id: install
         run: composer install --prefer-dist --no-progress --no-interaction
         env:
           # php-core and the dwoo 1.2 fork are VCS-repository packages whose
@@ -41,16 +42,23 @@ jobs:
       - name: PHP syntax lint
         run: find php-classes php-config php-migrations event-handlers site-root site-tasks console-commands data-exporters dwoo-plugins -name '*.php' -print0 | xargs -0 -n1 -P4 php -l > /dev/null
 
+      # the analysis steps run even when an earlier one fails (but not when
+      # setup failed or the run was cancelled) so a single failing tool can't
+      # mask regressions accumulating invisibly behind it in the others
       - name: Rector (dry-run)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: vendor/bin/rector process --dry-run --no-progress-bar
 
       - name: PHPStan
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
       - name: Psalm (taint analysis)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: vendor/bin/psalm --taint-analysis --no-progress
 
       - name: PHP-CS-Fixer (check)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: vendor/bin/php-cs-fixer check --diff
         env:
           PHP_CS_FIXER_IGNORE_ENV: '1'

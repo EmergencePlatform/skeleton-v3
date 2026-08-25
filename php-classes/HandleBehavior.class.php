@@ -63,7 +63,12 @@ class HandleBehavior extends RecordBehavior
             // ascii-fold via iconv — Patchwork\Utf8 was a legacy-VFS library
             // never carried into the modern composition (and is abandoned
             // upstream); the follow-up regex strips anything TRANSLIT leaves
-            $text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', (string) $text) ?: $text;
+            // keep the original text when the fold fails or comes back falsy
+            // (same semantics as the previous `?:` fallback)
+            $folded = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', (string) $text);
+            if (!in_array($folded, [false, '', '0'], true)) {
+                $text = $folded;
+            }
 
             // trim any non-word characters created during transliterate and any adjacent placeholders
             $text = preg_replace('/[-_]*[^-\w\.]+[-_]*/u', '', (string) $text);
