@@ -91,6 +91,17 @@ logged); a run past its deadline is killed (`timeout`, exit 124); every
 firing and exit status is logged to the container log with a
 `[cron-events]` prefix. Events with no handlers are cheap no-ops.
 
+**The scheduler is deliberately boring**: it only fires the events and
+ignores what happens after — no retries, no outcome interpretation, no
+failure escalation, and it never exits based on a run's result. The
+`flock` and `timeout` are firing discipline (protecting the scheduler's
+own ability to keep ticking), not outcome handling, and the exit-status
+log lines are passive observation for operators. Success/failure
+semantics belong to handlers and to external monitoring (a dead-man
+snitch like menunet's, if ever wanted, belongs in a handler or the
+orchestrator — not this loop). Keep it that way: do not "improve" the
+loop into something outcome-aware.
+
 ## Tools
 
 - `tools/console-run.php` — run a site console-command
