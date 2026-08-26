@@ -1,4 +1,9 @@
-describe('Blogging', () => {
+// retries disabled: these tests are a chain — 'Edit post' depends on the
+// post 'Create post' saved. A retried middle test re-runs against state the
+// failed attempt already mutated (the before() reset does NOT re-run on
+// retries), so the retry compounds state and reports garbage that hides the
+// real first failure; with retries off the true failure surfaces instead
+describe('Blogging', { retries: 0 }, () => {
 
     // reset database before tests
     before(() => {

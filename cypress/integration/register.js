@@ -1,7 +1,10 @@
 describe('Registration', () => {
 
-    // reset database before tests
-    before(() => {
+    // drop database before every attempt: this spec's single test registers
+    // the 'zerocool' user (asserting ID 1), and Cypress re-runs beforeEach
+    // (but NOT before) hooks on each retry attempt — with a before() drop, a
+    // retry would collide with the user the failed attempt already created
+    beforeEach(() => {
         cy.dropDatabase();
     });
 

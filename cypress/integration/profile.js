@@ -1,4 +1,11 @@
-describe('Profile', () => {
+// retries disabled: these tests are a chain — 'Fill out profile' asserts
+// PrimaryPhotoID from 'Upload profile photos', and 'View profile' asserts
+// the About/photos both earlier tests wrote. A retried middle test re-runs
+// against state the failed attempt already mutated (the before() reset does
+// NOT re-run on retries) — e.g. re-typing appends to Location/About and
+// re-uploading adds photos — so the retry compounds state and reports
+// garbage that hides the real first failure
+describe('Profile', { retries: 0 }, () => {
 
     // reset database before tests
     before(() => {
