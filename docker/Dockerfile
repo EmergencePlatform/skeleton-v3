@@ -102,5 +102,11 @@ RUN curl -fsSL -o /tmp/multirun.tar.gz \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# the php-fpm base sets STOPSIGNAL SIGQUIT (php-fpm's graceful stop), which
+# multirun does not handle — and PID 1 ignores unhandled signals' default
+# dispositions, so `docker stop` would hang until SIGKILL and mysqld would
+# lose its clean shutdown. SIGTERM is what multirun forwards to children.
+STOPSIGNAL SIGTERM
+
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]

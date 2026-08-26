@@ -119,4 +119,6 @@ else
 fi
 
 echo "--- starting multirun: ${COMMANDS[*]}"
-exec multirun -v "${COMMANDS[@]}"
+# stdbuf -oL: multirun's verbose messages full-buffer under a pipe (the
+# container log) and would otherwise only flush at exit
+exec stdbuf -oL multirun -v "${COMMANDS[@]}"
