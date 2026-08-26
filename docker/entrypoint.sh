@@ -3,10 +3,19 @@
 # a reviewer can `docker run` -> `curl` with zero orchestration. Production
 # would run MySQL externally (Cloud SQL) — set DB_HOST to skip the bundled one.
 #
+# Process model: init runs sequentially (config render; bundled-MySQL
+# initialize/provision/seed via a temporary mysqld that is shut down cleanly),
+# then execs multirun as PID 1 supervising all long-running processes:
+# php-fpm, nginx, the bundled mysqld (DB_HOST unset), and the cron-events
+# scheduler (CRON_EVENTS != 0). If any supervised process dies the container
+# exits so the orchestrator restarts it; signals are forwarded to every
+# child and zombies are reaped.
+#
 # Env:
 #   SITE_HANDLE  framework site handle (default: slate)
 #   SITE_DB      database name (default: $SITE_HANDLE)
 #   DB_HOST      external MySQL host — skips the bundled server entirely
+#   CRON_EVENTS  set 0 to disable the named-cron-events scheduler (default on)
 #   /opt/seed/*.sql.gz  (mount) — imported into $SITE_DB on first
 #                initialization of the bundled server (real site data)
 set -euo pipefail
@@ -27,8 +36,16 @@ if [ "${ASSUME_HTTPS:-1}" = "0" ]; then
         /etc/nginx/sites-available/default
 fi
 
+MYSQLD_ARGS=(
+    --user=mysql
+    --datadir=/var/lib/mysql
+    --socket=/run/mysqld/mysqld.sock
+    --bind-address=127.0.0.1
+    --disabled-storage-engines=MyISAM
+)
+
 if [ -z "${DB_HOST:-}" ]; then
-    echo "--- starting bundled MySQL 8"
+    echo "--- provisioning bundled MySQL 8 (temporary instance)"
     mkdir -p /var/lib/mysql /var/lib/mysql-files /run/mysqld
     chown -R mysql:mysql /var/lib/mysql /var/lib/mysql-files /run/mysqld
 
@@ -39,11 +56,7 @@ if [ -z "${DB_HOST:-}" ]; then
         FRESH_DATADIR=1
     fi
 
-    mysqld --user=mysql --datadir=/var/lib/mysql \
-        --socket=/run/mysqld/mysqld.sock \
-        --bind-address=127.0.0.1 \
-        --disabled-storage-engines=MyISAM \
-        >/var/log/mysqld.log 2>&1 &
+    mysqld "${MYSQLD_ARGS[@]}" >/var/log/mysqld.log 2>&1 &
 
     echo "--- waiting for MySQL"
     for i in $(seq 1 60); do
@@ -77,11 +90,35 @@ SQL
         echo "--- seed complete ($(mysql --socket=/run/mysqld/mysqld.sock -uroot -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${SITE_DB}'") tables)"
     fi
 
-    echo "--- MySQL ready ($(mysql --socket=/run/mysqld/mysqld.sock -uroot -N -e 'SELECT VERSION()'))"
+    echo "--- MySQL provisioned ($(mysql --socket=/run/mysqld/mysqld.sock -uroot -N -e 'SELECT VERSION()')); stopping temporary instance"
+    # the -core client packages ship no mysqladmin; the SQL SHUTDOWN
+    # statement is the same clean-shutdown path
+    mysql --socket=/run/mysqld/mysqld.sock -uroot -e 'SHUTDOWN'
+    wait # for the temporary mysqld to exit cleanly before multirun owns one
 fi
 
-echo "--- starting php-fpm"
-php-fpm -D
+# --- hand off to multirun: every long-running process supervised as a
+# first-class child of PID 1 (the supervised mysqld logs to the container
+# log; the temporary provisioning instance's log stays in /var/log/mysqld.log)
+COMMANDS=(
+    "php-fpm -F"
+    "nginx -g 'daemon off;'"
+)
 
-echo "--- starting nginx"
-exec nginx -g 'daemon off;'
+if [ -z "${DB_HOST:-}" ]; then
+    COMMANDS+=("mysqld ${MYSQLD_ARGS[*]}")
+fi
+
+# named cron events: fire minutely/hourly/daily/weekly into the composed
+# tree (context Emergence\Site) so layers can ship scheduled work as plain
+# event-handlers/ files — see README.md "Scheduled events"
+if [ "${CRON_EVENTS:-1}" != "0" ]; then
+    COMMANDS+=("/opt/emergence/tools/cron-events.sh")
+else
+    echo "--- cron-events scheduler disabled (CRON_EVENTS=0)"
+fi
+
+echo "--- starting multirun: ${COMMANDS[*]}"
+# stdbuf -oL: multirun's verbose messages full-buffer under a pipe (the
+# container log) and would otherwise only flush at exit
+exec stdbuf -oL multirun -v "${COMMANDS[@]}"

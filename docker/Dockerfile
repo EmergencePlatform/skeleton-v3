@@ -80,8 +80,33 @@ COPY nginx/default.conf /etc/nginx/sites-available/default
 COPY tools/sync-search-indexes.php /opt/emergence/tools/sync-search-indexes.php
 COPY tools/console-run.php /opt/emergence/tools/console-run.php
 
+# in-container scheduler firing the named cron events (minutely/hourly/
+# daily/weekly, context Emergence\Site) through console-run's events:fire —
+# supervised by multirun via entrypoint.sh; disable with CRON_EVENTS=0
+# (see README.md)
+COPY tools/cron-events.sh /opt/emergence/tools/cron-events.sh
+RUN chmod +x /opt/emergence/tools/cron-events.sh
+
+# --- multirun: tiny PID-1 supervisor for the container's long-running
+# processes (php-fpm, nginx, bundled mysqld, cron-events) — any child dying
+# exits the container, signals forward to all children, zombies get reaped.
+# No bookworm package; pinned release binary, checksum-verified.
+ARG MULTIRUN_VERSION=1.1.3
+ARG MULTIRUN_SHA256=0b8967dc6cf3111435db41642fe42448051e5f942f028c515c576a7a4509d400
+RUN curl -fsSL -o /tmp/multirun.tar.gz \
+        "https://github.com/nicolas-van/multirun/releases/download/${MULTIRUN_VERSION}/multirun-x86_64-linux-gnu-${MULTIRUN_VERSION}.tar.gz" \
+    && echo "${MULTIRUN_SHA256}  /tmp/multirun.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/multirun.tar.gz -C /usr/local/bin multirun \
+    && rm /tmp/multirun.tar.gz
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# the php-fpm base sets STOPSIGNAL SIGQUIT (php-fpm's graceful stop), which
+# multirun does not handle — and PID 1 ignores unhandled signals' default
+# dispositions, so `docker stop` would hang until SIGKILL and mysqld would
+# lose its clean shutdown. SIGTERM is what multirun forwards to children.
+STOPSIGNAL SIGTERM
 
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]

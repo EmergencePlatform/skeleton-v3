@@ -36,6 +36,17 @@ Only patched upstreams are forked into EmergencePlatform (currently just
 [dwoo](https://github.com/EmergencePlatform/dwoo) for PHP 8 fixes);
 unpatched vendor libraries pin their real upstreams.
 
+## Scheduled events
+
+The [runtime image](./docker/README.md#scheduled-events) fires four named
+cron events into the composed tree — `minutely`, `hourly`, `daily`,
+`weekly`, all in context `Emergence\Site`. Any composed layer schedules
+work by contributing a handler file (e.g.
+`event-handlers/Emergence/Site/daily/50_sync-reports.php`) — no external
+plumbing per activity. The event is just the tick: names carry no purpose
+(that lives in handlers) and no time-of-day (that is the scheduler's
+business).
+
 ## Scope
 
 Initial scope is the minimal set proven to boot and render Slate on
