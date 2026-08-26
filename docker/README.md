@@ -22,6 +22,30 @@ git holo project emergence-site --fetch --lens   # in the site repo
 docker build -t my-site docker/
 ```
 
+## Process model
+
+Init runs sequentially in `entrypoint.sh` — nginx config rendering, then
+(bundled MySQL only) datadir initialize / root provisioning / first-boot
+seeding via a **temporary** mysqld that is shut down cleanly — before the
+entrypoint execs [multirun](https://github.com/nicolas-van/multirun)
+(pinned, checksum-verified) as PID 1 supervising every long-running
+process as a first-class child:
+
+- `php-fpm -F`
+- `nginx -g 'daemon off;'`
+- `mysqld` (only when `DB_HOST` is unset — logs to the container log; the
+  provisioning instance's log stays in `/var/log/mysqld.log`)
+- `tools/cron-events.sh` (only when `CRON_EVENTS` != 0)
+
+If **any** supervised process dies, multirun stops the rest and the
+container exits so the orchestrator restarts it; signals (`docker stop`,
+Cloud Run shutdown) are forwarded to all children so mysqld shuts down
+cleanly — give the container a stop grace period that covers an InnoDB
+shutdown (e.g. `docker stop -t 30`); zombies are reaped by PID 1. The
+services start together **after** provisioning completes, so requests in
+the first seconds of a boot (and throughout first-boot seeding) can see
+connection errors/502s until nginx, php-fpm, and mysqld are all up.
+
 ## Runtime env
 
 | Var | Meaning |
@@ -58,7 +82,7 @@ handlers; when the tick lands is the scheduler's business, tuned via the
 (`daily-maintenance`, `nightly`, ...) — new scheduled work belongs under
 one of these four names.
 
-Mechanics (`tools/cron-events.sh`, spawned by `entrypoint.sh`): each firing
+Mechanics (`tools/cron-events.sh`, a multirun-supervised process): each firing
 runs `console-run.php events:fire <event> Emergence\Site` — a `system`-user
 session, handlers aggregated across all composed layers by
 `Emergence\EventBus`. Runs of the same event never overlap (per-event

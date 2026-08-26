@@ -5,7 +5,8 @@
 # contributing an event-handlers/ file — no external plumbing per activity.
 # See docker/README.md ("Scheduled events") for the contract.
 #
-# Spawned by entrypoint.sh alongside php-fpm/nginx unless CRON_EVENTS=0.
+# Runs as a first-class multirun-supervised process (see entrypoint.sh)
+# alongside php-fpm/nginx/mysqld unless CRON_EVENTS=0.
 # Operational semantics carried over from the gen-3 (menunet) CronJobs:
 #   - runs of the same event never overlap (per-event flock; late runs skip)
 #   - per-tier execution deadlines (`timeout`): minutely 50s, hourly 50m,

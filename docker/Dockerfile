@@ -82,9 +82,22 @@ COPY tools/console-run.php /opt/emergence/tools/console-run.php
 
 # in-container scheduler firing the named cron events (minutely/hourly/
 # daily/weekly, context Emergence\Site) through console-run's events:fire —
-# spawned by entrypoint.sh; disable with CRON_EVENTS=0 (see README.md)
+# supervised by multirun via entrypoint.sh; disable with CRON_EVENTS=0
+# (see README.md)
 COPY tools/cron-events.sh /opt/emergence/tools/cron-events.sh
 RUN chmod +x /opt/emergence/tools/cron-events.sh
+
+# --- multirun: tiny PID-1 supervisor for the container's long-running
+# processes (php-fpm, nginx, bundled mysqld, cron-events) — any child dying
+# exits the container, signals forward to all children, zombies get reaped.
+# No bookworm package; pinned release binary, checksum-verified.
+ARG MULTIRUN_VERSION=1.1.3
+ARG MULTIRUN_SHA256=0b8967dc6cf3111435db41642fe42448051e5f942f028c515c576a7a4509d400
+RUN curl -fsSL -o /tmp/multirun.tar.gz \
+        "https://github.com/nicolas-van/multirun/releases/download/${MULTIRUN_VERSION}/multirun-x86_64-linux-gnu-${MULTIRUN_VERSION}.tar.gz" \
+    && echo "${MULTIRUN_SHA256}  /tmp/multirun.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/multirun.tar.gz -C /usr/local/bin multirun \
+    && rm /tmp/multirun.tar.gz
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
