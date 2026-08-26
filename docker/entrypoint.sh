@@ -7,6 +7,7 @@
 #   SITE_HANDLE  framework site handle (default: slate)
 #   SITE_DB      database name (default: $SITE_HANDLE)
 #   DB_HOST      external MySQL host — skips the bundled server entirely
+#   CRON_EVENTS  set 0 to disable the named-cron-events scheduler (default on)
 #   /opt/seed/*.sql.gz  (mount) — imported into $SITE_DB on first
 #                initialization of the bundled server (real site data)
 set -euo pipefail
@@ -82,6 +83,16 @@ fi
 
 echo "--- starting php-fpm"
 php-fpm -D
+
+# named cron events: fire minutely/hourly/daily/weekly into the composed
+# tree (context Emergence\Site) so layers can ship scheduled work as plain
+# event-handlers/ files — see README.md "Scheduled events"
+if [ "${CRON_EVENTS:-1}" != "0" ]; then
+    echo "--- starting cron-events scheduler"
+    /opt/emergence/tools/cron-events.sh &
+else
+    echo "--- cron-events scheduler disabled (CRON_EVENTS=0)"
+fi
 
 echo "--- starting nginx"
 exec nginx -g 'daemon off;'

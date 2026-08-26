@@ -80,6 +80,12 @@ COPY nginx/default.conf /etc/nginx/sites-available/default
 COPY tools/sync-search-indexes.php /opt/emergence/tools/sync-search-indexes.php
 COPY tools/console-run.php /opt/emergence/tools/console-run.php
 
+# in-container scheduler firing the named cron events (minutely/hourly/
+# daily/weekly, context Emergence\Site) through console-run's events:fire —
+# spawned by entrypoint.sh; disable with CRON_EVENTS=0 (see README.md)
+COPY tools/cron-events.sh /opt/emergence/tools/cron-events.sh
+RUN chmod +x /opt/emergence/tools/cron-events.sh
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
