@@ -20,6 +20,12 @@ class Mailgun extends AbstractMailer
             $from = static::getDefaultFrom();
         }
 
+        // Mailgun takes each custom header as an `h:`-prefixed form field;
+        // a nested Headers array or raw header lines are not sent as headers
+        foreach (static::extractHeaders($options) as $header) {
+            $options['h:'.$header['Name']] = $header['Value'];
+        }
+
         $response = static::apiPost(array_merge($options, [
             'to' => $to,
             'from' => $from,

@@ -33,29 +33,18 @@ class PostmarkMailer extends AbstractMailer
             $from = static::getDefaultFrom();
         }
 
-        // callers in the Email::send tradition pass raw header lines as
-        // numeric-keyed $options entries; translate them into API fields
-        // (Postmark ignores unknown numeric members, so these were dropped)
-        $headers = isset($options['Headers']) && is_array($options['Headers']) ? $options['Headers'] : [];
-        foreach ($options as $key => $value) {
-            if (!is_int($key)) {
-                continue;
-            }
-            if (!is_string($value)) {
-                continue;
-            }
-            if (!str_contains($value, ':')) {
-                continue;
-            }
-            unset($options[$key]);
-            [$name, $content] = array_map(trim(...), explode(':', $value, 2));
-
-            if (strcasecmp($name, 'Reply-To') === 0) {
+        // Postmark takes custom headers as a list of {Name, Value} objects;
+        // callers pass PHPMailer's `Name => value` map or raw header lines,
+        // which Postmark rejects or drops, so translate them. Reply-To is
+        // Postmark's own ReplyTo field rather than a custom header.
+        $headers = [];
+        foreach (static::extractHeaders($options) as $header) {
+            if (strcasecmp($header['Name'], 'Reply-To') === 0) {
                 $options['ReplyTo'] = isset($options['ReplyTo']) && $options['ReplyTo'] !== ''
-                    ? $options['ReplyTo'].', '.$content
-                    : $content;
+                    ? $options['ReplyTo'].', '.$header['Value']
+                    : $header['Value'];
             } else {
-                $headers[] = ['Name' => $name, 'Value' => $content];
+                $headers[] = $header;
             }
         }
         if (count($headers) > 0) {
