@@ -290,38 +290,22 @@ class MediaRequestHandler extends RecordsRequestHandler
 
             // interpret range requests
             if (!empty($_SERVER['HTTP_RANGE']) && $seekable) {
-                $chunkStart = $start;
-                $chunkEnd = $end;
+                $range = static::parseByteRange($_SERVER['HTTP_RANGE'], (int) $size);
 
-                list(, $range) = explode('=', $_SERVER['HTTP_RANGE'], 2);
-
-                if (str_contains($range, ',')) {
+                if ($range === false) {
                     header('HTTP/1.1 416 Requested Range Not Satisfiable');
-                    header("Content-Range: bytes $start-$end/$size");
+                    header("Content-Range: bytes */$size");
                     exit();
                 }
 
-                if ($range === '-') {
-                    $chunkStart = $size - substr($range, 1);
-                } else {
-                    $range = explode('-', $range);
-                    $chunkStart = $range[0];
-                    $chunkEnd = (isset($range[1]) && is_numeric($range[1])) ? $range[1] : $size;
+                // null: not a byte range we understand, so serve the full content
+                if ($range !== null) {
+                    [$start, $end] = $range;
+                    $length = $end - $start + 1;
+
+                    fseek($fp, $start);
+                    header('HTTP/1.1 206 Partial Content');
                 }
-
-                $chunkEnd = ($chunkEnd > $end) ? $end : $chunkEnd;
-                if ($chunkStart > $chunkEnd || $chunkStart > $size - 1 || $chunkEnd >= $size) {
-                    header('HTTP/1.1 416 Requested Range Not Satisfiable');
-                    header("Content-Range: bytes $start-$end/$size");
-                    exit();
-                }
-
-                $start = $chunkStart;
-                $end = $chunkEnd;
-                $length = $end - $start + 1;
-
-                fseek($fp, $start);
-                header('HTTP/1.1 206 Partial Content');
             }
 
             // finish response
@@ -342,6 +326,65 @@ class MediaRequestHandler extends RecordsRequestHandler
 
             Site::finishRequest();
         }
+    }
+
+    /**
+     * Resolve a `Range` request header against a file of $size bytes
+     * (RFC 9110 section 14). Only a single byte range is supported.
+     *
+     * @return array{int, int}|false|null the first and last byte offsets
+     *     (inclusive) to send; false when the range cannot be satisfied
+     *     (answer 416); null when the header is not a byte range this
+     *     handler understands and should be ignored (answer with the full
+     *     content)
+     */
+    public static function parseByteRange(string $header, int $size): array|false|null
+    {
+        if (!preg_match('/^\s*bytes\s*=\s*(.*?)\s*$/i', $header, $matches)) {
+            return null;
+        }
+
+        // multiple ranges would need a multipart/byteranges response
+        if (str_contains($matches[1], ',')) {
+            return false;
+        }
+
+        if (!preg_match('/^(\d*)-(\d*)$/', $matches[1], $matches) || $matches[1].$matches[2] === '') {
+            return null;
+        }
+
+        [, $first, $last] = $matches;
+
+        // suffix range (`bytes=-500`): the final N bytes
+        if ($first === '') {
+            $suffixLength = (int) $last;
+
+            if ($suffixLength === 0 || $size === 0) {
+                return false;
+            }
+
+            return [max(0, $size - $suffixLength), $size - 1];
+        }
+
+        $first = (int) $first;
+
+        if ($first >= $size) {
+            return false;
+        }
+
+        // open-ended range (`bytes=100-`) runs to the end of the file
+        if ($last === '') {
+            return [$first, $size - 1];
+        }
+
+        $last = (int) $last;
+
+        // a last offset before the first makes the range invalid, not unsatisfiable
+        if ($last < $first) {
+            return null;
+        }
+
+        return [$first, min($last, $size - 1)];
     }
 
     public static function handleInfoRequest($mediaID)

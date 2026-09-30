@@ -3766,12 +3766,6 @@ parameters:
 			path: php-classes/MediaManagerRequestHandler.class.php
 
 		-
-			message: '#^Binary operation "\-" between int and '''' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: php-classes/MediaRequestHandler.class.php
-
-		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 1
