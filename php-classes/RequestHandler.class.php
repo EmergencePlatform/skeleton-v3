@@ -10,7 +10,7 @@ abstract class RequestHandler
     public static $userResponseModes = []; // array of responseModes that can be selected by the user, with key optionally set to a MIME Type
     public static $beforeRespond;
     public static $wkhtmltopdfPath = 'wkhtmltopdf';
-    public static $wkhtmltopdfArguments = '-L 0.5in -R 0.5in -T 0.5in -B 0.5in';
+    public static $wkhtmltopdfArguments = '--disable-local-file-access -L 0.5in -R 0.5in -T 0.5in -B 0.5in';
 
 
     // static properties

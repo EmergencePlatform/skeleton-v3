@@ -45,6 +45,27 @@ RUN apt-get update \
     && sed -i 's#<policy domain="coder" rights="none" pattern="PDF" />#<policy domain="coder" rights="read|write" pattern="PDF" />#' /etc/ImageMagick-6/policy.xml \
     && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
+# --- wkhtmltopdf: RequestHandler::respondPrint() shells out to it for every
+# `?format=pdf` response and answers 501 when it is missing. The upstream
+# wkhtmltopdf/packaging bookworm build (static patched Qt) adds about half
+# what Debian's own package does (that one pulls the Qt5 WebKit stack), and
+# the patched Qt also honors headers/footers and page-break options that
+# Debian's unpatched build ignores. Upstream is archived; this is its final
+# release. Pinned, checksum-verified; apt resolves its few X/font deps. ---
+ARG WKHTMLTOX_VERSION=0.12.6.1-3
+ARG WKHTMLTOX_SHA256=98ba0d157b50d36f23bd0dedf4c0aa28c7b0c50fcdcdc54aa5b6bbba81a3941d
+RUN curl -fsSL -o /tmp/wkhtmltox.deb \
+        "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOX_VERSION}/wkhtmltox_${WKHTMLTOX_VERSION}.bookworm_amd64.deb" \
+    && echo "${WKHTMLTOX_SHA256}  /tmp/wkhtmltox.deb" | sha256sum -c - \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends /tmp/wkhtmltox.deb \
+    && rm /tmp/wkhtmltox.deb \
+    && rm -rf /var/lib/apt/lists/* \
+    # system font cache, so renders as www-data (no writable home cache)
+    # don't rescan fonts and warn "No writable cache directories" each time
+    && fc-cache -f \
+    && wkhtmltopdf --version
+
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 COPY php/zz-emergence.ini /usr/local/etc/php/conf.d/zz-emergence.ini
