@@ -82,6 +82,15 @@ renders on this skeleton (JarvusInnovations/emergence-skeleton#192).
   class that overrides `send()` or `sendFromTemplate()` must declare
   `: bool` as well, or PHP refuses to load it.
 
+## Connector jobs
+
+- **`Emergence\Connectors\Job::logException()` takes `\Throwable`**, not
+  `\Exception`, so a synchronization that dies on a PHP `Error`
+  (`TypeError`, an undefined method) is logged to the job and marked
+  Failed like any exception. A site-layer `Job` subclass that overrides
+  `logException(\Exception $e)` must widen its parameter to `\Throwable`,
+  or PHP refuses to load it.
+
 ## Purged subsystems
 
 - **`sencha-workspace/` and the ExtJS 6.2 SDK build tooling.** The `/manage`

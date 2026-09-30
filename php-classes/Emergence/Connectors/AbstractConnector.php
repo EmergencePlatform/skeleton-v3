@@ -179,7 +179,7 @@ abstract class AbstractConnector extends \RequestHandler implements IConnector
         // execute synchronization
         try {
             $success = static::synchronize($Job, $pretend);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $Job->logException($e);
             $success = false;
         }
