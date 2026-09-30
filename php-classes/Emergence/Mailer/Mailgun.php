@@ -7,18 +7,30 @@ class Mailgun extends AbstractMailer
     public static $domain;
     public static $apiKey;
 
-    public static function send($to, $subject, $body, $from = false, array $options = [])
+    /**
+     * The decoded Mailgun API response for the last message accepted by
+     * send(), or null when the last send failed. send() itself returns a
+     * bool, as IMailer requires.
+     */
+    public static ?array $lastResponse = null;
+
+    public static function send($to, $subject, $body, $from = false, array $options = []): bool
     {
         if (!$from) {
             $from = static::getDefaultFrom();
         }
 
-        return static::apiPost(array_merge($options, [
+        $response = static::apiPost(array_merge($options, [
             'to' => $to,
             'from' => $from,
             'subject' => $subject,
             'html' => $body
         ]));
+
+        static::$lastResponse = is_array($response) ? $response : null;
+
+        // apiPost() returns false on any non-200 response
+        return $response !== false;
     }
 
     protected static function apiPost(array $data)

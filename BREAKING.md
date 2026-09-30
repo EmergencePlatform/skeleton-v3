@@ -71,6 +71,17 @@ renders on this skeleton (JarvusInnovations/emergence-skeleton#192).
   symfony 3.4 process/yaml (EOL, no PHP 8 support), and the Sencha
   apikit/hotfixes family.
 
+## Mailer contract
+
+- **`IMailer::send()` and `sendFromTemplate()` return `bool`**, declared on
+  the interface: true when the transport accepted the message, false when
+  it did not. `PostmarkMailer` and `Mailgun` used to return the decoded API
+  response array, which broke callers that count sends
+  (`$count += $sent` is a `TypeError` on PHP 8). Their response is now on
+  `PostmarkMailer::$lastResponse` / `Mailgun::$lastResponse`. A site-layer
+  class that overrides `send()` or `sendFromTemplate()` must declare
+  `: bool` as well, or PHP refuses to load it.
+
 ## Purged subsystems
 
 - **`sencha-workspace/` and the ExtJS 6.2 SDK build tooling.** The `/manage`
