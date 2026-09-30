@@ -38,10 +38,6 @@ echo "\n";
 $Job->setLogger($logger);
 
 
-// reduce error reporting
-error_reporting(E_ALL & ~E_NOTICE);
-
-
 // set time limit
 set_time_limit(0);
 
