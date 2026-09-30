@@ -190,7 +190,7 @@ class Job extends ActiveRecord implements IJob
         );
     }
 
-    public function logException(\Exception $e)
+    public function logException(\Throwable $e)
     {
         return $this->log(
             LogLevel::ERROR,
