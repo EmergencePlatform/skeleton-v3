@@ -14,7 +14,14 @@ class PostmarkMailer extends AbstractMailer
     // domains (e.g. district addresses).
     public static $verifiedFromDomains = [];
 
-    public static function send($to, $subject, $body, $from = false, $options = [])
+    /**
+     * The decoded Postmark API response (MessageID, SubmittedAt, ...) for the
+     * last message accepted by send(), or null when the last send failed.
+     * send() itself returns a bool, as IMailer requires.
+     */
+    public static ?array $lastResponse = null;
+
+    public static function send($to, $subject, $body, $from = false, $options = []): bool
     {
         // callers in the Email::send tradition pass recipient lists as arrays
         // (see PHPMailer::send); Postmark's To is a comma-separated string
@@ -73,12 +80,18 @@ class PostmarkMailer extends AbstractMailer
             }
         }
 
-        return static::apiPost(array_merge($options, [
+        $response = static::apiPost(array_merge($options, [
             'To' => $to
             ,'From' => $from
             ,'Subject' => $subject
             ,'HtmlBody' => $body
         ]));
+
+        static::$lastResponse = is_array($response) ? $response : null;
+
+        // apiPost() returns false on any non-200 response; Postmark answers
+        // 200 only when it has accepted the message
+        return $response !== false;
     }
 
 

@@ -4,7 +4,7 @@ namespace Emergence\Mailer;
 
 class PHPMailer extends AbstractMailer
 {
-    public static function send($to, $subject, $body, $from = false, $options = [])
+    public static function send($to, $subject, $body, $from = false, $options = []): bool
     {
         if (!$from) {
             $from = static::getDefaultFrom();
