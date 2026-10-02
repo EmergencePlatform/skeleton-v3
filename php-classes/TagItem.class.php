@@ -161,16 +161,43 @@ class TagItem extends ActiveRecord
 
 
 
-        $tagSummaryQuery = 'SELECT Tag.*, (%s) AS itemsCount FROM `%s` Tag WHERE (%s)';
-        $tagSummaryParams = [
-            DB::prepareQuery($itemsCountQuery, $itemsCountParams)
-            ,Tag::$tableName
-            ,count($options['tagConditions']) > 0 ? implode(') AND (', $options['tagConditions']) : '1'
-        ];
+        $tagConditionsSql = count($options['tagConditions']) > 0 ? implode(') AND (', $options['tagConditions']) : '1';
 
-        // exclude empty
         if ($options['excludeEmpty']) {
-            $tagSummaryQuery .= ' HAVING itemsCount > 0';
+            // Only tags with items are wanted, so count from the items side: one pass
+            // over tag_items on its (ContextClass, ContextID) index joined to tags, instead
+            // of a correlated COUNT(*) subquery run once for every tag in the table. The
+            // item conditions are the ones built above, with the TagID = Tag.ID join
+            // moved into the JOIN; the rows and the itemsCount values are the same.
+            $itemsCountPrefix = sprintf(
+                'SELECT COUNT(*) FROM `%s` TagItem WHERE TagItem.`%s` = Tag.`%s` AND ',
+                TagItem::$tableName,
+                TagItem::getColumnName('TagID'),
+                Tag::getColumnName('ID')
+            );
+            $preparedItemsCount = DB::prepareQuery($itemsCountQuery, $itemsCountParams);
+            if (strpos($preparedItemsCount, $itemsCountPrefix) !== 0) {
+                throw new Exception('Unexpected tag items query shape');
+            }
+            $joinConditions = substr($preparedItemsCount, strlen($itemsCountPrefix));
+
+            $tagSummaryQuery = 'SELECT Tag.*, COUNT(*) AS itemsCount FROM `%s` TagItem JOIN `%s` Tag ON Tag.`%s` = TagItem.`%s` WHERE %s AND (%s) GROUP BY Tag.`%s`';
+            $tagSummaryParams = [
+                TagItem::$tableName
+                ,Tag::$tableName
+                ,Tag::getColumnName('ID')
+                ,TagItem::getColumnName('TagID')
+                ,$joinConditions
+                ,$tagConditionsSql
+                ,Tag::getColumnName('ID')
+            ];
+        } else {
+            $tagSummaryQuery = 'SELECT Tag.*, (%s) AS itemsCount FROM `%s` Tag WHERE (%s)';
+            $tagSummaryParams = [
+                DB::prepareQuery($itemsCountQuery, $itemsCountParams)
+                ,Tag::$tableName
+                ,$tagConditionsSql
+            ];
         }
 
         // add order options
